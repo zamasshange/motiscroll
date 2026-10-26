@@ -1,0 +1,46 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "publishedItems",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "field", "order": "ASCENDING" },
+        { "fieldPath": "rand", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "publishedItems",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "moods", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "rand", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "publishedItems",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "field", "order": "ASCENDING" },
+        { "fieldPath": "moods", "arrayConfig": "CONTAINS" },
+        { "fieldPath": "rand", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "reports",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "itemId", "order": "ASCENDING" },
+        { "fieldPath": "status", "order": "ASCENDING" }
+      ]
+    },
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "reminderUtcBucket", "order": "ASCENDING" },
+        { "fieldPath": "lastPushDate", "order": "ASCENDING" }
+      ]
+    }
+  ],
+  "fieldOverrides": []
+}

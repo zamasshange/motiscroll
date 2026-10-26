@@ -1,0 +1,90 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function signedIn() {
+      return request.auth != null;
+    }
+    function isOwner(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+    function isEditor() {
+      return signedIn() && request.auth.token.editor == true;
+    }
+    function lockedKeys() {
+      return ['streakCount', 'lastActiveDate', 'reminderUtcBucket', 'lastPushDate'];
+    }
+
+    match /publishedItems/{itemId} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+    match /collections/{fieldSlug} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+    match /daily/{day} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    match /users/{uid} {
+      allow read: if isOwner(uid);
+      allow create: if isOwner(uid)
+        && !request.resource.data.keys().hasAny(lockedKeys())
+        && request.resource.data.size() < 40;
+      allow update: if isOwner(uid)
+        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(lockedKeys());
+      allow delete: if false;
+
+      match /saved/{itemId} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && request.resource.data.size() < 12;
+      }
+      match /liked/{itemId} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && request.resource.data.size() < 12;
+      }
+      match /followedFields/{field} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && request.resource.data.size() < 8;
+      }
+      match /progress/{itemId} {
+        allow read, delete: if isOwner(uid);
+        allow create, update: if isOwner(uid) && request.resource.data.size() < 12;
+      }
+    }
+
+    match /reports/{reportId} {
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'open'
+        && request.resource.data.keys().hasOnly(['itemId', 'userId', 'reason', 'note', 'status', 'createdAt'])
+        && request.resource.data.note is string
+        && request.resource.data.note.size() < 500;
+      allow read, update: if isEditor();
+      allow delete: if false;
+    }
+
+    match /items/{itemId} {
+      allow read, write: if isEditor();
+      match /{subcollection}/{docId} {
+        allow read, write: if isEditor();
+      }
+    }
+    match /authors/{authorId} {
+      allow read, write: if isEditor();
+    }
+    match /misattributionWatchlist/{authorId} {
+      allow read, write: if isEditor();
+    }
+    match /importSources/{sourceId} {
+      allow read, write: if isEditor();
+    }
+    match /importLog/{logId} {
+      allow read, write: if isEditor();
+    }
+    match /config/{docId} {
+      allow read, write: if isEditor();
+    }
+  }
+}
