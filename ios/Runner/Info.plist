@@ -45,6 +45,17 @@
 	</array>
 	<key>CFBundleVersion</key>
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
+	<key>LSApplicationQueriesSchemes</key>
+	<array>
+		<string>instagram-stories</string>
+		<string>instagram</string>
+		<string>facebook-stories</string>
+		<string>fb</string>
+		<string>fb-lite</string>
+		<string>whatsapp</string>
+	</array>
+	<key>NSPhotoLibraryAddUsageDescription</key>
+	<string>MotiScroll saves the quote card you chose to Photos. It does not read your library.</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIApplicationSceneManifest</key>
