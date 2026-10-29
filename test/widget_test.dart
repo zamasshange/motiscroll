@@ -39,22 +39,24 @@ void main() {
     await tester.tap(find.text('Get started'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
-    expect(find.text('A line is waiting'), findsOneWidget);
-
-    await tester.tap(find.text('Skip'));
+    expect(find.text('Select language'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('onboard-language-continue')));
     await tester.pump();
-    await tester.pump(const Duration(milliseconds: 500));
-    expect(find.text('Make it yours'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('Select topics'), findsOneWidget);
 
     await tester.ensureVisible(find.text('Leadership'));
     await tester.tap(find.text('Leadership'));
     await tester.ensureVisible(find.text('Need focus'));
     await tester.tap(find.text('Need focus'));
-    await tester.ensureVisible(find.text('Continue'));
-    await tester.pump();
-    await tester.tap(find.text('Continue'));
+    await tester.tap(find.byKey(const Key('onboard-topics-continue')));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('A line is waiting'), findsOneWidget);
+
+    await tester.tap(find.text('Skip'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
     expect(find.text('Maybe later'), findsOneWidget);
     await tester.tap(find.text('Maybe later'));
     await tester.pump();
