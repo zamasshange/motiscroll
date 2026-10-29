@@ -2,7 +2,8 @@ import { initializeApp } from "firebase-admin/app";
 
 initializeApp();
 
-export { approveItem, previewApproval, rejectItem, retireItem } from "./approve.js";
+export { approveItem, approveBatch, previewApproval, rejectItem, retireItem } from "./approve.js";
+export { resolveAuthors } from "./resolveAuthors.js";
 export { deleteAccount, recordView } from "./account.js";
 export { onItemWritten, onCandidateCreated, onSourceWritten, onReportCreated } from "./checks.js";
 export { draftDeeper } from "./deeper.js";

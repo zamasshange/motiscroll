@@ -1,5 +1,7 @@
+import 'dart:async';
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,12 +10,27 @@ import '../data/catalog.dart';
 import '../data/discover_deck.dart';
 import '../data/models.dart';
 import '../data/repositories.dart';
+import '../data/roster_lines.dart';
+import '../l10n/languages.dart';
 import '../theme/tokens.dart';
+import '../widgets/widget_payload.dart';
+import '../widgets/widget_sync.dart';
+
+String libraryFailure(Object _) => 'The library could not be opened.';
+
+String _quoteSlug(String name) {
+  return name
+      .toLowerCase()
+      .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
+      .replaceAll(RegExp(r'^-+|-+$'), '');
+}
 
 class AppState extends ChangeNotifier {
-  static const _storageKey = 'moti-scroll-state';
+  static const _storageKey = widgetUserStateKey;
 
   bool dark = true;
+  bool followSystemTheme = false;
+  bool largeText = false;
   bool onboardingComplete = false;
   Mood? usualMood;
   int streak = 0;
@@ -21,25 +38,77 @@ class AppState extends ChangeNotifier {
   bool hintDismissed = false;
   bool reminderOn = false;
   int bestStreak = 0;
+  String? contentLanguage;
+  String? uiLanguage;
+  String? secondLanguage;
+  bool widgetsEnabled = true;
+  bool showSavedOnLockScreen = false;
   String? feedTarget;
+  Field? collectionFocus;
+  int? pendingTab;
+  int feedDeck = DateTime.now().microsecondsSinceEpoch;
+  int discoverShuffle = DateTime.now().microsecondsSinceEpoch ^ 0x9e3779b9;
+  bool browseAll = false;
   final liked = <String>{};
   final saved = <String>{};
   final read = <String>{};
   final visitDays = <String>{};
   final notes = <String, String>{};
   final followed = <Field>{};
-  List<Item> items = kItems;
+  List<Item> _items = const [];
+  bool _fromPublished = false;
   List<Item> discoverItems = const [];
   Item? daily;
   bool remote = false;
+  bool firebaseReady = false;
+  bool contentReady = false;
   bool catalogLoading = false;
   bool feedHasMore = false;
   String? catalogError;
+  String? accountError;
   String? accountLabel;
-  ItemRepository repository = LocalItemRepository(kItems);
+  Map<Field, int> collectionCounts = const {};
+  List<AuthorProfile> authors = const [];
+  ItemRepository? repository;
   UserDirectory? directory;
   Future<int?> Function(String itemId)? syncView;
+  Future<void> Function()? reloadFlags;
   final discoverDeck = DiscoverDeck();
+
+  List<Item> get items =>
+      kReleaseMode && !_fromPublished ? const <Item>[] : _items;
+
+  /// Roster people who have no published line yet.
+  List<AuthorProfile> get authorsAwaitingLines {
+    final quoted = {for (final item in items) personKey(item.author)};
+    return authors
+        .where((author) => !quoted.contains(personKey(author.name)))
+        .toList();
+  }
+
+  /// Portrait already stored for this speaker, when the line itself has none.
+  AuthorProfile? portraitFor(String name) {
+    final key = personKey(name);
+    for (final author in authors) {
+      final url = author.imageUrl;
+      if (personKey(author.name) == key && url != null && url.isNotEmpty) {
+        return author;
+      }
+    }
+    return null;
+  }
+
+  void debugSeed(List<Item> seeded, {List<AuthorProfile> profiles = const []}) {
+    if (kReleaseMode) return;
+    _items = seeded;
+    authors = profiles;
+    _fromPublished = false;
+    collectionCounts = {
+      for (final field in Field.values)
+        field: seeded.where((item) => item.field == field).length,
+    };
+    notifyListeners();
+  }
 
   Future<void> load() async {
     final prefs = await SharedPreferences.getInstance();
@@ -56,6 +125,8 @@ class AppState extends ChangeNotifier {
 
   void _read(Map<String, dynamic> map) {
     dark = map['dark'] as bool? ?? true;
+    followSystemTheme = map['followSystemTheme'] as bool? ?? false;
+    largeText = map['largeText'] as bool? ?? false;
     onboardingComplete = map['onboardingComplete'] as bool? ?? false;
     usualMood = _mood(map['usualMood'] as String?);
     streak = (map['streak'] as num?)?.toInt() ?? 0;
@@ -81,10 +152,30 @@ class AppState extends ChangeNotifier {
     followed
       ..clear()
       ..addAll(_strings(map['followed']).map(_field).whereType<Field>());
+    contentLanguage = languageByCode(map['contentLanguage'] as String?)?.code;
+    uiLanguage = languageByCode(map['uiLanguage'] as String?)?.code;
+    secondLanguage = languageByCode(map['secondLanguage'] as String?)?.code;
+    widgetsEnabled = map['widgetsEnabled'] as bool? ?? true;
+    showSavedOnLockScreen = map['showSavedOnLockScreen'] as bool? ?? false;
+    if (followed.length == 1) collectionFocus = followed.first;
+  }
+
+  /// A followed field, the open collection, or a line from one of the quote
+  /// lists. Those lists are not tagged with a roster field.
+  bool showsInFeed(Item item) =>
+      showsField(item.field) || fromQuoteList(item.source.url);
+
+  bool showsField(Field field) {
+    if (browseAll) return true;
+    if (collectionFocus != null) return field == collectionFocus;
+    if (followed.isNotEmpty) return followed.contains(field);
+    return true;
   }
 
   Map<String, Object?> _toJson() => {
     'dark': dark,
+    'followSystemTheme': followSystemTheme,
+    'largeText': largeText,
     'onboardingComplete': onboardingComplete,
     'usualMood': usualMood?.name,
     'streak': streak,
@@ -98,6 +189,11 @@ class AppState extends ChangeNotifier {
     'visitDays': visitDays.toList(),
     'notes': notes,
     'followed': followed.map((field) => field.name).toList(),
+    'contentLanguage': contentLanguage,
+    'uiLanguage': uiLanguage,
+    'secondLanguage': secondLanguage,
+    'widgetsEnabled': widgetsEnabled,
+    'showSavedOnLockScreen': showSavedOnLockScreen,
   };
 
   Future<void> _persist() async {
@@ -126,6 +222,7 @@ class AppState extends ChangeNotifier {
     if (!on) saved.remove(id);
     _touch();
     directory?.setFlag(collection: 'saved', id: id, on: on);
+    syncWidgets();
   }
 
   void toggleRead(String id) {
@@ -155,9 +252,49 @@ class AppState extends ChangeNotifier {
     feedTarget = null;
   }
 
+  void consumePendingTab() {
+    pendingTab = null;
+  }
+
+  void reshuffleFeed() {
+    feedDeck = DateTime.now().microsecondsSinceEpoch;
+    notifyListeners();
+  }
+
+  void reshuffleDiscover() {
+    discoverShuffle = DateTime.now().microsecondsSinceEpoch;
+    notifyListeners();
+  }
+
+  void openCollection(Field field) {
+    collectionFocus = field;
+    browseAll = false;
+    pendingTab = 3;
+    _touch();
+  }
+
+  void focusCollection(Field? field) {
+    collectionFocus = field;
+    browseAll = false;
+    _touch();
+  }
+
+  void showEverything() {
+    collectionFocus = null;
+    browseAll = true;
+    _touch();
+  }
+
   void toggleFollow(Field field) {
     final on = followed.add(field);
     if (!on) followed.remove(field);
+    browseAll = false;
+    if (on) {
+      collectionFocus = field;
+      pendingTab = 3;
+    } else if (collectionFocus == field) {
+      collectionFocus = followed.length == 1 ? followed.first : null;
+    }
     _touch();
     directory?.setFlag(collection: 'followedFields', id: field.name, on: on);
   }
@@ -169,10 +306,147 @@ class AppState extends ChangeNotifier {
   }
 
   void setDark(bool value) {
-    if (dark == value) return;
+    if (dark == value && !followSystemTheme) return;
     dark = value;
+    followSystemTheme = false;
     _touch();
   }
+
+  void followSystem(bool systemDark) {
+    followSystemTheme = true;
+    dark = systemDark;
+    _touch();
+  }
+
+  void applySystemBrightness(bool systemDark) {
+    if (!followSystemTheme || dark == systemDark) return;
+    dark = systemDark;
+    _touch();
+  }
+
+  void setLargeText(bool value) {
+    if (largeText == value) return;
+    largeText = value;
+    _touch();
+  }
+
+  /// Null follows the device. Choosing a language sets the app and the
+  /// quotes to the same language until the two are changed apart.
+  void setContentLanguage(String? code) {
+    final next = languageByCode(code)?.code;
+    contentLanguage = next;
+    uiLanguage = next;
+    if (secondLanguage != null && secondLanguage == next) secondLanguage = null;
+    _touch();
+    _syncLanguages();
+    syncWidgets();
+  }
+
+  void setSecondLanguage(String? code) {
+    final next = languageByCode(code)?.code;
+    final primary = contentLanguage;
+    secondLanguage = next == null || next == primary ? null : next;
+    _touch();
+    _syncLanguages();
+    syncWidgets();
+  }
+
+  void setWidgetsEnabled(bool value) {
+    if (widgetsEnabled == value) {
+      syncWidgets();
+      return;
+    }
+    widgetsEnabled = value;
+    _touch();
+    syncWidgets();
+  }
+
+  void setShowSavedOnLockScreen(bool value) {
+    if (showSavedOnLockScreen == value) return;
+    showSavedOnLockScreen = value;
+    _touch();
+    syncWidgets();
+  }
+
+  void syncWidgets() {
+    final payload = payloadForLibrary(
+      items: _items,
+      now: DateTime.now(),
+      contentLanguage: contentLanguage,
+      uiLanguage: uiLanguage,
+      device: PlatformDispatcher.instance.locale,
+      streakCount: streak,
+      lastActiveDate: lastStreakDate,
+      savedIds: saved.toList(),
+      followed: followed,
+      widgetsEnabled: widgetsEnabled,
+      showSavedOnLockScreen: showSavedOnLockScreen,
+    );
+    final source = [
+      for (final item in _items) widgetSourceFromItem(item),
+    ];
+    unawaited(WidgetSyncService.publish(payload, source: source));
+  }
+
+  Future<void> clearWidgets() {
+    final device = PlatformDispatcher.instance.locale;
+    final content =
+        contentLanguage ?? resolveContentLanguage(saved: null, device: device);
+    final ui = uiLanguage ?? content;
+    return WidgetSyncService.publish(
+      widgetPayloadCleared(contentLanguage: content, uiLanguage: ui),
+    );
+  }
+
+  /// A widget tap. An unknown line opens Home rather than a blank card.
+  void openWidgetLink(Uri? uri) {
+    final link = WidgetLink.parse(uri);
+    if (link == null) return;
+    final id = link.itemId;
+    if (id != null && _items.any((item) => item.id == id)) {
+      openInFeed(id);
+      return;
+    }
+    pendingTab = 2;
+    notifyListeners();
+  }
+
+  String resolvedContentLanguage(Locale device) {
+    return resolveContentLanguage(saved: contentLanguage, device: device);
+  }
+
+  List<String> contentFallback(Locale device) {
+    return contentLanguageChain(
+      primary: resolvedContentLanguage(device),
+      second: secondLanguage,
+    );
+  }
+
+  void _syncLanguages() {
+    final directory = this.directory;
+    if (directory == null) return;
+    directory
+        .setLanguages(
+          contentLanguage: contentLanguage,
+          uiLanguage: uiLanguage,
+          secondLanguage: secondLanguage,
+        )
+        .catchError((_) {});
+  }
+
+  Future<bool> sendFeedback(String topic, String message) async {
+    final directory = this.directory;
+    if (directory == null) return false;
+    try {
+      await directory.feedback(topic: topic, message: message);
+      return true;
+    } on Exception {
+      return false;
+    }
+  }
+
+  /// Lines in the library the reader has marked as read.
+  int get readInLibrary => items.where((item) => read.contains(item.id)).length;
 
   void dismissHint() {
     if (hintDismissed) return;
@@ -200,51 +474,239 @@ class AppState extends ChangeNotifier {
     lastStreakDate = today;
     visitDays.add(today);
     _touch();
+    syncWidgets();
   }
 
   void completeOnboarding({required Set<Field> fields, required Mood? mood}) {
     followed
       ..clear()
       ..addAll(fields);
+    collectionFocus = fields.length == 1 ? fields.first : null;
+    browseAll = false;
     usualMood = mood;
     onboardingComplete = true;
     _touch();
     _publishProfile();
+    syncWidgets();
   }
 
   Future<void> refreshCatalog() async {
     catalogLoading = true;
     catalogError = null;
     notifyListeners();
+    final repository = this.repository;
+    if (repository == null) {
+      _ensureLines();
+      catalogLoading = false;
+      catalogError = _items.isEmpty
+          ? (accountError ?? 'Nothing is published yet.')
+          : null;
+      syncWidgets();
+      notifyListeners();
+      return;
+    }
     try {
       final page = await repository.page();
-      items = page.items;
+      _items = page.items;
+      _fromPublished = true;
+      feedHasMore = page.items.length >= catalogPageSize;
+      catalogError = page.items.isEmpty ? 'Nothing is published yet.' : null;
+    } on Exception catch (error, stack) {
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: error,
+          stack: stack,
+          library: 'catalog',
+          context: ErrorDescription('while opening the library'),
+        ),
+      );
+      _ensureLines();
+      catalogLoading = false;
+      catalogError = _items.isEmpty ? libraryFailure(error) : null;
+      syncWidgets();
+      notifyListeners();
+      return;
+    }
+    try {
       discoverItems = (await repository.discover(
         followed: followed,
         deck: discoverDeck,
       )).items;
-      daily = await repository.quoteOfDay(DateTime.now());
-      feedHasMore = remote && page.items.length >= 20;
-      catalogLoading = false;
-      catalogError = null;
-      notifyListeners();
-    } on Exception {
-      catalogLoading = false;
-      catalogError = 'The library could not be opened.';
-      if (!remote) items = kItems;
-      notifyListeners();
+      if (discoverItems.isEmpty) discoverItems = _items;
+    } on Exception catch (error, stack) {
+      discoverItems = _items;
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: error,
+          stack: stack,
+          library: 'catalog',
+          context: ErrorDescription('while opening discover'),
+        ),
+      );
     }
+    try {
+      daily = await repository.quoteOfDay(DateTime.now());
+    } on Exception catch (error, stack) {
+      daily = _items.isEmpty ? null : _items.first;
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: error,
+          stack: stack,
+          library: 'catalog',
+          context: ErrorDescription('while opening the daily line'),
+        ),
+      );
+    }
+    try {
+      collectionCounts = await repository.collectionCounts();
+    } on Exception catch (error, stack) {
+      collectionCounts = {
+        for (final field in Field.values)
+          field: _items.where((item) => item.field == field).length,
+      };
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: error,
+          stack: stack,
+          library: 'catalog',
+          context: ErrorDescription('while counting collections'),
+        ),
+      );
+    }
+    try {
+      authors = await repository.authors();
+    } on Exception catch (error, stack) {
+      FlutterError.reportError(
+        FlutterErrorDetails(
+          exception: error,
+          stack: stack,
+          library: 'catalog',
+          context: ErrorDescription('while opening the author roster'),
+        ),
+      );
+    }
+    _ensureLines();
+    catalogLoading = false;
+    catalogError = _items.isEmpty ? catalogError : null;
+    syncWidgets();
+    notifyListeners();
+  }
+
+  /// Keeps quotes on screen when the remote library is missing or over quota.
+  void _ensureLines() {
+    if (authors.isEmpty && rosterLines.isNotEmpty) {
+      authors = [for (final line in rosterLines) _profileFromLine(line)];
+    }
+    _applyRosterLines();
+    if (_items.isEmpty) return;
+    _fromPublished = true;
+    if (discoverItems.isEmpty) discoverItems = _items;
+  }
+
+  AuthorProfile _profileFromLine(RosterLine line) {
+    final url = line.imageUrl;
+    final hasPhoto = url != null && url.isNotEmpty;
+    return AuthorProfile(
+      id: 'roster-${personKey(line.name)}',
+      name: line.name,
+      role: '',
+      field: Field.other,
+      imageUrl: hasPhoto ? url : null,
+      imageCredit: hasPhoto
+          ? ImageCredit(
+              artist: line.artist,
+              license: line.license,
+              sourceUrl: line.sourceUrl,
+            )
+          : null,
+    );
+  }
+
+  /// Lines and portraits for roster people the published library does not
+  /// have yet. The quotes are the ones BrainyQuote lists under that name.
+  /// The portraits are allowed Wikimedia files.
+  void _applyRosterLines() {
+    if (rosterLines.isEmpty || authors.isEmpty) return;
+    final have = {for (final item in _items) personKey(item.author)};
+    final added = <Item>[];
+    authors = [for (final author in authors) _authorWithLine(author)];
+    for (final author in authors) {
+      final line = rosterLineByKey[personKey(author.name)];
+      if (line == null || line.quotes.isEmpty) continue;
+      if (have.contains(personKey(author.name))) continue;
+      final hasNewPhoto = line.imageUrl != null && line.imageUrl!.isNotEmpty;
+      final credit = hasNewPhoto
+          ? ImageCredit(
+              artist: line.artist,
+              license: line.license,
+              sourceUrl: line.sourceUrl,
+            )
+          : author.imageCredit;
+      final image = hasNewPhoto ? line.imageUrl : author.imageUrl;
+      for (var i = 0; i < line.quotes.length; i++) {
+        added.add(
+          Item(
+            id: 'gap-${personKey(author.name)}-$i',
+            type: 'quote',
+            text: line.quotes[i],
+            author: author.name,
+            authorRole: author.role,
+            field: author.field,
+            moods: const [],
+            source: Source(
+              title: line.sourceTitle.isEmpty ? 'BrainyQuote' : line.sourceTitle,
+              url: line.quoteUrl.isEmpty
+                  ? 'https://www.brainyquote.com/authors/${_quoteSlug(author.name)}-quotes'
+                  : line.quoteUrl,
+            ),
+            verified: true,
+            deeper: Deeper(
+              context: line.context,
+              didYouKnow: '',
+              takeaway: '',
+              related: const [],
+            ),
+            imageUrl: image,
+            imageCredit: credit,
+          ),
+        );
+      }
+    }
+    if (added.isNotEmpty) _items = [..._items, ...added];
+  }
+
+  AuthorProfile _authorWithLine(AuthorProfile author) {
+    final line = rosterLineByKey[personKey(author.name)];
+    final url = line?.imageUrl;
+    if (line == null || url == null || url.isEmpty) return author;
+    if (author.imageUrl != null && author.imageUrl!.isNotEmpty) return author;
+    return AuthorProfile(
+      id: author.id,
+      name: author.name,
+      role: author.role,
+      field: author.field,
+      bornYear: author.bornYear,
+      diedYear: author.diedYear,
+      isLiving: author.isLiving,
+      imageUrl: url,
+      imageCredit: ImageCredit(
+        artist: line.artist,
+        license: line.license,
+        sourceUrl: line.sourceUrl,
+      ),
+    );
   }
 
   Future<void> loadMore() async {
-    if (!remote || catalogLoading || !feedHasMore) return;
+    final repository = this.repository;
+    if (!remote || catalogLoading || !feedHasMore || repository == null) return;
     catalogLoading = true;
     notifyListeners();
     try {
       final page = await repository.page(more: true);
       final known = items.map((item) => item.id).toSet();
-      items = [
-        ...items,
+      _items = [
+        ..._items,
         for (final item in page.items)
           if (known.add(item.id)) item,
       ];
@@ -270,12 +732,17 @@ class AppState extends ChangeNotifier {
   void _syncView(String id) {
     final sync = syncView;
     if (sync == null) return;
-    sync(id).then((value) {
-      if (value == null || value == streak) return;
-      streak = value;
-      if (streak > bestStreak) bestStreak = streak;
-      _touch();
-    });
+    sync(id)
+        .then((value) {
+          if (value == null || value == streak) return;
+          streak = value;
+          if (streak > bestStreak) bestStreak = streak;
+          _touch();
+        })
+        .catchError((Object _) {
+          // A failed view ping must not stop the feed.
+          return null;
+        });
   }
 
   Future<void> _publishProfile() async {
@@ -317,6 +784,7 @@ class AppState extends ChangeNotifier {
     visitDays.clear();
     notes.clear();
     _touch();
+    syncWidgets();
   }
 
   Palette get palette => dark ? darkPalette : lightPalette;

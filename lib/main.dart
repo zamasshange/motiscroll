@@ -1,17 +1,24 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:home_widget/home_widget.dart';
 
+import 'l10n/languages.dart';
 import 'screens/onboarding_screen.dart';
 import 'services/backend.dart';
 import 'shell.dart';
 import 'state/app_state.dart';
 import 'theme/tokens.dart';
+import 'widgets/widget_payload.dart';
+import 'widgets/widget_sync.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final state = AppState();
   await state.load();
   await attachBackend(state);
+  await WidgetSyncService.registerRefresh();
   runApp(MotiApp(state: state));
 }
 
@@ -24,25 +31,69 @@ class MotiApp extends StatefulWidget {
   State<MotiApp> createState() => _MotiAppState();
 }
 
-class _MotiAppState extends State<MotiApp> {
+class _MotiAppState extends State<MotiApp> with WidgetsBindingObserver {
   late bool _dark = widget.state.dark;
+  late bool _largeText = widget.state.largeText;
+  late String? _language =
+      widget.state.uiLanguage ?? widget.state.contentLanguage;
+  StreamSubscription<Uri?>? _widgetClicks;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     widget.state.addListener(_onState);
+    _syncSystemBrightness();
     _applyOverlay();
+    _listenForWidgetLinks();
   }
 
   @override
   void dispose() {
+    _widgetClicks?.cancel();
+    WidgetsBinding.instance.removeObserver(this);
     widget.state.removeListener(_onState);
     super.dispose();
   }
 
+  Future<void> _listenForWidgetLinks() async {
+    try {
+      await HomeWidget.setAppGroupId(widgetAppGroup);
+      final initial = await HomeWidget.initiallyLaunchedFromHomeWidget();
+      if (!mounted) return;
+      widget.state.openWidgetLink(initial);
+      _widgetClicks = HomeWidget.widgetClicked.listen(
+        widget.state.openWidgetLink,
+        onError: (_) {},
+      );
+    } on Object {
+      return;
+    }
+  }
+
+  @override
+  void didChangePlatformBrightness() => _syncSystemBrightness();
+
+  void _syncSystemBrightness() {
+    final brightness =
+        WidgetsBinding.instance.platformDispatcher.platformBrightness;
+    widget.state.applySystemBrightness(brightness == Brightness.dark);
+  }
+
   void _onState() {
-    if (widget.state.dark == _dark) return;
-    setState(() => _dark = widget.state.dark);
+    final state = widget.state;
+    if (state.followSystemTheme) _syncSystemBrightness();
+    final language = state.uiLanguage ?? state.contentLanguage;
+    if (state.dark == _dark &&
+        state.largeText == _largeText &&
+        language == _language) {
+      return;
+    }
+    setState(() {
+      _dark = state.dark;
+      _largeText = state.largeText;
+      _language = language;
+    });
     _applyOverlay();
   }
 
@@ -67,18 +118,55 @@ class _MotiAppState extends State<MotiApp> {
         themeMode: _dark ? ThemeMode.dark : ThemeMode.light,
         theme: _theme(lightPalette, Brightness.light),
         darkTheme: _theme(darkPalette, Brightness.dark),
+        builder: (context, child) {
+          final state = AppScope.of(context);
+          final code = state.uiLanguage ??
+              state.resolvedContentLanguage(
+                View.of(context).platformDispatcher.locale,
+              );
+          final direction =
+              languageByCode(code)?.direction ?? TextDirection.ltr;
+          Widget body = child ?? const SizedBox.shrink();
+          if (_largeText) {
+            final media = MediaQuery.of(context);
+            body = MediaQuery(
+              data: media.copyWith(
+                textScaler: TextScaler.linear(
+                  (media.textScaler.scale(1) * 1.15).clamp(1.0, 2.0),
+                ),
+              ),
+              child: body,
+            );
+          }
+          return Directionality(textDirection: direction, child: body);
+        },
         home: const _Gate(),
       ),
     );
   }
 }
 
+const _libraryRevision = 14;
+var _appliedLibraryRevision = 0;
+
 class _Gate extends StatelessWidget {
   const _Gate();
 
   @override
   Widget build(BuildContext context) {
-    final onboarded = AppScope.of(context).onboardingComplete;
+    final state = AppScope.of(context);
+    if (_appliedLibraryRevision != _libraryRevision &&
+        (state.repository != null || state.catalogError != null)) {
+      _appliedLibraryRevision = _libraryRevision;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (state.repository == null) {
+          attachBackend(state);
+        } else {
+          state.refreshCatalog();
+        }
+      });
+    }
+    final onboarded = state.onboardingComplete;
     return onboarded ? const TabShell() : const OnboardingScreen();
   }
 }

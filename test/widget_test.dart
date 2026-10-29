@@ -4,7 +4,10 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:moti_scroll/data/models.dart';
 import 'package:moti_scroll/main.dart';
+import 'package:moti_scroll/screens/feed_screen.dart';
 import 'package:moti_scroll/state/app_state.dart';
+
+import 'support/ui_fixture.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -29,13 +32,14 @@ void main() {
     SharedPreferences.setMockInitialValues({});
     final state = AppState();
     await state.load();
+    state.debugSeed(uiFixture());
     await tester.pumpWidget(MotiApp(state: state));
     await tester.pump();
 
     await tester.tap(find.text('Get started'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
-    expect(find.text('Scroll with purpose'), findsOneWidget);
+    expect(find.text('A line is waiting'), findsOneWidget);
 
     await tester.tap(find.text('Skip'));
     await tester.pump();
@@ -49,6 +53,10 @@ void main() {
     await tester.ensureVisible(find.text('Continue'));
     await tester.pump();
     await tester.tap(find.text('Continue'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('Maybe later'), findsOneWidget);
+    await tester.tap(find.text('Maybe later'));
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
     expect(find.text('Not now'), findsOneWidget);
@@ -75,5 +83,106 @@ void main() {
     expect(find.text('Follow'), findsWidgets);
 
     await tester.pumpWidget(const SizedBox.shrink());
+  });
+
+  testWidgets('feed shows quotes and skips sourcing placeholders', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    SharedPreferences.setMockInitialValues({});
+    final state = AppState();
+    await state.load();
+    const person = AuthorProfile(
+      id: 'roster-person',
+      name: 'Roster Person',
+      role: 'Test role',
+      field: Field.sports,
+      bornYear: 1960,
+      isLiving: true,
+    );
+    state.debugSeed(uiFixture(), profiles: const [person]);
+    await tester.pumpWidget(
+      AppScope(
+        state: state,
+        child: const MaterialApp(home: Scaffold(body: FeedScreen())),
+      ),
+    );
+    await tester.pump();
+
+    final shown =
+        find.text('A fixture line for the home screen test.').evaluate().isNotEmpty ||
+        find
+            .text('A fixture speech line for the home screen test.')
+            .evaluate()
+            .isNotEmpty;
+    expect(shown, isTrue);
+    expect(find.text('Verified quotes are being sourced'), findsNothing);
+    expect(find.text('Roster Person'), findsNothing);
+  });
+
+  testWidgets('searching and choosing a person keeps the feed responsive', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    SharedPreferences.setMockInitialValues({});
+    final state = AppState();
+    await state.load();
+    state.debugSeed([
+      ...uiFixture(),
+      Item(
+        id: 'other-person',
+        type: 'quote',
+        text: 'A second person line.',
+        author: 'Ada Lovelace',
+        authorRole: 'Test',
+        field: Field.science,
+        moods: const [],
+        source: const Source(title: 'Notes'),
+        verified: true,
+        deeper: const Deeper(
+          context: 'Context',
+          didYouKnow: 'Note',
+          takeaway: '',
+          related: [],
+        ),
+      ),
+    ]);
+    await tester.pumpWidget(
+      AppScope(
+        state: state,
+        child: const MaterialApp(
+          home: Scaffold(
+            resizeToAvoidBottomInset: false,
+            body: FeedScreen(),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    await tester.tap(find.byIcon(Icons.expand_more_rounded));
+    await tester.pumpAndSettle();
+    expect(find.text('Select person'), findsOneWidget);
+
+    tester.view.viewInsets = const FakeViewPadding(bottom: 336);
+    addTearDown(tester.view.resetViewInsets);
+    await tester.enterText(find.byType(TextField), 'ada');
+    await tester.pump();
+    await tester.tap(find.widgetWithText(ListTile, 'Ada Lovelace'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Select person'), findsNothing);
+    expect(find.text('A second person line.'), findsOneWidget);
+    await tester.tap(find.bySemanticsLabel('Like').first);
+    await tester.pump();
+    expect(state.liked, contains('other-person'));
   });
 }

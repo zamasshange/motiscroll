@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "618992651998",
+    "project_id": "motiscroll",
+    "storage_bucket": "motiscroll.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:618992651998:android:1d6276bc8c7ce595f87c4f",
+        "android_client_info": {
+          "package_name": "com.example.moti_scroll"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "618992651998-neocgj9ieq7s9n9iftcb2kpar4m2qquk.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNORfwJmoJ2eKQGVX3Lp0npcQFFTwpMKU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "618992651998-neocgj9ieq7s9n9iftcb2kpar4m2qquk.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "618992651998-kmgkacqa9ihmmfaai2qrgcubgth2rvfb.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.motiScroll"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

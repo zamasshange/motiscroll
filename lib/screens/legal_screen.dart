@@ -28,7 +28,8 @@ class LegalScreen extends StatelessWidget {
         'Privacy',
         'Placeholder for lawyer review. The app stores your library, likes, saves, follows, and streak in Firebase under your account. '
             'Anonymous sign-in creates that account on the device. Linking Apple, Google, or email keeps the same account. '
-            'Delete account removes the library and the login. Crash reports may be sent so the app can be fixed. '
+            'Home screen and lock screen widgets keep a copy of quote text, the author, the streak, and saved lines in an App Group on this phone. That copy has no email, user id, or sign-in token. Saved lines are not shown on a lock screen widget. A setting records whether you would allow that, and it stays off until you turn it on. '
+            'Delete account removes the library and the login, and clears the widget copy. Crash reports may be sent so the app can be fixed. '
             'There are no advertising or tracking SDKs. Quote text is not sold.',
       ),
       LegalKind.terms => (

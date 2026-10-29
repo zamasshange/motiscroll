@@ -456,7 +456,7 @@ class AuthorAvatar extends StatelessWidget {
           ? CachedNetworkImage(
               imageUrl: imageUrl!,
               httpHeaders: imageHeaders,
-              fit: BoxFit.contain,
+              fit: BoxFit.cover,
               fadeInDuration: reduceMotion(context)
                   ? Duration.zero
                   : const Duration(milliseconds: 200),
@@ -603,9 +603,10 @@ void showPhotoCredit(BuildContext context, ImageCredit credit) {
 }
 
 class PhotoCreditLine extends StatelessWidget {
-  const PhotoCreditLine({super.key, required this.credit});
+  const PhotoCreditLine({super.key, required this.credit, this.maxLines});
 
   final ImageCredit credit;
+  final int? maxLines;
 
   @override
   Widget build(BuildContext context) {
@@ -614,9 +615,12 @@ class PhotoCreditLine extends StatelessWidget {
       onPressed: () => showPhotoCredit(context, credit),
       semanticLabel: 'Photo credit',
       child: Padding(
-        padding: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.symmetric(vertical: 2),
         child: Text(
           'Photo: ${credit.artist} · ${credit.license}',
+          maxLines: maxLines,
+          overflow: maxLines == null ? null : TextOverflow.ellipsis,
+          textAlign: maxLines == null ? TextAlign.start : TextAlign.center,
           style: sans(palette, 12, height: 1.3, color: palette.textFaint),
         ),
       ),
@@ -625,9 +629,10 @@ class PhotoCreditLine extends StatelessWidget {
 }
 
 class SourceLine extends StatelessWidget {
-  const SourceLine({super.key, required this.item});
+  const SourceLine({super.key, required this.item, this.maxLines});
 
   final Item item;
+  final int? maxLines;
 
   @override
   Widget build(BuildContext context) {
@@ -635,6 +640,9 @@ class SourceLine extends StatelessWidget {
     final url = item.source.url;
     final text = Text(
       'Source · ${item.source.line}',
+      maxLines: maxLines,
+      overflow: maxLines == null ? null : TextOverflow.ellipsis,
+      textAlign: maxLines == null ? TextAlign.start : TextAlign.center,
       style: sans(palette, 13, height: 1.35, color: palette.textMuted),
     );
     if (url == null) return text;

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- needs_review: machine translation, same standard as the app UI. -->
+    <string name="widgets">Widgets</string>
+    <string name="quoteOfTheDay">Citation du jour</string>
+    <string name="translated">Traduit</string>
+    <string name="openToStart">Ouvrez l’app pour commencer</string>
+    <string name="openToRefresh">Ouvrez Moti Scroll pour actualiser</string>
+    <string name="streakLabel">jours d’affilée</string>
+    <string name="saveAQuote">Enregistrez une citation pour la voir ici</string>
+    <string name="yourDailyQuote">Votre citation du jour s’affiche ici</string>
+    <string name="choosePool">Choisissez une humeur ou un domaine</string>
+    <string name="quote_widget_description">La phrase du jour sur votre écran d’accueil</string>
+    <string name="streak_widget_name">Série</string>
+    <string name="streak_widget_description">Combien de jours vous êtes revenu</string>
+    <string name="saved_widget_name">Citations enregistrées</string>
+    <string name="saved_widget_description">Les phrases enregistrées, uniquement sur l’écran d’accueil</string>
+    <string name="pool_widget_name">Humeur ou domaine</string>
+    <string name="pool_widget_description">Une phrase de l’humeur ou du domaine choisi</string>
+    <string name="refreshWidgets">Actualiser les widgets</string>
+    <string name="showSavedLock">Afficher les citations enregistrées sur l’écran verrouillé</string>
+    <string name="showSavedLockDetail">Désactivé par défaut. Les citations enregistrées restent hors de l’écran verrouillé. Un téléphone verrouillé peut être lu par quelqu’un à côté.</string>
+    <string name="iosWidgetHelp">Sur iPhone, maintenez l’écran d’accueil, touchez + et choisissez Moti Scroll. Les mêmes widgets s’ajoutent depuis l’écran verrouillé. Les citations enregistrées n’y sont pas proposées.</string>
+    <string name="androidWidgetHelp">Sur Android, maintenez l’écran d’accueil, ouvrez Widgets et choisissez Moti Scroll. Il n’y a pas de widget d’écran verrouillé.</string>
+    <string name="field_sports">Sport</string>
+    <string name="field_business">Affaires</string>
+    <string name="field_science">Science</string>
+    <string name="field_arts">Arts</string>
+    <string name="field_leadership">Leadership</string>
+    <string name="field_resilience">Résilience</string>
+    <string name="field_other">Autre</string>
+    <string name="mood_startingOver">Recommencer</string>
+    <string name="mood_badDay">Mauvaise journée</string>
+    <string name="mood_needFocus">Besoin de concentration</string>
+    <string name="mood_preWorkout">Avant l’entraînement</string>
+    <string name="mood_examStress">Stress d’examen</string>
+    <string name="mood_feelingStuck">Sentiment de blocage</string>
+</resources>

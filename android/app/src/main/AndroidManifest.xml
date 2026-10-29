@@ -27,6 +27,65 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="motiscroll" android:host="item"/>
+                <data android:scheme="motiscroll" android:host="home"/>
+            </intent-filter>
+        </activity>
+        <receiver
+            android:name=".QuoteWidgetProvider"
+            android:exported="true"
+            android:label="@string/quoteOfTheDay">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/quote_widget_info"/>
+        </receiver>
+        <receiver
+            android:name=".StreakWidgetProvider"
+            android:exported="true"
+            android:label="@string/streak_widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/streak_widget_info"/>
+        </receiver>
+        <receiver
+            android:name=".SavedWidgetProvider"
+            android:exported="true"
+            android:label="@string/saved_widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/saved_widget_info"/>
+        </receiver>
+        <receiver
+            android:name=".PoolWidgetProvider"
+            android:exported="true"
+            android:label="@string/pool_widget_name">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE"/>
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/pool_widget_info"/>
+        </receiver>
+        <activity
+            android:name=".PoolWidgetConfigureActivity"
+            android:exported="true"
+            android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_CONFIGURE"/>
+            </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

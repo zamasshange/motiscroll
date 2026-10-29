@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- needs_review: machine translation, same standard as the app UI. -->
+    <string name="widgets">Wijeti</string>
+    <string name="quoteOfTheDay">Nukuu ya leo</string>
+    <string name="translated">Imetafsiriwa</string>
+    <string name="openToStart">Fungua programu uanze</string>
+    <string name="openToRefresh">Fungua Moti Scroll upate upya</string>
+    <string name="streakLabel">siku mfululizo</string>
+    <string name="saveAQuote">Hifadhi nukuu ili uione hapa</string>
+    <string name="yourDailyQuote">Nukuu yako ya kila siku itaonekana hapa</string>
+    <string name="choosePool">Chagua hisia au fani</string>
+    <string name="quote_widget_description">Mstari wa leo kwenye skrini ya nyumbani</string>
+    <string name="streak_widget_name">Mfululizo</string>
+    <string name="streak_widget_description">Siku ngapi umerudi</string>
+    <string name="saved_widget_name">Nukuu zilizohifadhiwa</string>
+    <string name="saved_widget_description">Mistari uliyohifadhi, kwenye skrini ya nyumbani tu</string>
+    <string name="pool_widget_name">Hisia au fani</string>
+    <string name="pool_widget_description">Mstari kutoka hisia au fani unayochagua</string>
+    <string name="refreshWidgets">Onyesha upya wijeti sasa</string>
+    <string name="showSavedLock">Onyesha nukuu zilizohifadhiwa kwenye skrini iliyofungwa</string>
+    <string name="showSavedLockDetail">Imezimwa kwa chaguo-msingi. Nukuu zilizohifadhiwa hazionekani kwenye skrini iliyofungwa. Simu iliyofungwa bado inaweza kusomwa na aliye karibu.</string>
+    <string name="iosWidgetHelp">Kwenye iPhone, gusa na ushikilie skrini ya nyumbani, gusa +, kisha chagua Moti Scroll. Wijeti hizo zinaweza kuongezwa kwenye skrini iliyofungwa. Nukuu zilizohifadhiwa hazitolewi huko.</string>
+    <string name="androidWidgetHelp">Kwenye Android, gusa na ushikilie skrini ya nyumbani, fungua Wijeti, kisha chagua Moti Scroll. Wijeti za skrini iliyofungwa hazitolewi.</string>
+    <string name="field_sports">Michezo</string>
+    <string name="field_business">Biashara</string>
+    <string name="field_science">Sayansi</string>
+    <string name="field_arts">Sanaa</string>
+    <string name="field_leadership">Uongozi</string>
+    <string name="field_resilience">Ustahimilivu</string>
+    <string name="field_other">Nyingine</string>
+    <string name="mood_startingOver">Kuanza upya</string>
+    <string name="mood_badDay">Siku mbaya</string>
+    <string name="mood_needFocus">Nahitaji umakini</string>
+    <string name="mood_preWorkout">Kabla ya mazoezi</string>
+    <string name="mood_examStress">Msongo wa mtihani</string>
+    <string name="mood_feelingStuck">Kuhisi kuzuiliwa</string>
+</resources>

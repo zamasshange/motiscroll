@@ -14,7 +14,7 @@ const keepHeading = /quote|sourced|speech/i;
 
 export async function runWikiquote() {
   const db = getFirestore();
-  const authors = await db.collection("authors").where("wikiquoteTitle", "!=", "").limit(25).get();
+  const authors = await db.collection("authors").where("wikiquoteTitle", "!=", "").limit(80).get();
   let added = 0;
   let skipped = 0;
   const errors: string[] = [];
@@ -258,6 +258,10 @@ export const importItems = onCall({ ...callable, timeoutSeconds: 120 }, async (r
     const authorId = String(row?.authorId ?? "").trim();
     const sourceUrl = String(row?.sourceUrl ?? "").trim();
     const sourceTitle = String(row?.sourceTitle ?? "").trim();
+    if (text.toUpperCase().startsWith("EXAMPLE")) {
+      errors.push("Example rows are labels for editors and are not imported.");
+      continue;
+    }
     if (!text || !authorId || !sourceUrl || !sourceTitle) {
       errors.push("A row is missing text, authorId, sourceTitle, or sourceUrl.");
       continue;

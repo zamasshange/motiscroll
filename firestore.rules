@@ -18,6 +18,10 @@ service cloud.firestore {
       allow read: if signedIn();
       allow write: if false;
     }
+    match /publishedAuthors/{authorId} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
     match /collections/{fieldSlug} {
       allow read: if signedIn();
       allow write: if false;
@@ -61,6 +65,20 @@ service cloud.firestore {
         && request.resource.data.keys().hasOnly(['itemId', 'userId', 'reason', 'note', 'status', 'createdAt'])
         && request.resource.data.note is string
         && request.resource.data.note.size() < 500;
+      allow read, update: if isEditor();
+      allow delete: if false;
+    }
+
+    match /feedback/{feedbackId} {
+      allow create: if signedIn()
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'open'
+        && request.resource.data.keys().hasOnly(['userId', 'topic', 'message', 'status', 'createdAt'])
+        && request.resource.data.topic is string
+        && request.resource.data.topic.size() < 80
+        && request.resource.data.message is string
+        && request.resource.data.message.size() > 0
+        && request.resource.data.message.size() < 2000;
       allow read, update: if isEditor();
       allow delete: if false;
     }

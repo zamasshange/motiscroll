@@ -44,6 +44,10 @@
     "web": "expo start --web",
     "grant-editor": "npm --prefix functions run grant-editor --",
     "seed:drafts": "npm --prefix functions run seed",
+    "bootstrap": "npm --prefix functions run bootstrap --",
+    "content:report": "npm --prefix functions run content:report --",
+    "roster:report": "npm --prefix functions run roster:report --",
+    "roster:publish": "npm --prefix functions run roster:publish --",
     "emulators": "npx firebase emulators:start"
   },
   "private": true

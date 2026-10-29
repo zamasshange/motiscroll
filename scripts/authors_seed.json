@@ -1,0 +1,1252 @@
+[
+  {
+    "name": "Mahatma Gandhi",
+    "field": "leadership",
+    "era": "20th"
+  },
+  {
+    "name": "Martin Luther King Jr.",
+    "field": "leadership",
+    "era": "20th"
+  },
+  {
+    "name": "Nelson Mandela",
+    "field": "leadership",
+    "era": "20th"
+  },
+  {
+    "name": "Winston Churchill",
+    "field": "leadership",
+    "era": "20th"
+  },
+  {
+    "name": "Franklin D. Roosevelt",
+    "field": "leadership",
+    "era": "20th"
+  },
+  {
+    "name": "Eleanor Roosevelt",
+    "field": "leadership",
+    "era": "20th"
+  },
+  {
+    "name": "John F. Kennedy",
+    "field": "leadership",
+    "era": "20th"
+  },
+  {
+    "name": "Theodore Roosevelt",
+    "field": "leadership",
+    "era": "20th"
+  },
+  {
+    "name": "Margaret Thatcher",
+    "field": "leadership",
+    "era": "20th"
+  },
+  {
+    "name": "Mikhail Gorbachev",
+    "field": "leadership",
+    "era": "20th"
+  },
+  {
+    "name": "Ronald Reagan",
+    "field": "leadership",
+    "era": "20th"
+  },
+  {
+    "name": "Golda Meir",
+    "field": "leadership",
+    "era": "20th"
+  },
+  {
+    "name": "Indira Gandhi",
+    "field": "leadership",
+    "era": "20th"
+  },
+  {
+    "name": "Ruth Bader Ginsburg",
+    "field": "leadership",
+    "era": "20th"
+  },
+  {
+    "name": "Desmond Tutu",
+    "field": "leadership",
+    "era": "20th"
+  },
+  {
+    "name": "Malcolm X",
+    "field": "leadership",
+    "era": "20th"
+  },
+  {
+    "name": "Rosa Parks",
+    "field": "leadership",
+    "era": "20th"
+  },
+  {
+    "name": "Cesar Chavez",
+    "field": "leadership",
+    "era": "20th"
+  },
+  {
+    "name": "Harvey Milk",
+    "field": "leadership",
+    "era": "20th"
+  },
+  {
+    "name": "Václav Havel",
+    "field": "leadership",
+    "era": "20th"
+  },
+  {
+    "name": "Lech Wałęsa",
+    "field": "leadership",
+    "era": "20th"
+  },
+  {
+    "name": "The Dalai Lama",
+    "field": "leadership",
+    "era": "20th"
+  },
+  {
+    "name": "Mother Teresa",
+    "field": "leadership",
+    "era": "20th"
+  },
+  {
+    "name": "Óscar Romero",
+    "field": "leadership",
+    "era": "20th"
+  },
+  {
+    "name": "Steve Biko",
+    "field": "leadership",
+    "era": "20th"
+  },
+  {
+    "name": "Albert Einstein",
+    "field": "science",
+    "era": "20th"
+  },
+  {
+    "name": "Marie Curie",
+    "field": "science",
+    "era": "20th"
+  },
+  {
+    "name": "Stephen Hawking",
+    "field": "science",
+    "era": "20th"
+  },
+  {
+    "name": "Richard Feynman",
+    "field": "science",
+    "era": "20th"
+  },
+  {
+    "name": "Carl Sagan",
+    "field": "science",
+    "era": "20th"
+  },
+  {
+    "name": "Alan Turing",
+    "field": "science",
+    "era": "20th"
+  },
+  {
+    "name": "Niels Bohr",
+    "field": "science",
+    "era": "20th"
+  },
+  {
+    "name": "Rosalind Franklin",
+    "field": "science",
+    "era": "20th"
+  },
+  {
+    "name": "Jonas Salk",
+    "field": "science",
+    "era": "20th"
+  },
+  {
+    "name": "Alexander Fleming",
+    "field": "science",
+    "era": "20th"
+  },
+  {
+    "name": "Nikola Tesla",
+    "field": "science",
+    "era": "20th"
+  },
+  {
+    "name": "Jane Goodall",
+    "field": "science",
+    "era": "20th"
+  },
+  {
+    "name": "Rachel Carson",
+    "field": "science",
+    "era": "20th"
+  },
+  {
+    "name": "Neil Armstrong",
+    "field": "science",
+    "era": "20th"
+  },
+  {
+    "name": "Sally Ride",
+    "field": "science",
+    "era": "20th"
+  },
+  {
+    "name": "Buckminster Fuller",
+    "field": "science",
+    "era": "20th"
+  },
+  {
+    "name": "Linus Pauling",
+    "field": "science",
+    "era": "20th"
+  },
+  {
+    "name": "Barbara McClintock",
+    "field": "science",
+    "era": "20th"
+  },
+  {
+    "name": "Katherine Johnson",
+    "field": "science",
+    "era": "20th"
+  },
+  {
+    "name": "Edwin Hubble",
+    "field": "science",
+    "era": "20th"
+  },
+  {
+    "name": "Sigmund Freud",
+    "field": "science",
+    "era": "20th"
+  },
+  {
+    "name": "Carl Jung",
+    "field": "science",
+    "era": "20th"
+  },
+  {
+    "name": "Viktor Frankl",
+    "field": "science",
+    "era": "20th"
+  },
+  {
+    "name": "Abraham Maslow",
+    "field": "science",
+    "era": "20th"
+  },
+  {
+    "name": "Maria Montessori",
+    "field": "science",
+    "era": "20th"
+  },
+  {
+    "name": "Henry Ford",
+    "field": "business",
+    "era": "20th"
+  },
+  {
+    "name": "Walt Disney",
+    "field": "business",
+    "era": "20th"
+  },
+  {
+    "name": "Coco Chanel",
+    "field": "business",
+    "era": "20th"
+  },
+  {
+    "name": "Sam Walton",
+    "field": "business",
+    "era": "20th"
+  },
+  {
+    "name": "Steve Jobs",
+    "field": "business",
+    "era": "20th"
+  },
+  {
+    "name": "Dale Carnegie",
+    "field": "business",
+    "era": "20th"
+  },
+  {
+    "name": "Napoleon Hill",
+    "field": "business",
+    "era": "20th"
+  },
+  {
+    "name": "Zig Ziglar",
+    "field": "business",
+    "era": "20th"
+  },
+  {
+    "name": "Jim Rohn",
+    "field": "business",
+    "era": "20th"
+  },
+  {
+    "name": "Peter Drucker",
+    "field": "business",
+    "era": "20th"
+  },
+  {
+    "name": "Soichiro Honda",
+    "field": "business",
+    "era": "20th"
+  },
+  {
+    "name": "Akio Morita",
+    "field": "business",
+    "era": "20th"
+  },
+  {
+    "name": "Ray Kroc",
+    "field": "business",
+    "era": "20th"
+  },
+  {
+    "name": "Madam C.J. Walker",
+    "field": "business",
+    "era": "20th"
+  },
+  {
+    "name": "Estée Lauder",
+    "field": "business",
+    "era": "20th"
+  },
+  {
+    "name": "Anita Roddick",
+    "field": "business",
+    "era": "20th"
+  },
+  {
+    "name": "Mary Kay Ash",
+    "field": "business",
+    "era": "20th"
+  },
+  {
+    "name": "Lee Iacocca",
+    "field": "business",
+    "era": "20th"
+  },
+  {
+    "name": "Conrad Hilton",
+    "field": "business",
+    "era": "20th"
+  },
+  {
+    "name": "Og Mandino",
+    "field": "business",
+    "era": "20th"
+  },
+  {
+    "name": "Muhammad Ali",
+    "field": "sports",
+    "era": "20th"
+  },
+  {
+    "name": "Michael Jordan",
+    "field": "sports",
+    "era": "20th"
+  },
+  {
+    "name": "Jesse Owens",
+    "field": "sports",
+    "era": "20th"
+  },
+  {
+    "name": "Jackie Robinson",
+    "field": "sports",
+    "era": "20th"
+  },
+  {
+    "name": "Pelé",
+    "field": "sports",
+    "era": "20th"
+  },
+  {
+    "name": "Diego Maradona",
+    "field": "sports",
+    "era": "20th"
+  },
+  {
+    "name": "Bruce Lee",
+    "field": "sports",
+    "era": "20th"
+  },
+  {
+    "name": "Arthur Ashe",
+    "field": "sports",
+    "era": "20th"
+  },
+  {
+    "name": "Billie Jean King",
+    "field": "sports",
+    "era": "20th"
+  },
+  {
+    "name": "Wilma Rudolph",
+    "field": "sports",
+    "era": "20th"
+  },
+  {
+    "name": "Babe Ruth",
+    "field": "sports",
+    "era": "20th"
+  },
+  {
+    "name": "Vince Lombardi",
+    "field": "sports",
+    "era": "20th"
+  },
+  {
+    "name": "John Wooden",
+    "field": "sports",
+    "era": "20th"
+  },
+  {
+    "name": "Roger Bannister",
+    "field": "sports",
+    "era": "20th"
+  },
+  {
+    "name": "Nadia Comăneci",
+    "field": "sports",
+    "era": "20th"
+  },
+  {
+    "name": "Martina Navratilova",
+    "field": "sports",
+    "era": "20th"
+  },
+  {
+    "name": "Johan Cruyff",
+    "field": "sports",
+    "era": "20th"
+  },
+  {
+    "name": "Wayne Gretzky",
+    "field": "sports",
+    "era": "20th"
+  },
+  {
+    "name": "Ayrton Senna",
+    "field": "sports",
+    "era": "20th"
+  },
+  {
+    "name": "Magic Johnson",
+    "field": "sports",
+    "era": "20th"
+  },
+  {
+    "name": "Charlie Chaplin",
+    "field": "arts",
+    "era": "20th"
+  },
+  {
+    "name": "Pablo Picasso",
+    "field": "arts",
+    "era": "20th"
+  },
+  {
+    "name": "Frida Kahlo",
+    "field": "arts",
+    "era": "20th"
+  },
+  {
+    "name": "Georgia O'Keeffe",
+    "field": "arts",
+    "era": "20th"
+  },
+  {
+    "name": "Andy Warhol",
+    "field": "arts",
+    "era": "20th"
+  },
+  {
+    "name": "Louis Armstrong",
+    "field": "arts",
+    "era": "20th"
+  },
+  {
+    "name": "Duke Ellington",
+    "field": "arts",
+    "era": "20th"
+  },
+  {
+    "name": "Nina Simone",
+    "field": "arts",
+    "era": "20th"
+  },
+  {
+    "name": "Bob Marley",
+    "field": "arts",
+    "era": "20th"
+  },
+  {
+    "name": "John Lennon",
+    "field": "arts",
+    "era": "20th"
+  },
+  {
+    "name": "Aretha Franklin",
+    "field": "arts",
+    "era": "20th"
+  },
+  {
+    "name": "Miles Davis",
+    "field": "arts",
+    "era": "20th"
+  },
+  {
+    "name": "Maya Angelou",
+    "field": "arts",
+    "era": "20th"
+  },
+  {
+    "name": "Langston Hughes",
+    "field": "arts",
+    "era": "20th"
+  },
+  {
+    "name": "Ernest Hemingway",
+    "field": "arts",
+    "era": "20th"
+  },
+  {
+    "name": "Virginia Woolf",
+    "field": "arts",
+    "era": "20th"
+  },
+  {
+    "name": "George Orwell",
+    "field": "arts",
+    "era": "20th"
+  },
+  {
+    "name": "Toni Morrison",
+    "field": "arts",
+    "era": "20th"
+  },
+  {
+    "name": "James Baldwin",
+    "field": "arts",
+    "era": "20th"
+  },
+  {
+    "name": "Audrey Hepburn",
+    "field": "arts",
+    "era": "20th"
+  },
+  {
+    "name": "Fred Rogers",
+    "field": "arts",
+    "era": "20th"
+  },
+  {
+    "name": "Jim Henson",
+    "field": "arts",
+    "era": "20th"
+  },
+  {
+    "name": "Leonard Bernstein",
+    "field": "arts",
+    "era": "20th"
+  },
+  {
+    "name": "Pablo Neruda",
+    "field": "arts",
+    "era": "20th"
+  },
+  {
+    "name": "Orson Welles",
+    "field": "arts",
+    "era": "20th"
+  },
+  {
+    "name": "Helen Keller",
+    "field": "resilience",
+    "era": "20th"
+  },
+  {
+    "name": "Anne Frank",
+    "field": "resilience",
+    "era": "20th"
+  },
+  {
+    "name": "Elie Wiesel",
+    "field": "resilience",
+    "era": "20th"
+  },
+  {
+    "name": "Primo Levi",
+    "field": "resilience",
+    "era": "20th"
+  },
+  {
+    "name": "Simone de Beauvoir",
+    "field": "resilience",
+    "era": "20th"
+  },
+  {
+    "name": "C.S. Lewis",
+    "field": "resilience",
+    "era": "20th"
+  },
+  {
+    "name": "Dietrich Bonhoeffer",
+    "field": "resilience",
+    "era": "20th"
+  },
+  {
+    "name": "Thich Nhat Hanh",
+    "field": "resilience",
+    "era": "20th"
+  },
+  {
+    "name": "Joseph Campbell",
+    "field": "resilience",
+    "era": "20th"
+  },
+  {
+    "name": "Alan Watts",
+    "field": "resilience",
+    "era": "20th"
+  },
+  {
+    "name": "Barack Obama",
+    "field": "leadership",
+    "era": "modern"
+  },
+  {
+    "name": "Michelle Obama",
+    "field": "leadership",
+    "era": "modern"
+  },
+  {
+    "name": "Angela Merkel",
+    "field": "leadership",
+    "era": "modern"
+  },
+  {
+    "name": "Malala Yousafzai",
+    "field": "leadership",
+    "era": "modern"
+  },
+  {
+    "name": "Greta Thunberg",
+    "field": "leadership",
+    "era": "modern"
+  },
+  {
+    "name": "Jacinda Ardern",
+    "field": "leadership",
+    "era": "modern"
+  },
+  {
+    "name": "Volodymyr Zelenskyy",
+    "field": "leadership",
+    "era": "modern"
+  },
+  {
+    "name": "Pope Francis",
+    "field": "leadership",
+    "era": "modern"
+  },
+  {
+    "name": "Ellen Johnson Sirleaf",
+    "field": "leadership",
+    "era": "modern"
+  },
+  {
+    "name": "Wangari Maathai",
+    "field": "leadership",
+    "era": "modern"
+  },
+  {
+    "name": "Leymah Gbowee",
+    "field": "leadership",
+    "era": "modern"
+  },
+  {
+    "name": "Tarana Burke",
+    "field": "leadership",
+    "era": "modern"
+  },
+  {
+    "name": "Bryan Stevenson",
+    "field": "leadership",
+    "era": "modern"
+  },
+  {
+    "name": "Nadia Murad",
+    "field": "leadership",
+    "era": "modern"
+  },
+  {
+    "name": "Kailash Satyarthi",
+    "field": "leadership",
+    "era": "modern"
+  },
+  {
+    "name": "Amal Clooney",
+    "field": "leadership",
+    "era": "modern"
+  },
+  {
+    "name": "Cyril Ramaphosa",
+    "field": "leadership",
+    "era": "modern"
+  },
+  {
+    "name": "José Mujica",
+    "field": "leadership",
+    "era": "modern"
+  },
+  {
+    "name": "Justin Trudeau",
+    "field": "leadership",
+    "era": "modern"
+  },
+  {
+    "name": "Kofi Annan",
+    "field": "leadership",
+    "era": "modern"
+  },
+  {
+    "name": "Mia Mottley",
+    "field": "leadership",
+    "era": "modern"
+  },
+  {
+    "name": "Ngozi Okonjo-Iweala",
+    "field": "leadership",
+    "era": "modern"
+  },
+  {
+    "name": "Graça Machel",
+    "field": "leadership",
+    "era": "modern"
+  },
+  {
+    "name": "Thuli Madonsela",
+    "field": "leadership",
+    "era": "modern"
+  },
+  {
+    "name": "Ai Weiwei",
+    "field": "leadership",
+    "era": "modern"
+  },
+  {
+    "name": "Jennifer Doudna",
+    "field": "science",
+    "era": "modern"
+  },
+  {
+    "name": "Katalin Karikó",
+    "field": "science",
+    "era": "modern"
+  },
+  {
+    "name": "Neil deGrasse Tyson",
+    "field": "science",
+    "era": "modern"
+  },
+  {
+    "name": "Brian Cox",
+    "field": "science",
+    "era": "modern"
+  },
+  {
+    "name": "Fei-Fei Li",
+    "field": "science",
+    "era": "modern"
+  },
+  {
+    "name": "Tim Berners-Lee",
+    "field": "science",
+    "era": "modern"
+  },
+  {
+    "name": "Demis Hassabis",
+    "field": "science",
+    "era": "modern"
+  },
+  {
+    "name": "David Attenborough",
+    "field": "science",
+    "era": "modern"
+  },
+  {
+    "name": "Sylvia Earle",
+    "field": "science",
+    "era": "modern"
+  },
+  {
+    "name": "Yuval Noah Harari",
+    "field": "science",
+    "era": "modern"
+  },
+  {
+    "name": "Michio Kaku",
+    "field": "science",
+    "era": "modern"
+  },
+  {
+    "name": "Temple Grandin",
+    "field": "science",
+    "era": "modern"
+  },
+  {
+    "name": "Mae Jemison",
+    "field": "science",
+    "era": "modern"
+  },
+  {
+    "name": "Chris Hadfield",
+    "field": "science",
+    "era": "modern"
+  },
+  {
+    "name": "Jocelyn Bell Burnell",
+    "field": "science",
+    "era": "modern"
+  },
+  {
+    "name": "Elon Musk",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Bill Gates",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Jeff Bezos",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Mark Zuckerberg",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Satya Nadella",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Tim Cook",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Jack Ma",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Sam Altman",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Warren Buffett",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Richard Branson",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Sara Blakely",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Reid Hoffman",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Arianna Huffington",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Sheryl Sandberg",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Simon Sinek",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Brené Brown",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Tony Robbins",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Gary Vaynerchuk",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Robin Sharma",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Mel Robbins",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "James Clear",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Jay Shetty",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Eckhart Tolle",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Ray Dalio",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Naval Ravikant",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Mark Cuban",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Daymond John",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Indra Nooyi",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Mary Barra",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Aliko Dangote",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Patrice Motsepe",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Strive Masiyiwa",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Les Brown",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Lewis Howes",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "Marie Forleo",
+    "field": "business",
+    "era": "modern"
+  },
+  {
+    "name": "LeBron James",
+    "field": "sports",
+    "era": "modern"
+  },
+  {
+    "name": "Serena Williams",
+    "field": "sports",
+    "era": "modern"
+  },
+  {
+    "name": "Roger Federer",
+    "field": "sports",
+    "era": "modern"
+  },
+  {
+    "name": "Rafael Nadal",
+    "field": "sports",
+    "era": "modern"
+  },
+  {
+    "name": "Cristiano Ronaldo",
+    "field": "sports",
+    "era": "modern"
+  },
+  {
+    "name": "Lionel Messi",
+    "field": "sports",
+    "era": "modern"
+  },
+  {
+    "name": "Usain Bolt",
+    "field": "sports",
+    "era": "modern"
+  },
+  {
+    "name": "Michael Phelps",
+    "field": "sports",
+    "era": "modern"
+  },
+  {
+    "name": "Simone Biles",
+    "field": "sports",
+    "era": "modern"
+  },
+  {
+    "name": "Tom Brady",
+    "field": "sports",
+    "era": "modern"
+  },
+  {
+    "name": "Kobe Bryant",
+    "field": "sports",
+    "era": "modern"
+  },
+  {
+    "name": "Tiger Woods",
+    "field": "sports",
+    "era": "modern"
+  },
+  {
+    "name": "Naomi Osaka",
+    "field": "sports",
+    "era": "modern"
+  },
+  {
+    "name": "Novak Djokovic",
+    "field": "sports",
+    "era": "modern"
+  },
+  {
+    "name": "Eliud Kipchoge",
+    "field": "sports",
+    "era": "modern"
+  },
+  {
+    "name": "Caster Semenya",
+    "field": "sports",
+    "era": "modern"
+  },
+  {
+    "name": "Siya Kolisi",
+    "field": "sports",
+    "era": "modern"
+  },
+  {
+    "name": "Lewis Hamilton",
+    "field": "sports",
+    "era": "modern"
+  },
+  {
+    "name": "Stephen Curry",
+    "field": "sports",
+    "era": "modern"
+  },
+  {
+    "name": "Megan Rapinoe",
+    "field": "sports",
+    "era": "modern"
+  },
+  {
+    "name": "Oprah Winfrey",
+    "field": "arts",
+    "era": "modern"
+  },
+  {
+    "name": "Steve Harvey",
+    "field": "arts",
+    "era": "modern"
+  },
+  {
+    "name": "Denzel Washington",
+    "field": "arts",
+    "era": "modern"
+  },
+  {
+    "name": "Dwayne Johnson",
+    "field": "arts",
+    "era": "modern"
+  },
+  {
+    "name": "Will Smith",
+    "field": "arts",
+    "era": "modern"
+  },
+  {
+    "name": "Taylor Swift",
+    "field": "arts",
+    "era": "modern"
+  },
+  {
+    "name": "Beyoncé",
+    "field": "arts",
+    "era": "modern"
+  },
+  {
+    "name": "Jay-Z",
+    "field": "arts",
+    "era": "modern"
+  },
+  {
+    "name": "Kendrick Lamar",
+    "field": "arts",
+    "era": "modern"
+  },
+  {
+    "name": "Lady Gaga",
+    "field": "arts",
+    "era": "modern"
+  },
+  {
+    "name": "Adele",
+    "field": "arts",
+    "era": "modern"
+  },
+  {
+    "name": "Bono",
+    "field": "arts",
+    "era": "modern"
+  },
+  {
+    "name": "Lin-Manuel Miranda",
+    "field": "arts",
+    "era": "modern"
+  },
+  {
+    "name": "Chimamanda Ngozi Adichie",
+    "field": "arts",
+    "era": "modern"
+  },
+  {
+    "name": "Trevor Noah",
+    "field": "arts",
+    "era": "modern"
+  },
+  {
+    "name": "Morgan Freeman",
+    "field": "arts",
+    "era": "modern"
+  },
+  {
+    "name": "Viola Davis",
+    "field": "arts",
+    "era": "modern"
+  },
+  {
+    "name": "Keanu Reeves",
+    "field": "arts",
+    "era": "modern"
+  },
+  {
+    "name": "Matthew McConaughey",
+    "field": "arts",
+    "era": "modern"
+  },
+  {
+    "name": "Chadwick Boseman",
+    "field": "arts",
+    "era": "modern"
+  },
+  {
+    "name": "Lupita Nyong'o",
+    "field": "arts",
+    "era": "modern"
+  },
+  {
+    "name": "Tyler Perry",
+    "field": "arts",
+    "era": "modern"
+  },
+  {
+    "name": "Kevin Hart",
+    "field": "arts",
+    "era": "modern"
+  },
+  {
+    "name": "Amanda Gorman",
+    "field": "arts",
+    "era": "modern"
+  },
+  {
+    "name": "Ava DuVernay",
+    "field": "arts",
+    "era": "modern"
+  },
+  {
+    "name": "Nick Vujicic",
+    "field": "resilience",
+    "era": "modern"
+  },
+  {
+    "name": "Bethany Hamilton",
+    "field": "resilience",
+    "era": "modern"
+  },
+  {
+    "name": "David Goggins",
+    "field": "resilience",
+    "era": "modern"
+  },
+  {
+    "name": "Jocko Willink",
+    "field": "resilience",
+    "era": "modern"
+  },
+  {
+    "name": "T.D. Jakes",
+    "field": "resilience",
+    "era": "modern"
+  }
+]

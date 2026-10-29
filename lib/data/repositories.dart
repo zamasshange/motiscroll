@@ -28,6 +28,10 @@ abstract class ItemRepository {
     required DiscoverDeck deck,
     int limit = 20,
   });
+
+  Future<Map<Field, int>> collectionCounts();
+
+  Future<List<AuthorProfile>> authors();
 }
 
 abstract class UserDirectory {
@@ -52,44 +56,14 @@ abstract class UserDirectory {
   });
 
   Future<int?> recordView(String itemId);
-}
 
-class LocalItemRepository implements ItemRepository {
-  LocalItemRepository(this.items);
+  Future<void> feedback({required String topic, required String message});
 
-  final List<Item> items;
-
-  @override
-  Future<PageChunk> page({
-    Field? field,
-    Mood? mood,
-    bool more = false,
-    int limit = 20,
-  }) async {
-    if (more) return const PageChunk([]);
-    final filtered = items.where((item) {
-      if (field != null && item.field != field) return false;
-      if (mood != null && !item.moods.contains(mood)) return false;
-      return true;
-    }).toList();
-    return PageChunk(filtered);
-  }
-
-  @override
-  Future<Item?> byId(String id) async => itemById(id, items);
-
-  @override
-  Future<Item?> quoteOfDay(DateTime day) async =>
-      dailyPicks(day, null, items)?.quote;
-
-  @override
-  Future<PageChunk> discover({
-    required Set<Field> followed,
-    required DiscoverDeck deck,
-    int limit = 20,
-  }) async {
-    return PageChunk(discoverOrder(followed, items));
-  }
+  Future<void> setLanguages({
+    String? contentLanguage,
+    String? uiLanguage,
+    String? secondLanguage,
+  });
 }
 
 class FirestoreItemRepository implements ItemRepository {
@@ -105,18 +79,29 @@ class FirestoreItemRepository implements ItemRepository {
     bool more = false,
     int limit = 20,
   }) async {
+    if (!more && field == null && mood == null) {
+      final snap = await _db
+          .collection('publishedItems')
+          .limit(catalogPageSize)
+          .get();
+      return PageChunk(rotateAuthors(_itemsFrom(snap)));
+    }
     if (!more) _cursor = null;
-    Query<Map<String, dynamic>> query = _db.collection('publishedItems');
-    if (field != null) query = query.where('field', isEqualTo: field.name);
-    if (mood != null) query = query.where('moods', arrayContains: mood.name);
-    query = query.orderBy('rand').limit(limit);
-    final cursor = _cursor;
-    if (more && cursor != null) query = query.startAfterDocument(cursor);
-    final snap = await query.get();
+    late QuerySnapshot<Map<String, dynamic>> snap;
+    try {
+      Query<Map<String, dynamic>> query = _db.collection('publishedItems');
+      if (field != null) query = query.where('field', isEqualTo: field.name);
+      if (mood != null) query = query.where('moods', arrayContains: mood.name);
+      query = query.orderBy('rand').limit(limit);
+      final cursor = _cursor;
+      if (more && cursor != null) query = query.startAfterDocument(cursor);
+      snap = await query.get();
+    } on FirebaseException catch (error) {
+      if (error.code != 'failed-precondition' || more) rethrow;
+      snap = await _db.collection('publishedItems').limit(limit).get();
+    }
     if (snap.docs.isNotEmpty) _cursor = snap.docs.last;
-    return PageChunk(
-      snap.docs.map((doc) => itemFromPublished(doc.id, doc.data())).toList(),
-    );
+    return PageChunk(rotateAuthors(_itemsFrom(snap)));
   }
 
   @override
@@ -180,16 +165,49 @@ class FirestoreItemRepository implements ItemRepository {
     return PageChunk(page);
   }
 
+  @override
+  Future<Map<Field, int>> collectionCounts() async {
+    final snap = await _db.collection('collections').get();
+    final counts = <Field, int>{};
+    for (final doc in snap.docs) {
+      final field = _field(doc.id);
+      final count = doc.data()['itemCount'];
+      if (field != null && count is num) counts[field] = count.toInt();
+    }
+    return counts;
+  }
+
+  @override
+  Future<List<AuthorProfile>> authors() async {
+    final snap = await _db.collection('publishedAuthors').get();
+    final profiles = <AuthorProfile>[];
+    for (final doc in snap.docs) {
+      final profile = authorFromPublished(doc.id, doc.data());
+      if (profile != null) profiles.add(profile);
+    }
+    return profiles;
+  }
+
   Future<List<Item>> _randPage(double start, {List<String>? whereIn}) async {
     Query<Map<String, dynamic>> query = _db.collection('publishedItems');
     if (whereIn != null && whereIn.isNotEmpty) {
       query = query.where('field', whereIn: whereIn.take(10).toList());
     }
-    final snap = await query
-        .where('rand', isGreaterThanOrEqualTo: start)
-        .orderBy('rand')
-        .limit(20)
-        .get();
+    late QuerySnapshot<Map<String, dynamic>> snap;
+    try {
+      snap = await query
+          .where('rand', isGreaterThanOrEqualTo: start)
+          .orderBy('rand')
+          .limit(20)
+          .get();
+    } on FirebaseException catch (error) {
+      if (error.code != 'failed-precondition') rethrow;
+      snap = await _db.collection('publishedItems').limit(20).get();
+    }
+    return rotateAuthors(_itemsFrom(snap));
+  }
+
+  List<Item> _itemsFrom(QuerySnapshot<Map<String, dynamic>> snap) {
     return snap.docs
         .map((doc) => itemFromPublished(doc.id, doc.data()))
         .toList();
@@ -263,6 +281,33 @@ class FirestoreUserDirectory implements UserDirectory {
   Future<int?> recordView(String itemId) async {
     return null;
   }
+
+  @override
+  Future<void> feedback({
+    required String topic,
+    required String message,
+  }) async {
+    await _db.collection('feedback').add({
+      'userId': uid,
+      'topic': topic,
+      'message': message,
+      'status': 'open',
+      'createdAt': FieldValue.serverTimestamp(),
+    });
+  }
+
+  @override
+  Future<void> setLanguages({
+    String? contentLanguage,
+    String? uiLanguage,
+    String? secondLanguage,
+  }) async {
+    await _user.set({
+      'contentLanguage': contentLanguage ?? FieldValue.delete(),
+      'uiLanguage': uiLanguage ?? FieldValue.delete(),
+      'secondLanguage': secondLanguage ?? FieldValue.delete(),
+    }, SetOptions(merge: true));
+  }
 }
 
 Item itemFromPublished(String id, Map<String, dynamic> data) {
@@ -282,9 +327,9 @@ Item itemFromPublished(String id, Map<String, dynamic> data) {
   return Item(
     id: id,
     type: data['type'] as String? ?? 'quote',
-    text: data['text'] as String? ?? '',
-    author: data['authorName'] as String? ?? '',
-    authorRole: data['authorRole'] as String? ?? '',
+    text: decodeText(data['text'] as String? ?? ''),
+    author: decodeText(data['authorName'] as String? ?? ''),
+    authorRole: decodeText(data['authorRole'] as String? ?? ''),
     field: _field(data['field'] as String?) ?? Field.other,
     moods: [
       for (final name in (data['moods'] as List?) ?? const [])
@@ -292,7 +337,7 @@ Item itemFromPublished(String id, Map<String, dynamic> data) {
           _mood(name as String?)!,
     ],
     source: Source(
-      title: sourceMap['title'] as String? ?? 'Source',
+      title: decodeText(sourceMap['title'] as String? ?? 'Source'),
       year: year is num ? year.toInt() : null,
       url: (sourceMap['url'] as String?)?.isEmpty ?? true
           ? null
@@ -300,9 +345,9 @@ Item itemFromPublished(String id, Map<String, dynamic> data) {
     ),
     verified: true,
     deeper: Deeper(
-      context: deeperMap['context'] as String? ?? '',
-      didYouKnow: deeperMap['didYouKnow'] as String? ?? '',
-      takeaway: deeperMap['takeaway'] as String? ?? '',
+      context: decodeText(deeperMap['context'] as String? ?? ''),
+      didYouKnow: decodeText(deeperMap['didYouKnow'] as String? ?? ''),
+      takeaway: decodeText(deeperMap['takeaway'] as String? ?? ''),
       related: [
         for (final id in (data['related'] as List?) ?? const [])
           if (id is String) id,
@@ -318,7 +363,33 @@ Item itemFromPublished(String id, Map<String, dynamic> data) {
     imageCredit: creditMap == null
         ? null
         : ImageCredit(
-            artist: creditMap['artist'] as String? ?? '',
+            artist: decodeText(creditMap['artist'] as String? ?? ''),
+            license: creditMap['license'] as String? ?? '',
+            sourceUrl: creditMap['sourceUrl'] as String? ?? '',
+          ),
+  );
+}
+
+AuthorProfile? authorFromPublished(String id, Map<String, dynamic> data) {
+  final name = data['name'] as String? ?? '';
+  final field = _field(data['field'] as String?);
+  if (name.isEmpty || field == null) return null;
+  final credit = data['imageCredit'];
+  final creditMap = credit is Map ? Map<String, dynamic>.from(credit) : null;
+  final imageUrl = data['imageUrl'] as String?;
+  return AuthorProfile(
+    id: id,
+    name: decodeText(name),
+    role: decodeText(data['role'] as String? ?? ''),
+    field: field,
+    bornYear: (data['bornYear'] as num?)?.toInt(),
+    diedYear: (data['diedYear'] as num?)?.toInt(),
+    isLiving: data['isLiving'] as bool? ?? false,
+    imageUrl: imageUrl == null || imageUrl.isEmpty ? null : imageUrl,
+    imageCredit: creditMap == null
+        ? null
+        : ImageCredit(
+            artist: decodeText(creditMap['artist'] as String? ?? ''),
             license: creditMap['license'] as String? ?? '',
             sourceUrl: creditMap['sourceUrl'] as String? ?? '',
           ),

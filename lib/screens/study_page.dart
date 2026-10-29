@@ -17,6 +17,9 @@ class StudyPage extends StatelessWidget {
     final state = AppScope.of(context);
     final palette = state.palette;
     final read = state.read.contains(item.id);
+    final portrait = state.portraitFor(item.author);
+    final imageUrl = item.imageUrl ?? portrait?.imageUrl;
+    final credit = item.imageCredit ?? portrait?.imageCredit;
     return Scaffold(
       backgroundColor: palette.bg,
       body: SafeArea(
@@ -81,37 +84,39 @@ class StudyPage extends StatelessWidget {
               const SizedBox(height: 8),
               const Center(child: UnverifiedMark()),
             ],
-            if (item.imageCredit != null) ...[
-              const SizedBox(height: 12),
+            if (imageUrl != null && imageUrl.isNotEmpty) ...[
+              const SizedBox(height: 16),
               Center(
                 child: AuthorAvatar(
                   author: item.author,
-                  size: 72,
-                  imageUrl: item.imageUrl,
-                  imageCredit: item.imageCredit,
+                  size: 88,
+                  imageUrl: imageUrl,
+                  imageCredit: credit,
                 ),
               ),
-              PhotoCreditLine(credit: item.imageCredit!),
+              if (credit != null) PhotoCreditLine(credit: credit),
             ],
             const SizedBox(height: 8),
             Divider(color: palette.border, height: 32),
             _Section(
               title: 'Context',
-              body: item.deeper.context,
-              onCopy: () => _copy(context, item.deeper.context),
+              body: item.shownContext,
+              onCopy: () => _copy(context, item.shownContext),
             ),
             const SizedBox(height: 16),
             _TintedSection(
               title: 'Did you know',
-              body: item.deeper.didYouKnow,
-              onCopy: () => _copy(context, item.deeper.didYouKnow),
+              body: item.shownDidYouKnow,
+              onCopy: () => _copy(context, item.shownDidYouKnow),
             ),
-            const SizedBox(height: 16),
-            _Section(
-              title: 'Takeaway',
-              body: item.deeper.takeaway,
-              onCopy: () => _copy(context, item.deeper.takeaway),
-            ),
+            if (item.shownTakeaway.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              _Section(
+                title: 'Takeaway',
+                body: item.shownTakeaway,
+                onCopy: () => _copy(context, item.shownTakeaway),
+              ),
+            ],
             const SizedBox(height: 8),
             Center(
               child: Pressable(

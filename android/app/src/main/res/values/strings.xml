@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="widgets">Widgets</string>
+    <string name="quoteOfTheDay">Quote of the Day</string>
+    <string name="translated">Translated</string>
+    <string name="openToStart">Open the app to get started</string>
+    <string name="openToRefresh">Open Moti Scroll to refresh</string>
+    <string name="streakLabel">day streak</string>
+    <string name="saveAQuote">Save a quote to see it here</string>
+    <string name="yourDailyQuote">Your daily quote appears here</string>
+    <string name="choosePool">Choose a mood or a field</string>
+    <string name="quote_widget_description">Today’s line on your home screen</string>
+    <string name="streak_widget_name">Streak</string>
+    <string name="streak_widget_description">How many days you have come back</string>
+    <string name="saved_widget_name">Saved quotes</string>
+    <string name="saved_widget_description">Lines you saved, on the home screen only</string>
+    <string name="pool_widget_name">Mood or field</string>
+    <string name="pool_widget_description">A line from a mood or a field you choose</string>
+    <string name="refreshWidgets">Refresh widgets now</string>
+    <string name="showSavedLock">Show saved quotes on lock screen widgets</string>
+    <string name="showSavedLockDetail">Off by default. Saved quotes stay off the lock screen either way. A locked phone can be read by anyone nearby.</string>
+    <string name="iosWidgetHelp">On iPhone, touch and hold the Home Screen, tap +, and choose Moti Scroll. The same widgets can be added from the lock screen customizer. Saved quotes are not offered on the lock screen.</string>
+    <string name="androidWidgetHelp">On Android, touch and hold the Home Screen, open Widgets, and choose Moti Scroll. Lock screen widgets are not offered.</string>
+    <string name="field_sports">Sports</string>
+    <string name="field_business">Business</string>
+    <string name="field_science">Science</string>
+    <string name="field_arts">Arts</string>
+    <string name="field_leadership">Leadership</string>
+    <string name="field_resilience">Resilience</string>
+    <string name="field_other">Other</string>
+    <string name="mood_startingOver">Starting over</string>
+    <string name="mood_badDay">Bad day</string>
+    <string name="mood_needFocus">Need focus</string>
+    <string name="mood_preWorkout">Pre-workout</string>
+    <string name="mood_examStress">Exam stress</string>
+    <string name="mood_feelingStuck">Feeling stuck</string>
+</resources>

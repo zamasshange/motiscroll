@@ -37,6 +37,7 @@ void showNotes(BuildContext context, Item item) {
               alignment: Alignment.centerRight,
               child: TextButton(
                 onPressed: () {
+                  FocusManager.instance.primaryFocus?.unfocus();
                   state.setNote(item.id, controller.text);
                   Navigator.of(context).pop();
                 },
@@ -57,7 +58,7 @@ void showNotes(BuildContext context, Item item) {
               ),
             ),
             Text(
-              item.source.line,
+              item.author,
               textAlign: TextAlign.center,
               style: sans(palette, 18, weight: FontWeight.w700),
             ),

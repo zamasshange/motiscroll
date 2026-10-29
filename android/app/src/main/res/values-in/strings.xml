@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- needs_review: machine translation, same standard as the app UI. -->
+    <string name="widgets">Widget</string>
+    <string name="quoteOfTheDay">Kutipan hari ini</string>
+    <string name="translated">Terjemahan</string>
+    <string name="openToStart">Buka aplikasi untuk mulai</string>
+    <string name="openToRefresh">Buka Moti Scroll untuk menyegarkan</string>
+    <string name="streakLabel">hari beruntun</string>
+    <string name="saveAQuote">Simpan kutipan untuk melihatnya di sini</string>
+    <string name="yourDailyQuote">Kutipan harian Anda muncul di sini</string>
+    <string name="choosePool">Pilih suasana atau bidang</string>
+    <string name="quote_widget_description">Baris hari ini di layar utama</string>
+    <string name="streak_widget_name">Rangkaian</string>
+    <string name="streak_widget_description">Berapa hari Anda kembali</string>
+    <string name="saved_widget_name">Kutipan tersimpan</string>
+    <string name="saved_widget_description">Baris yang Anda simpan, hanya di layar utama</string>
+    <string name="pool_widget_name">Suasana atau bidang</string>
+    <string name="pool_widget_description">Baris dari suasana atau bidang yang Anda pilih</string>
+    <string name="refreshWidgets">Segarkan widget sekarang</string>
+    <string name="showSavedLock">Tampilkan kutipan tersimpan di widget layar kunci</string>
+    <string name="showSavedLockDetail">Mati secara bawaan. Kutipan tersimpan tidak tampil di layar kunci. Ponsel yang terkunci tetap bisa dibaca orang di dekatnya.</string>
+    <string name="iosWidgetHelp">Di iPhone, sentuh dan tahan Layar Utama, ketuk +, lalu pilih Moti Scroll. Widget yang sama bisa ditambahkan dari layar kunci. Kutipan tersimpan tidak ditawarkan di sana.</string>
+    <string name="androidWidgetHelp">Di Android, sentuh dan tahan Layar Utama, buka Widget, lalu pilih Moti Scroll. Widget layar kunci tidak ditawarkan.</string>
+    <string name="field_sports">Olahraga</string>
+    <string name="field_business">Bisnis</string>
+    <string name="field_science">Sains</string>
+    <string name="field_arts">Seni</string>
+    <string name="field_leadership">Kepemimpinan</string>
+    <string name="field_resilience">Ketangguhan</string>
+    <string name="field_other">Lainnya</string>
+    <string name="mood_startingOver">Mulai lagi</string>
+    <string name="mood_badDay">Hari buruk</string>
+    <string name="mood_needFocus">Butuh fokus</string>
+    <string name="mood_preWorkout">Sebelum latihan</string>
+    <string name="mood_examStress">Stres ujian</string>
+    <string name="mood_feelingStuck">Merasa buntu</string>
+</resources>

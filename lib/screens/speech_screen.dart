@@ -116,7 +116,7 @@ class SpeechScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
                 Text(
-                  item.deeper.context,
+                  item.shownContext,
                   style: sans(palette, 16, height: 1.45),
                 ),
                 const SizedBox(height: 8),

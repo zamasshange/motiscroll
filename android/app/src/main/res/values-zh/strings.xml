@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- needs_review: machine translation, same standard as the app UI. -->
+    <string name="widgets">小组件</string>
+    <string name="quoteOfTheDay">今日引言</string>
+    <string name="translated">译文</string>
+    <string name="openToStart">打开应用开始使用</string>
+    <string name="openToRefresh">打开 Moti Scroll 以刷新</string>
+    <string name="streakLabel">天连续</string>
+    <string name="saveAQuote">保存一条引言，即可在此查看</string>
+    <string name="yourDailyQuote">您的每日引言会显示在这里</string>
+    <string name="choosePool">选择心情或领域</string>
+    <string name="quote_widget_description">主屏幕上的今日一句</string>
+    <string name="streak_widget_name">连续</string>
+    <string name="streak_widget_description">你连续回来了多少天</string>
+    <string name="saved_widget_name">已保存的引言</string>
+    <string name="saved_widget_description">你保存的句子，仅在主屏幕</string>
+    <string name="pool_widget_name">心情或领域</string>
+    <string name="pool_widget_description">来自你所选心情或领域的一句</string>
+    <string name="refreshWidgets">立即刷新小组件</string>
+    <string name="showSavedLock">在锁屏小组件上显示已保存的引言</string>
+    <string name="showSavedLockDetail">默认关闭。已保存的引言不会出现在锁屏上。旁边的人仍可能读到锁屏上的内容。</string>
+    <string name="iosWidgetHelp">在 iPhone 上按住主屏幕，点 +，选择 Moti Scroll。锁屏自定义里也可以添加同样的小组件。已保存的引言不会出现在锁屏上。</string>
+    <string name="androidWidgetHelp">在 Android 上按住主屏幕，打开小组件，选择 Moti Scroll。不提供锁屏小组件。</string>
+    <string name="field_sports">体育</string>
+    <string name="field_business">商业</string>
+    <string name="field_science">科学</string>
+    <string name="field_arts">艺术</string>
+    <string name="field_leadership">领导力</string>
+    <string name="field_resilience">韧性</string>
+    <string name="field_other">其他</string>
+    <string name="mood_startingOver">重新开始</string>
+    <string name="mood_badDay">糟糕的一天</string>
+    <string name="mood_needFocus">需要专注</string>
+    <string name="mood_preWorkout">锻炼前</string>
+    <string name="mood_examStress">考试压力</string>
+    <string name="mood_feelingStuck">感到卡住</string>
+</resources>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- needs_review: machine translation, same standard as the app UI. -->
+    <string name="widgets">Widget’lar</string>
+    <string name="quoteOfTheDay">Günün sözü</string>
+    <string name="translated">Çeviri</string>
+    <string name="openToStart">Başlamak için uygulamayı açın</string>
+    <string name="openToRefresh">Yenilemek için Moti Scroll’u açın</string>
+    <string name="streakLabel">günlük seri</string>
+    <string name="saveAQuote">Burada görmek için bir söz kaydedin</string>
+    <string name="yourDailyQuote">Günlük sözünüz burada görünür</string>
+    <string name="choosePool">Bir ruh hali veya alan seçin</string>
+    <string name="quote_widget_description">Ana ekranda günün satırı</string>
+    <string name="streak_widget_name">Seri</string>
+    <string name="streak_widget_description">Kaç gündür geri döndüğünüz</string>
+    <string name="saved_widget_name">Kayıtlı sözler</string>
+    <string name="saved_widget_description">Kaydettiğiniz satırlar, yalnızca ana ekranda</string>
+    <string name="pool_widget_name">Ruh hali veya alan</string>
+    <string name="pool_widget_description">Seçtiğiniz ruh halinden veya alandan bir satır</string>
+    <string name="refreshWidgets">Widget’ları şimdi yenile</string>
+    <string name="showSavedLock">Kayıtlı sözleri kilit ekranı widget’larında göster</string>
+    <string name="showSavedLockDetail">Varsayılan olarak kapalı. Kayıtlı sözler kilit ekranında görünmez. Kilitli bir telefonu yakındaki biri okuyabilir.</string>
+    <string name="iosWidgetHelp">iPhone’da Ana Ekrana basılı tutun, + düğmesine dokunun ve Moti Scroll’u seçin. Aynı widget’lar kilit ekranından da eklenebilir. Kayıtlı sözler orada sunulmaz.</string>
+    <string name="androidWidgetHelp">Android’de Ana Ekrana basılı tutun, Widget’lar’ı açın ve Moti Scroll’u seçin. Kilit ekranı widget’ı sunulmaz.</string>
+    <string name="field_sports">Spor</string>
+    <string name="field_business">İş</string>
+    <string name="field_science">Bilim</string>
+    <string name="field_arts">Sanat</string>
+    <string name="field_leadership">Liderlik</string>
+    <string name="field_resilience">Dayanıklılık</string>
+    <string name="field_other">Diğer</string>
+    <string name="mood_startingOver">Yeniden başlamak</string>
+    <string name="mood_badDay">Kötü gün</string>
+    <string name="mood_needFocus">Odak gerek</string>
+    <string name="mood_preWorkout">Antrenman öncesi</string>
+    <string name="mood_examStress">Sınav stresi</string>
+    <string name="mood_feelingStuck">Sıkışmış hissetmek</string>
+</resources>

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- needs_review: machine translation, same standard as the app UI. -->
+    <string name="widgets">Amawijethi</string>
+    <string name="quoteOfTheDay">Isisho sanamuhla</string>
+    <string name="translated">Kuhunyushiwe</string>
+    <string name="openToStart">Vula uhlelo ukuze uqale</string>
+    <string name="openToRefresh">Vula i-Moti Scroll ukuze uvuselele</string>
+    <string name="streakLabel">izinsuku zilandelana</string>
+    <string name="saveAQuote">Londoloza isisho ukuze usibone lapha</string>
+    <string name="yourDailyQuote">Isisho sakho sansuku zonke sivela lapha</string>
+    <string name="choosePool">Khetha umuzwa noma umkhakha</string>
+    <string name="quote_widget_description">Umugqa wanamuhla esikrinini sasekhaya</string>
+    <string name="streak_widget_name">Uchungechunge</string>
+    <string name="streak_widget_description">Zingaki izinsuku obuyile ngazo</string>
+    <string name="saved_widget_name">Izisho ezilondoloziwe</string>
+    <string name="saved_widget_description">Imigqa oyilondolozile, esikrinini sasekhaya kuphela</string>
+    <string name="pool_widget_name">Umuzwa noma umkhakha</string>
+    <string name="pool_widget_description">Umugqa womuzwa noma umkhakha owukhethayo</string>
+    <string name="refreshWidgets">Vuselela amawijethi manje</string>
+    <string name="showSavedLock">Bonisa izisho ezilondoloziwe kuwijethi yesikrini esikhiyiwe</string>
+    <string name="showSavedLockDetail">Icishwe ngokuzenzakalelayo. Izisho ezilondoloziwe aziveli esikrinini esikhiyiwe. Ofone ekhiyiwe angafundwa ngomuntu oseduze.</string>
+    <string name="iosWidgetHelp">Ku-iPhone, thinta futhi ubambe isikrini sasekhaya, thepha +, bese ukhetha i-Moti Scroll. Amawijethi afanayo angengezwa esikrinini esikhiyiwe. Izisho ezilondoloziwe azinikezwa lapho.</string>
+    <string name="androidWidgetHelp">Ku-Android, thinta futhi ubambe isikrini sasekhaya, vula Amawijethi, bese ukhetha i-Moti Scroll. Amawijethi esikrini esikhiyiwe awanikwa.</string>
+    <string name="field_sports">Ezemidlalo</string>
+    <string name="field_business">Ibhizinisi</string>
+    <string name="field_science">Isayensi</string>
+    <string name="field_arts">Ubuciko</string>
+    <string name="field_leadership">Ubuholi</string>
+    <string name="field_resilience">Ukuqina</string>
+    <string name="field_other">Okunye</string>
+    <string name="mood_startingOver">Qala kabusha</string>
+    <string name="mood_badDay">Usuku olubi</string>
+    <string name="mood_needFocus">Ngidinga ukugxila</string>
+    <string name="mood_preWorkout">Ngaphambi kokuzivocavoca</string>
+    <string name="mood_examStress">Ingcindezi yokuhlolwa</string>
+    <string name="mood_feelingStuck">Ngizwa ngibambekele</string>
+</resources>

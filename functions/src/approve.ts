@@ -15,10 +15,12 @@ export const previewApproval = onCall(callable, async (request) => {
   return { errors: approvalErrors(input) };
 });
 
-export const approveItem = onCall(callable, async (request) => {
-  const editor = assertEditor(request);
-  const itemId = String(request.data?.itemId ?? "").trim();
-  const override = String(request.data?.longQuoteOverrideReason ?? "").trim();
+export async function approveItemById(
+  itemId: string,
+  editor: string,
+  override = "",
+  options?: { recount?: boolean },
+) {
   if (!itemId || itemId.length > 120) {
     throw new HttpsError("invalid-argument", "itemId is required.");
   }
@@ -92,21 +94,66 @@ export const approveItem = onCall(callable, async (request) => {
       { merge: true },
     );
     tx.set(db.collection("publishedItems").doc(itemId), published);
-    const field = String(item.field ?? "other");
-    const collectionRef = db.collection("collections").doc(field);
-    tx.set(
-      collectionRef,
+  });
+  if (options?.recount !== false) await recomputeCollectionCounts();
+  return { ok: true };
+}
+
+export const approveItem = onCall(callable, async (request) => {
+  const editor = assertEditor(request);
+  const itemId = String(request.data?.itemId ?? "").trim();
+  const override = String(request.data?.longQuoteOverrideReason ?? "").trim();
+  return approveItemById(itemId, editor, override);
+});
+
+export const approveBatch = onCall({ ...callable, timeoutSeconds: 300 }, async (request) => {
+  const editor = assertEditor(request);
+  const raw = Array.isArray(request.data?.itemIds) ? request.data.itemIds : null;
+  if (!raw || raw.length === 0) {
+    throw new HttpsError("invalid-argument", "Pass itemIds, up to 25.");
+  }
+  if (raw.length > 25) {
+    throw new HttpsError("invalid-argument", "Approve at most 25 items at a time.");
+  }
+  const approved: string[] = [];
+  const skipped: { itemId: string; reason: string }[] = [];
+  for (const value of raw) {
+    const itemId = String(value ?? "").trim();
+    try {
+      await approveItemById(itemId, editor, "", { recount: false });
+      approved.push(itemId);
+    } catch (error) {
+      const reason = error instanceof HttpsError ? error.message : "That item could not be approved.";
+      skipped.push({ itemId, reason });
+    }
+  }
+  await recomputeCollectionCounts();
+  return { approved, skipped };
+});
+
+const collectionFields = ["sports", "business", "science", "arts", "leadership", "resilience", "other"];
+
+export async function recomputeCollectionCounts() {
+  const db = getFirestore();
+  const snap = await db.collection("publishedItems").get();
+  const counts = new Map<string, number>(collectionFields.map((field) => [field, 0]));
+  for (const doc of snap.docs) {
+    const field = String(doc.data().field ?? "other");
+    counts.set(field, (counts.get(field) ?? 0) + 1);
+  }
+  for (const [field, itemCount] of counts) {
+    await db.collection("collections").doc(field).set(
       {
         title: field,
+        description: "",
         coverSeed: field,
-        itemCount: FieldValue.increment(1),
+        itemCount,
         updatedAt: FieldValue.serverTimestamp(),
       },
       { merge: true },
     );
-  });
-  return { ok: true };
-});
+  }
+}
 
 export const rejectItem = onCall(callable, async (request) => {
   assertEditor(request);
@@ -125,6 +172,7 @@ export const rejectItem = onCall(callable, async (request) => {
     { merge: true },
   );
   await db.collection("publishedItems").doc(itemId).delete();
+  await recomputeCollectionCounts();
   return { ok: true };
 });
 
@@ -142,6 +190,7 @@ export const retireItem = onCall(callable, async (request) => {
     { merge: true },
   );
   await db.collection("publishedItems").doc(itemId).delete();
+  await recomputeCollectionCounts();
   return { ok: true };
 });
 
@@ -157,6 +206,7 @@ export async function unpublishForReview(itemId: string, reason: string) {
     { merge: true },
   );
   await db.collection("publishedItems").doc(itemId).delete();
+  await recomputeCollectionCounts();
 }
 
 async function loadApprovalInput(itemId: string, override: string): Promise<ApprovalInput> {

@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- needs_review: machine translation, same standard as the app UI. -->
+    <string name="widgets">Виджеты</string>
+    <string name="quoteOfTheDay">Цитата дня</string>
+    <string name="translated">Перевод</string>
+    <string name="openToStart">Откройте приложение, чтобы начать</string>
+    <string name="openToRefresh">Откройте Moti Scroll, чтобы обновить</string>
+    <string name="streakLabel">дней подряд</string>
+    <string name="saveAQuote">Сохраните цитату, чтобы увидеть её здесь</string>
+    <string name="yourDailyQuote">Здесь появится цитата дня</string>
+    <string name="choosePool">Выберите настроение или область</string>
+    <string name="quote_widget_description">Сегодняшняя строка на домашнем экране</string>
+    <string name="streak_widget_name">Серия</string>
+    <string name="streak_widget_description">Сколько дней вы возвращались</string>
+    <string name="saved_widget_name">Сохранённые цитаты</string>
+    <string name="saved_widget_description">Сохранённые строки, только на домашнем экране</string>
+    <string name="pool_widget_name">Настроение или область</string>
+    <string name="pool_widget_description">Строка из выбранного настроения или области</string>
+    <string name="refreshWidgets">Обновить виджеты</string>
+    <string name="showSavedLock">Показывать сохранённые цитаты на экране блокировки</string>
+    <string name="showSavedLockDetail">Выключено по умолчанию. Сохранённые цитаты не попадают на экран блокировки. Заблокированный телефон может прочитать кто-то рядом.</string>
+    <string name="iosWidgetHelp">На iPhone удерживайте домашний экран, нажмите + и выберите Moti Scroll. Те же виджеты можно добавить с экрана блокировки. Сохранённые цитаты там не предлагаются.</string>
+    <string name="androidWidgetHelp">На Android удерживайте домашний экран, откройте «Виджеты» и выберите Moti Scroll. Виджетов экрана блокировки нет.</string>
+    <string name="field_sports">Спорт</string>
+    <string name="field_business">Бизнес</string>
+    <string name="field_science">Наука</string>
+    <string name="field_arts">Искусство</string>
+    <string name="field_leadership">Лидерство</string>
+    <string name="field_resilience">Стойкость</string>
+    <string name="field_other">Другое</string>
+    <string name="mood_startingOver">Начать заново</string>
+    <string name="mood_badDay">Тяжёлый день</string>
+    <string name="mood_needFocus">Нужен фокус</string>
+    <string name="mood_preWorkout">Перед тренировкой</string>
+    <string name="mood_examStress">Стресс перед экзаменом</string>
+    <string name="mood_feelingStuck">Чувство тупика</string>
+</resources>

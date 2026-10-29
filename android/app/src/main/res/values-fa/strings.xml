@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- needs_review: machine translation, same standard as the app UI. -->
+    <string name="widgets">ابزارک‌ها</string>
+    <string name="quoteOfTheDay">نقل‌قول روز</string>
+    <string name="translated">ترجمه‌شده</string>
+    <string name="openToStart">برای شروع برنامه را باز کنید</string>
+    <string name="openToRefresh">برای تازه‌سازی Moti Scroll را باز کنید</string>
+    <string name="streakLabel">روز پیاپی</string>
+    <string name="saveAQuote">یک نقل‌قول ذخیره کنید تا اینجا دیده شود</string>
+    <string name="yourDailyQuote">نقل‌قول روزانه اینجا نمایان می‌شود</string>
+    <string name="choosePool">حال‌وهوا یا زمینه را انتخاب کنید</string>
+    <string name="quote_widget_description">سطر امروز روی صفحهٔ اصلی</string>
+    <string name="streak_widget_name">روند</string>
+    <string name="streak_widget_description">چند روز برگشته‌اید</string>
+    <string name="saved_widget_name">نقل‌قول‌های ذخیره‌شده</string>
+    <string name="saved_widget_description">سطرهای ذخیره‌شده، فقط روی صفحهٔ اصلی</string>
+    <string name="pool_widget_name">حال‌وهوا یا زمینه</string>
+    <string name="pool_widget_description">سطری از حال‌وهوا یا زمینهٔ انتخابی</string>
+    <string name="refreshWidgets">تازه‌سازی ابزارک‌ها</string>
+    <string name="showSavedLock">نمایش نقل‌قول‌های ذخیره‌شده روی صفحهٔ قفل</string>
+    <string name="showSavedLockDetail">به‌طور پیش‌فرض خاموش است. نقل‌قول‌های ذخیره‌شده روی صفحهٔ قفل نمی‌آیند. کسی که کنار گوشی قفل باشد می‌تواند آن را بخواند.</string>
+    <string name="iosWidgetHelp">در iPhone صفحهٔ اصلی را لمس کنید و نگه دارید، + را بزنید و Moti Scroll را انتخاب کنید. همین ابزارک‌ها از صفحهٔ قفل هم اضافه می‌شوند. نقل‌قول‌های ذخیره‌شده آنجا پیشنهاد نمی‌شوند.</string>
+    <string name="androidWidgetHelp">در Android صفحهٔ اصلی را لمس کنید و نگه دارید، ابزارک‌ها را باز کنید و Moti Scroll را انتخاب کنید. ابزارک صفحهٔ قفل ارائه نمی‌شود.</string>
+    <string name="field_sports">ورزش</string>
+    <string name="field_business">کسب‌وکار</string>
+    <string name="field_science">علم</string>
+    <string name="field_arts">هنر</string>
+    <string name="field_leadership">رهبری</string>
+    <string name="field_resilience">تاب‌آوری</string>
+    <string name="field_other">سایر</string>
+    <string name="mood_startingOver">شروع دوباره</string>
+    <string name="mood_badDay">روز بد</string>
+    <string name="mood_needFocus">نیاز به تمرکز</string>
+    <string name="mood_preWorkout">پیش از تمرین</string>
+    <string name="mood_examStress">استرس امتحان</string>
+    <string name="mood_feelingStuck">احساس گیر کردن</string>
+</resources>

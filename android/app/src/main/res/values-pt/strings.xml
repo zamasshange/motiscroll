@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- needs_review: machine translation, same standard as the app UI. -->
+    <string name="widgets">Widgets</string>
+    <string name="quoteOfTheDay">Citação do dia</string>
+    <string name="translated">Traduzido</string>
+    <string name="openToStart">Abra a app para começar</string>
+    <string name="openToRefresh">Abra o Moti Scroll para atualizar</string>
+    <string name="streakLabel">dias seguidos</string>
+    <string name="saveAQuote">Guarde uma citação para a ver aqui</string>
+    <string name="yourDailyQuote">A sua citação do dia aparece aqui</string>
+    <string name="choosePool">Escolha um humor ou um campo</string>
+    <string name="quote_widget_description">A frase de hoje no ecrã inicial</string>
+    <string name="streak_widget_name">Sequência</string>
+    <string name="streak_widget_description">Quantos dias voltou</string>
+    <string name="saved_widget_name">Citações guardadas</string>
+    <string name="saved_widget_description">Frases que guardou, só no ecrã inicial</string>
+    <string name="pool_widget_name">Humor ou campo</string>
+    <string name="pool_widget_description">Uma frase do humor ou campo que escolher</string>
+    <string name="refreshWidgets">Atualizar widgets agora</string>
+    <string name="showSavedLock">Mostrar citações guardadas nos widgets do ecrã bloqueado</string>
+    <string name="showSavedLockDetail">Desligado por predefinição. As citações guardadas ficam fora do ecrã bloqueado. Um telefone bloqueado pode ser lido por quem estiver perto.</string>
+    <string name="iosWidgetHelp">No iPhone, toque e mantenha o ecrã inicial, toque em + e escolha Moti Scroll. Os mesmos widgets podem ser adicionados no ecrã bloqueado. As citações guardadas não são oferecidas aí.</string>
+    <string name="androidWidgetHelp">No Android, toque e mantenha o ecrã inicial, abra Widgets e escolha Moti Scroll. Não há widgets de ecrã bloqueado.</string>
+    <string name="field_sports">Desporto</string>
+    <string name="field_business">Negócios</string>
+    <string name="field_science">Ciência</string>
+    <string name="field_arts">Artes</string>
+    <string name="field_leadership">Liderança</string>
+    <string name="field_resilience">Resiliência</string>
+    <string name="field_other">Outro</string>
+    <string name="mood_startingOver">Recomeçar</string>
+    <string name="mood_badDay">Mau dia</string>
+    <string name="mood_needFocus">Preciso de foco</string>
+    <string name="mood_preWorkout">Antes do treino</string>
+    <string name="mood_examStress">Stress de exame</string>
+    <string name="mood_feelingStuck">A sentir-me preso</string>
+</resources>

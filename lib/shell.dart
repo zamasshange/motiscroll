@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'l10n/ui_text.dart';
 import 'screens/collections_screen.dart';
 import 'screens/discover_screen.dart';
 import 'screens/feed_screen.dart';
@@ -20,7 +21,13 @@ class _TabShellState extends State<TabShell> {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final target = AppScope.of(context).feedTarget;
+    final state = AppScope.of(context);
+    final tab = state.pendingTab;
+    if (tab != null) {
+      state.consumePendingTab();
+      if (_index != tab) setState(() => _index = tab);
+    }
+    final target = state.feedTarget;
     if (target != null && _index != 3) {
       setState(() => _index = 3);
     }
@@ -29,16 +36,25 @@ class _TabShellState extends State<TabShell> {
   void _select(int index) {
     if (index == _index) return;
     setState(() => _index = index);
-    if (index == 1 || index == 3) {
-      AppScope.of(context).noteVisit();
-    }
+    final state = AppScope.of(context);
+    if (index == 1) state.reshuffleDiscover();
+    if (index == 3) state.reshuffleFeed();
+    if (index == 1 || index == 3) state.noteVisit();
   }
 
   @override
   Widget build(BuildContext context) {
-    final palette = AppScope.of(context).palette;
+    final state = AppScope.of(context);
+    final palette = state.palette;
+    final code = state.uiLanguage ??
+        state.resolvedContentLanguage(
+          View.of(context).platformDispatcher.locale,
+        );
     return Scaffold(
       backgroundColor: palette.bg,
+      // The keyboard belongs to the sheet that opened it. Resizing this
+      // shell crushes the feed and the layout error eats every tap.
+      resizeToAvoidBottomInset: false,
       body: Stack(
         children: [
           IndexedStack(
@@ -72,25 +88,25 @@ class _TabShellState extends State<TabShell> {
                   children: [
                     _Tab(
                       icon: Icons.grid_view_rounded,
-                      label: 'Collections',
+                      label: ui(code, 'collections'),
                       selected: _index == 0,
                       onTap: () => _select(0),
                     ),
                     _Tab(
                       icon: Icons.auto_awesome,
-                      label: 'Discover',
+                      label: ui(code, 'discover'),
                       selected: _index == 1,
                       onTap: () => _select(1),
                     ),
                     _Tab(
                       icon: Icons.home_rounded,
-                      label: 'Home',
+                      label: ui(code, 'home'),
                       selected: _index == 2,
                       onTap: () => _select(2),
                     ),
                     _Tab(
                       icon: Icons.menu_book_rounded,
-                      label: 'Feed',
+                      label: ui(code, 'feed'),
                       selected: _index == 3,
                       onTap: () => _select(3),
                     ),

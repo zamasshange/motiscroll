@@ -1,0 +1,14 @@
+[
+  {
+    "name": "The Dalai Lama",
+    "reason": "No exact name match among the search hits. English Wikipedia \"Dalai Lama\" is Q37349, which Wikidata does not list as a human."
+  },
+  {
+    "name": "Brian Cox",
+    "reason": "More than one person matches. Q463581 English physicist and musician; Q34975 Scottish actor; Q4963453 American writer and director; Q19594790 English academic and poet (1928-2008); Q108070920 British QC and judge; Q4963454 professional footballer (born 1961); Q127249991 American football player (1998), Syracuse; Q130629293 computer scientist at Otago University; Q119040628 cancer researcher at University of Otago in New Zealand; Q91280214 Canadian researcher English Wikipedia \"Brian Cox\" is a disambiguation page."
+  },
+  {
+    "name": "Les Brown",
+    "reason": "More than one person matches. Q353587 American bandleader (1912–2001); Q116476446 rugby league footballer; Q6530685 American politician and motivational speaker; Q107571598 American journalist; Q6529276 American football player (born 1987); Q64014945; Q133751578 English Wikipedia \"Les Brown\" is a disambiguation page."
+  }
+]

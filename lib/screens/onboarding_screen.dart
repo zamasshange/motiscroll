@@ -13,14 +13,8 @@ class OnboardingScreen extends StatefulWidget {
   State<OnboardingScreen> createState() => _OnboardingScreenState();
 }
 
-class _OnboardingScreenState extends State<OnboardingScreen>
-    with SingleTickerProviderStateMixin {
+class _OnboardingScreenState extends State<OnboardingScreen> {
   final _page = PageController();
-  late final AnimationController _art = AnimationController(
-    vsync: this,
-    duration: const Duration(milliseconds: 1600),
-  );
-  var _index = 0;
   var _seeded = false;
   var _busy = false;
   final _fields = <Field>{};
@@ -29,29 +23,16 @@ class _OnboardingScreenState extends State<OnboardingScreen>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (!_seeded) {
-      final state = AppScope.of(context);
-      _fields.addAll(state.followed);
-      _mood = state.usualMood;
-      _seeded = true;
-    }
-    _syncArt();
-  }
-
-  void _syncArt() {
-    final valuePage = _index >= 1 && _index <= 3;
-    if (reduceMotion(context) || !valuePage) {
-      _art.stop();
-      _art.value = 1;
-    } else if (!_art.isAnimating) {
-      _art.repeat(reverse: true);
-    }
+    if (_seeded) return;
+    final state = AppScope.of(context);
+    _fields.addAll(state.followed);
+    _mood = state.usualMood;
+    _seeded = true;
   }
 
   @override
   void dispose() {
     _page.dispose();
-    _art.dispose();
     super.dispose();
   }
 
@@ -83,34 +64,33 @@ class _OnboardingScreenState extends State<OnboardingScreen>
       backgroundColor: palette.bg,
       body: PageView(
         controller: _page,
-        onPageChanged: (index) => setState(() {
-          _index = index;
-          _syncArt();
-        }),
         children: [
           _Welcome(onStart: () => _go(1)),
           _ValuePage(
-            art: _ValueArt(index: 0, animation: _art),
-            title: 'Scroll with purpose',
-            body: 'One passage at a time, long enough to read and short enough to keep.',
+            image: 'assets/onboarding/home.png',
+            title: 'A line is waiting',
+            body:
+                'Home opens on the line of the day, a finder, and today\'s line.',
             showSkip: true,
             onNext: () => _go(2),
             onSkip: () => _go(4),
             page: 0,
           ),
           _ValuePage(
-            art: _ValueArt(index: 1, animation: _art),
+            image: 'assets/onboarding/discover.png',
             title: 'Go deeper on any quote',
-            body: 'Context, a fact, and a next step sit behind the line. The source stays in view.',
+            body:
+                'Context, a fact, and a next step sit behind the line. The source stays in view.',
             showSkip: true,
             onNext: () => _go(3),
             onSkip: () => _go(4),
             page: 1,
           ),
           _ValuePage(
-            art: _ValueArt(index: 2, animation: _art),
-            title: 'Build a daily habit',
-            body: 'Pick a mood, follow a field, and let a streak count only when you actually open a line.',
+            image: 'assets/onboarding/feed.png',
+            title: 'Scroll with purpose',
+            body:
+                'One passage at a time, long enough to read and short enough to keep.',
             showSkip: true,
             onNext: () => _go(4),
             onSkip: () => _go(4),
@@ -127,9 +107,10 @@ class _OnboardingScreenState extends State<OnboardingScreen>
             onBack: () => _go(3),
             onNext: () => _go(5),
           ),
+          _WidgetOffer(onNext: () => _go(6), onBack: () => _go(4)),
           _Reminder(
             busy: _busy,
-            onBack: () => _go(4),
+            onBack: () => _go(5),
             onAllow: () => _finish(reminder: true),
             onSkip: () => _finish(reminder: false),
           ),
@@ -157,7 +138,7 @@ class _Welcome extends StatelessWidget {
           Text(
             'Short lines and speeches, with the source still attached.',
             textAlign: TextAlign.center,
-            style: serif(palette, 34, height: 1.2),
+            style: serif(palette, 36, height: 1.15),
           ),
           const SizedBox(height: 16),
           Text(
@@ -175,7 +156,7 @@ class _Welcome extends StatelessWidget {
 
 class _ValuePage extends StatelessWidget {
   const _ValuePage({
-    required this.art,
+    required this.image,
     required this.title,
     required this.body,
     required this.showSkip,
@@ -184,7 +165,7 @@ class _ValuePage extends StatelessWidget {
     required this.page,
   });
 
-  final Widget art;
+  final String image;
   final String title;
   final String body;
   final bool showSkip;
@@ -198,9 +179,8 @@ class _ValuePage extends StatelessWidget {
     final top = MediaQuery.paddingOf(context).top;
     final bottom = MediaQuery.paddingOf(context).bottom;
     return Padding(
-      padding: EdgeInsets.fromLTRB(24, top + 16, 24, bottom + 24),
+      padding: EdgeInsets.fromLTRB(24, top + 4, 24, bottom + 16),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Align(
             alignment: Alignment.centerRight,
@@ -209,7 +189,7 @@ class _ValuePage extends StatelessWidget {
                     onPressed: onSkip,
                     semanticLabel: 'Skip',
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      padding: const EdgeInsets.symmetric(vertical: 4),
                       child: Text(
                         'Skip',
                         style: sans(
@@ -221,24 +201,24 @@ class _ValuePage extends StatelessWidget {
                       ),
                     ),
                   )
-                : const SizedBox(height: 32),
+                : const SizedBox(height: 28),
           ),
-          const Spacer(),
-          Center(child: art),
-          const SizedBox(height: 28),
           Text(
             title,
             textAlign: TextAlign.center,
-            style: serif(palette, 32, height: 1.15),
+            style: serif(palette, 36, height: 1.12),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 10),
           Text(
             body,
             textAlign: TextAlign.center,
-            style: sans(palette, 16, height: 1.4, color: palette.textMuted),
+            style: sans(palette, 17, height: 1.35, color: palette.textMuted),
           ),
-          const Spacer(),
+          const SizedBox(height: 18),
+          Expanded(child: _PhoneFrame(image: image)),
+          const SizedBox(height: 20),
           Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               for (var dot = 0; dot < 3; dot++)
                 AnimatedContainer(
@@ -247,7 +227,7 @@ class _ValuePage extends StatelessWidget {
                       : const Duration(milliseconds: 200),
                   width: dot == page ? 16 : 6,
                   height: 6,
-                  margin: const EdgeInsets.only(right: 8),
+                  margin: const EdgeInsets.symmetric(horizontal: 4),
                   decoration: BoxDecoration(
                     color: dot == page ? palette.accent : palette.textFaint,
                     borderRadius: BorderRadius.circular(99),
@@ -255,7 +235,7 @@ class _ValuePage extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 16),
           PrimaryButton(label: 'Continue', onPressed: onNext),
         ],
       ),
@@ -263,68 +243,48 @@ class _ValuePage extends StatelessWidget {
   }
 }
 
-class _ValueArt extends StatelessWidget {
-  const _ValueArt({required this.index, required this.animation});
+class _PhoneFrame extends StatelessWidget {
+  const _PhoneFrame({required this.image});
 
-  final int index;
-  final Animation<double> animation;
+  final String image;
 
   @override
   Widget build(BuildContext context) {
-    final palette = AppScope.of(context).palette;
-    return AnimatedBuilder(
-      animation: animation,
-      builder: (context, _) {
-        final lift = reduceMotion(context) ? 0.0 : (animation.value - 0.5) * 8;
-        return Transform.translate(
-          offset: Offset(0, lift),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const shot = 1206 / 2622;
+        const bezelFrac = 0.042;
+        final outerAspect = (1 + 2 * bezelFrac) / (1 / shot + 2 * bezelFrac);
+        var outerW = constraints.maxWidth;
+        var outerH = outerW / outerAspect;
+        if (outerH > constraints.maxHeight) {
+          outerH = constraints.maxHeight;
+          outerW = outerH * outerAspect;
+        }
+        final bezel = outerW * bezelFrac / (1 + 2 * bezelFrac);
+        final radius = (outerW - bezel * 2) * 0.125;
+        return Center(
           child: Container(
-            width: 200,
-            height: 240,
+            width: outerW,
+            height: outerH,
+            padding: EdgeInsets.all(bezel),
             decoration: BoxDecoration(
-              color: palette.card,
-              borderRadius: BorderRadius.circular(28),
-              border: Border.all(color: palette.text, width: 3),
+              color: const Color(0xFF1C1C1E),
+              borderRadius: BorderRadius.circular(radius + bezel),
               boxShadow: [
                 BoxShadow(
-                  color: palette.backdrop.withValues(alpha: 0.12),
-                  blurRadius: 24,
-                  offset: const Offset(0, 12),
+                  color: const Color(0x331C1610),
+                  blurRadius: 28,
+                  offset: const Offset(0, 16),
                 ),
               ],
             ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 28, 16, 16),
-              child: Column(
-                children: [
-                  Container(
-                    width: 64,
-                    height: 8,
-                    decoration: BoxDecoration(
-                      color: palette.cardAlt,
-                      borderRadius: BorderRadius.circular(99),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  Text(
-                    index == 0
-                        ? 'One line'
-                        : index == 1
-                        ? 'Go deeper'
-                        : 'A daily line',
-                    style: serif(palette, 18),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    index == 0
-                        ? 'Long enough to read. Short enough to keep.'
-                        : index == 1
-                        ? 'Context and the source stay on the card.'
-                        : 'A streak counts a day you open a line.',
-                    textAlign: TextAlign.center,
-                    style: sans(palette, 12, color: palette.textMuted),
-                  ),
-                ],
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(radius),
+              child: Image.asset(
+                image,
+                fit: BoxFit.cover,
+                filterQuality: FilterQuality.high,
               ),
             ),
           ),
@@ -431,6 +391,74 @@ class _Personalize extends StatelessWidget {
         const SizedBox(height: 32),
         PrimaryButton(label: 'Continue', onPressed: onNext),
       ],
+    );
+  }
+}
+
+class _WidgetOffer extends StatelessWidget {
+  const _WidgetOffer({required this.onNext, required this.onBack});
+
+  final VoidCallback onNext;
+  final VoidCallback onBack;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = AppScope.of(context).palette;
+    final top = MediaQuery.paddingOf(context).top;
+    final bottom = MediaQuery.paddingOf(context).bottom;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(24, top + 16, 24, bottom + 24),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Pressable(
+            onPressed: onBack,
+            semanticLabel: 'Back',
+            child: Text(
+              'Back',
+              style: sans(
+                palette,
+                15,
+                weight: FontWeight.w600,
+                color: palette.textMuted,
+              ),
+            ),
+          ),
+          const Spacer(),
+          DecoratedBox(
+            decoration: BoxDecoration(
+              color: const Color(0xFF0B0B0D),
+              borderRadius: BorderRadius.circular(24),
+            ),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Your daily quote appears here',
+                    style: serif(palette, 22, color: const Color(0xFFF4F1EA)),
+                  ),
+                  const SizedBox(height: 12),
+                  Text(
+                    'Sample',
+                    style: sans(palette, 13, color: const Color(0xFFE07A4A)),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: 28),
+          Text('Add a widget', style: serif(palette, 32, height: 1.1)),
+          const SizedBox(height: 8),
+          Text(
+            'A line can sit on the home screen. You can add it later from Settings.',
+            style: sans(palette, 16, height: 1.4, color: palette.textMuted),
+          ),
+          const Spacer(),
+          OutlineButton(label: 'Maybe later', onPressed: onNext),
+        ],
+      ),
     );
   }
 }

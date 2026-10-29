@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../l10n/ui_text.dart';
 import '../data/catalog.dart';
 import '../data/models.dart';
 import '../state/app_state.dart';
 import '../theme/tokens.dart';
 import '../widgets/chrome.dart';
 import '../widgets/go_deeper.dart';
+import '../widgets/quote_tap.dart';
 import 'study_page.dart';
 
 class DiscoverScreen extends StatefulWidget {
@@ -18,14 +20,15 @@ class DiscoverScreen extends StatefulWidget {
 class _DiscoverScreenState extends State<DiscoverScreen> {
   final _page = PageController(viewportFraction: 0.92);
   var _index = 0;
+  var _deck = 0;
   var _signature = '';
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    final signature = AppScope.of(context).followed
-        .map((field) => field.name)
-        .join(',');
+    final state = AppScope.of(context);
+    final signature =
+        '${state.browseAll}|${state.collectionFocus?.name ?? ''}|${state.followed.map((field) => field.name).join(',')}';
     if (signature != _signature) {
       final reset = _signature.isNotEmpty;
       _signature = signature;
@@ -36,6 +39,13 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
         });
       }
     }
+    if (_deck != 0 && state.discoverShuffle != _deck) {
+      _index = 0;
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (_page.hasClients) _page.jumpToPage(0);
+      });
+    }
+    _deck = state.discoverShuffle;
   }
 
   @override
@@ -44,13 +54,57 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     super.dispose();
   }
 
+  List<Item> _visible(AppState state) {
+    bool keep(Item item) => state.showsInFeed(item);
+    final open =
+        state.browseAll ||
+        (state.collectionFocus == null && state.followed.isEmpty);
+    if (open && state.items.isNotEmpty) {
+      return freshDeck(state.items, state.discoverShuffle);
+    }
+    final merged = state.items.where(keep).toList();
+    for (final item in state.discoverItems.where(keep)) {
+      if (merged.every((other) => other.id != item.id)) merged.add(item);
+    }
+    if (merged.isEmpty) {
+      final fallback = state.discoverItems.isNotEmpty
+          ? state.discoverItems
+          : state.items;
+      return freshDeck(fallback, state.discoverShuffle);
+    }
+    return freshDeck(merged, state.discoverShuffle);
+  }
+
   @override
   Widget build(BuildContext context) {
     final state = AppScope.of(context);
-    final items = state.discoverItems.isNotEmpty
-        ? state.discoverItems
-        : discoverOrder(state.followed, state.items);
+    final palette = state.palette;
+    final items = _visible(state);
     final top = MediaQuery.paddingOf(context).top;
+    if (items.isEmpty) {
+      return Padding(
+        padding: EdgeInsets.fromLTRB(24, top + 24, 24, dockInset(context)),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              state.items.isEmpty
+                  ? (state.catalogError ?? 'Nothing is published yet.')
+                  : 'Nothing in this collection yet.',
+              textAlign: TextAlign.center,
+              style: sans(palette, 16, color: palette.textMuted),
+            ),
+            const SizedBox(height: 16),
+            PrimaryButton(
+              label: state.items.isEmpty ? 'Try again' : 'See everything',
+              onPressed: state.items.isEmpty
+                  ? state.refreshCatalog
+                  : state.showEverything,
+            ),
+          ],
+        ),
+      );
+    }
     return PageView.builder(
       controller: _page,
       scrollDirection: Axis.vertical,
@@ -79,7 +133,13 @@ class _DiscoverCard extends StatelessWidget {
     final palette = state.palette;
     final saved = state.saved.contains(item.id);
     final read = state.read.contains(item.id);
-    return RiseIn(
+    final portrait = state.portraitFor(item.author);
+    final imageUrl = item.imageUrl ?? portrait?.imageUrl;
+    final credit = item.imageCredit ?? portrait?.imageCredit;
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => openStudy(context, item),
+      child: RiseIn(
       play: active,
       child: Container(
         decoration: BoxDecoration(
@@ -93,55 +153,78 @@ class _DiscoverCard extends StatelessWidget {
             ),
           ],
         ),
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-          children: [
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 14, 20, 4),
+          child: Column(
+            children: [
+              Expanded(
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    return FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.topCenter,
+                      child: SizedBox(
+                        width: constraints.maxWidth,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
             Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 12,
-                  vertical: 6,
-                ),
-                decoration: BoxDecoration(
-                  color: palette.cardAlt,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  fieldInfo[item.field]!.title,
-                  style: sans(
-                    palette,
-                    12,
-                    weight: FontWeight.w600,
-                    color: palette.textMuted,
+              child: Pressable(
+                semanticLabel: fieldInfo[item.field]!.title,
+                onPressed: () => state.focusCollection(item.field),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: palette.cardAlt,
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                  child: Text(
+                    fieldInfo[item.field]!.title,
+                    style: sans(
+                      palette,
+                      12,
+                      weight: FontWeight.w600,
+                      color: palette.textMuted,
+                    ),
                   ),
                 ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 10),
+            if (imageUrl != null && imageUrl.isNotEmpty) ...[
+              AuthorAvatar(
+                author: item.author,
+                size: 64,
+                imageUrl: imageUrl,
+                imageCredit: credit,
+              ),
+              const SizedBox(height: 8),
+            ],
             Text(
               item.author,
               textAlign: TextAlign.center,
-              style: serif(palette, 32, height: 1.1),
+              style: serif(palette, 36, height: 1.08),
             ),
-            const SizedBox(height: 4),
-            Text(
-              item.source.line,
-              textAlign: TextAlign.center,
-              style: sans(palette, 13, color: palette.textFaint),
-            ),
-            const SizedBox(height: 16),
-            Text(
-              item.text,
-              textAlign: TextAlign.center,
-              style: serif(
-                palette,
-                18,
-                height: 1.4,
-                style: FontStyle.italic,
-                weight: FontWeight.w500,
+            const SizedBox(height: 10),
+            QuoteTap(
+              itemId: item.id,
+              onOpen: () => openStudy(context, item),
+              child: Text(
+                item.text,
+                textAlign: TextAlign.center,
+                style: serif(
+                  palette,
+                  26,
+                  height: 1.28,
+                  style: FontStyle.italic,
+                  weight: FontWeight.w500,
+                ),
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             Text(
               'CONTEXT',
               style: sans(
@@ -151,11 +234,16 @@ class _DiscoverCard extends StatelessWidget {
                 color: palette.textFaint,
               ),
             ),
-            const SizedBox(height: 8),
-            Text(item.deeper.context, style: sans(palette, 16, height: 1.45)),
-            const SizedBox(height: 16),
+            const SizedBox(height: 4),
+            Text(
+              item.shownContext,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: sans(palette, 17, height: 1.35),
+            ),
+            const SizedBox(height: 12),
             Container(
-              padding: const EdgeInsets.all(16),
+              padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
               decoration: BoxDecoration(
                 color: palette.cardAlt,
                 borderRadius: BorderRadius.circular(16),
@@ -184,13 +272,15 @@ class _DiscoverCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    item.deeper.didYouKnow,
-                    style: sans(palette, 15, height: 1.4),
+                    item.shownDidYouKnow,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: sans(palette, 17, height: 1.3),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 8),
             Wrap(
               spacing: 8,
               runSpacing: 8,
@@ -206,7 +296,14 @@ class _DiscoverCard extends StatelessWidget {
                   ),
               ],
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
             Center(
               child: Pressable(
                 onPressed: () => openStudy(context, item),
@@ -214,7 +311,7 @@ class _DiscoverCard extends StatelessWidget {
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Text(
-                    'Go deeper  ›',
+                    '${ui(AppScope.of(context).uiLanguage ?? AppScope.of(context).resolvedContentLanguage(View.of(context).platformDispatcher.locale), 'goDeeper')}  ›',
                     style: sans(
                       palette,
                       15,
@@ -225,15 +322,14 @@ class _DiscoverCard extends StatelessWidget {
                 ),
               ),
             ),
-            if (!item.verified) const Center(child: UnverifiedMark()),
             if (item.imageCredit != null)
-              PhotoCreditLine(credit: item.imageCredit!),
-            SourceLine(item: item),
-            const SizedBox(height: 8),
+              PhotoCreditLine(credit: item.imageCredit!, maxLines: 1),
+            const SizedBox(height: 4),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 IconButton(
+                  visualDensity: VisualDensity.compact,
                   onPressed: () => state.toggleSave(item.id),
                   icon: Icon(
                     saved
@@ -243,6 +339,7 @@ class _DiscoverCard extends StatelessWidget {
                   ),
                 ),
                 IconButton(
+                  visualDensity: VisualDensity.compact,
                   onPressed: () => openStudy(context, item),
                   icon: Icon(
                     Icons.chat_bubble_outline_rounded,
@@ -251,6 +348,7 @@ class _DiscoverCard extends StatelessWidget {
                 ),
                 Builder(
                   builder: (context) => IconButton(
+                    visualDensity: VisualDensity.compact,
                     onPressed: () => shareItem(context, item),
                     icon: Icon(
                       Icons.ios_share_rounded,
@@ -259,6 +357,7 @@ class _DiscoverCard extends StatelessWidget {
                   ),
                 ),
                 IconButton(
+                  visualDensity: VisualDensity.compact,
                   onPressed: () => state.toggleRead(item.id),
                   icon: Icon(
                     read ? Icons.check_circle : Icons.check_circle_outline,
@@ -268,7 +367,9 @@ class _DiscoverCard extends StatelessWidget {
               ],
             ),
           ],
+          ),
         ),
+      ),
       ),
     );
   }

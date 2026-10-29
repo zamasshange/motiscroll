@@ -7,6 +7,9 @@ import '../theme/tokens.dart';
 import '../widgets/chrome.dart';
 import '../widgets/generated_cover.dart';
 import '../widgets/go_deeper.dart';
+import '../widgets/quote_tap.dart';
+import 'daily_screen.dart';
+import 'line_screen.dart';
 import 'habit_sheet.dart';
 import 'notes_sheet.dart';
 import 'paths_screen.dart';
@@ -66,13 +69,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final palette = state.palette;
     final top = MediaQuery.paddingOf(context).top;
     final localPicks = dailyPicks(DateTime.now(), state.usualMood, state.items);
-    final picks = localPicks == null
-        ? null
-        : DailyPicks(
-            quote: state.daily ?? localPicks.quote,
-            speech: localPicks.speech,
-            boost: localPicks.boost,
-          );
+    final picks = localPicks;
     final fields = collectionFields;
     final field = fields[_fieldIndex.clamp(0, fields.length - 1)];
     final lines = state.items.where((item) => item.field == field).toList();
@@ -120,7 +117,7 @@ class _HomeScreenState extends State<HomeScreen> {
               icon: Icons.bookmark_border_rounded,
               label: 'Saved',
               onTap: () => Navigator.of(context).push(
-                MaterialPageRoute<void>(builder: (_) => const SavedScreen()),
+                MaterialPageRoute<void>(builder: (_) => const LibraryScreen()),
               ),
             ),
             _IconTap(
@@ -152,15 +149,45 @@ class _HomeScreenState extends State<HomeScreen> {
                   _TinyPill(fieldInfo[picks.quote.field]!.title),
                 ],
               ),
-              const SizedBox(height: 8),
-              Text(
-                picks.quote.source.title,
-                style: sans(palette, 18, weight: FontWeight.w700),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  AuthorAvatar(
+                    author: picks.quote.author,
+                    size: 56,
+                    imageUrl:
+                        picks.quote.imageUrl ??
+                        state.portraitFor(picks.quote.author)?.imageUrl,
+                    imageCredit:
+                        picks.quote.imageCredit ??
+                        state.portraitFor(picks.quote.author)?.imageCredit,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          picks.quote.author,
+                          style: sans(palette, 18, weight: FontWeight.w700),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
               ),
               const SizedBox(height: 12),
-              Text(picks.quote.text, style: serif(palette, 22, height: 1.3)),
+              QuoteTap(
+                itemId: picks.quote.id,
+                onOpen: () => openLineReader(context, picks.quote),
+                child: Text(
+                  picks.quote.text,
+                  maxLines: 6,
+                  overflow: TextOverflow.ellipsis,
+                  style: serif(palette, 32, height: 1.25),
+                ),
+              ),
               const SizedBox(height: 8),
-              SourceLine(item: picks.quote),
               if (picks.quote.imageCredit != null)
                 PhotoCreditLine(credit: picks.quote.imageCredit!),
               const SizedBox(height: 4),
@@ -190,6 +217,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     icon: Icons.more_horiz_rounded,
                     label: 'Notes',
                     onTap: () => showNotes(context, picks.quote),
+                  ),
+                  _PlainIcon(
+                    icon: Icons.wb_sunny_outlined,
+                    label: 'Daily',
+                    onTap: () => openDaily(context),
                   ),
                 ],
               ),
@@ -229,7 +261,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 8),
               SizedBox(
-                height: 108,
+                height: 72,
                 child: Row(
                   children: [
                     Expanded(
@@ -260,12 +292,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ],
                 ),
-              ),
-              const SizedBox(height: 8),
-              Text(
-                '${line.author} · ${line.source.line}',
-                style: sans(palette, 13, color: palette.textMuted),
-              ),
+                ),
               const SizedBox(height: 12),
               PrimaryButton(
                 label: 'Open this line',
@@ -369,16 +396,15 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(14),
-                    child: SizedBox(
-                      width: 64,
-                      height: 64,
-                      child: GeneratedCover(
-                        field: picks.boost.field,
-                        seed: 'boost-${picks.boost.id}',
-                      ),
-                    ),
+                  AuthorAvatar(
+                    author: picks.boost.author,
+                    size: 64,
+                    imageUrl:
+                        picks.boost.imageUrl ??
+                        state.portraitFor(picks.boost.author)?.imageUrl,
+                    imageCredit:
+                        picks.boost.imageCredit ??
+                        state.portraitFor(picks.boost.author)?.imageCredit,
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -388,10 +414,6 @@ class _HomeScreenState extends State<HomeScreen> {
                         Text(
                           picks.boost.author,
                           style: sans(palette, 18, weight: FontWeight.w700),
-                        ),
-                        Text(
-                          picks.boost.source.line,
-                          style: sans(palette, 13, color: palette.textMuted),
                         ),
                       ],
                     ),
@@ -403,7 +425,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 picks.boost.text,
                 maxLines: 3,
                 overflow: TextOverflow.ellipsis,
-                style: sans(palette, 15, height: 1.4),
+                style: sans(palette, 20, height: 1.35),
               ),
               const SizedBox(height: 12),
               Row(
@@ -434,7 +456,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               if (picks.boost.imageCredit != null)
                 PhotoCreditLine(credit: picks.boost.imageCredit!),
-              SourceLine(item: picks.boost),
             ],
           ),
         ),
@@ -486,7 +507,7 @@ class _Wheel extends StatelessWidget {
                 label(index),
                 style: sans(
                   palette,
-                  on ? 16 : 14,
+                  on ? 18 : 15,
                   weight: on ? FontWeight.w700 : FontWeight.w500,
                   color: on ? palette.text : palette.textFaint,
                 ),

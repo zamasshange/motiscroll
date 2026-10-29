@@ -3,20 +3,31 @@ import { FieldValue, getFirestore } from "firebase-admin/firestore";
 import { onDocumentWritten } from "firebase-functions/v2/firestore";
 import { onSchedule } from "firebase-functions/v2/scheduler";
 
-export const writeDaily = onSchedule("every day 00:05", async () => {
-  const day = new Date().toISOString().slice(0, 10);
+export async function backfillDaily(days = 30): Promise<number> {
   const db = getFirestore();
-  const ref = db.collection("daily").doc(day);
-  if ((await ref.get()).exists) return;
-  const snap = await db.collection("publishedItems").where("type", "==", "quote").limit(30).get();
-  if (snap.empty) return;
-  const index = [...day].reduce((sum, char) => sum + char.charCodeAt(0), 0) % snap.size;
-  const pick = snap.docs[index];
-  await ref.set({
-    itemId: pick.id,
-    publishedItemSnapshot: pick.data(),
-    createdAt: FieldValue.serverTimestamp(),
-  });
+  const snap = await db.collection("publishedItems").where("type", "==", "quote").get();
+  if (snap.empty) return 0;
+  let written = 0;
+  for (let offset = 0; offset < days; offset += 1) {
+    const date = new Date();
+    date.setUTCDate(date.getUTCDate() + offset);
+    const day = date.toISOString().slice(0, 10);
+    const ref = db.collection("daily").doc(day);
+    if ((await ref.get()).exists) continue;
+    const index = [...day].reduce((sum, char) => sum + char.charCodeAt(0), 0) % snap.size;
+    const pick = snap.docs[index];
+    await ref.set({
+      itemId: pick.id,
+      publishedItemSnapshot: pick.data(),
+      createdAt: FieldValue.serverTimestamp(),
+    });
+    written += 1;
+  }
+  return written;
+}
+
+export const writeDaily = onSchedule("every day 00:05", async () => {
+  await backfillDaily(1);
 });
 
 export const syncReminderBucket = onDocumentWritten("users/{uid}", async (event) => {

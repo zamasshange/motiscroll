@@ -65,55 +65,142 @@ class CoverPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     final palette = coverPalettes[field] ?? coverPalettes[Field.other]!;
     final rect = Offset.zero & size;
-    canvas.drawRect(rect, Paint()..color = palette[2]);
-    final random = math.Random(hashString('$field:$seed'));
-    for (var index = 0; index < 4; index++) {
-      final color = palette[index];
-      final center = Offset(
-        (random.nextDouble() * 0.9 - 0.15) * size.width,
-        (random.nextDouble() * 0.9 - 0.15) * size.height,
-      );
-      final radius = size.shortestSide * (0.5 + random.nextDouble() * 0.4);
-      final paint = Paint()
-        ..shader = ui.Gradient.radial(
-          center,
-          radius,
-          [color.withValues(alpha: 0.95), color.withValues(alpha: 0)],
-          [0, 1],
-        )
-        ..maskFilter = MaskFilter.blur(
-          BlurStyle.normal,
-          size.shortestSide * 0.14,
-        );
-      canvas.drawCircle(center, radius, paint);
-    }
-
-    final grain = math.Random(hashString('$seed:grain'));
-    final grainPaint = Paint()..color = const Color(0x18FFFFFF);
-    for (var index = 0; index < 80; index++) {
-      canvas.drawRect(
-        Rect.fromLTWH(
-          grain.nextDouble() * size.width,
-          grain.nextDouble() * size.height,
-          1.2,
-          1.2,
-        ),
-        grainPaint,
-      );
-    }
-
     canvas.drawRect(
       rect,
       Paint()
-        ..shader = ui.Gradient.radial(
-          size.center(Offset.zero),
-          size.longestSide * 0.72,
-          const [Color(0x00000000), Color(0x99000000)],
-          const [0.5, 1],
+        ..shader = ui.Gradient.linear(
+          Offset.zero,
+          Offset(size.width * 0.2, size.height),
+          [palette[2], palette[3]],
         ),
     );
+
+    final glow = Offset(size.width * 0.82, size.height * 0.18);
+    canvas.drawCircle(
+      glow,
+      size.shortestSide * 0.95,
+      Paint()
+        ..shader = ui.Gradient.radial(glow, size.shortestSide * 0.95, [
+          palette[0].withValues(alpha: 0.92),
+          palette[0].withValues(alpha: 0),
+        ])
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 16),
+    );
+    final wash = Offset(size.width * 0.08, size.height * 0.92);
+    canvas.drawCircle(
+      wash,
+      size.shortestSide * 0.72,
+      Paint()
+        ..shader = ui.Gradient.radial(wash, size.shortestSide * 0.72, [
+          palette[1].withValues(alpha: 0.7),
+          palette[1].withValues(alpha: 0),
+        ]),
+    );
+
+    _motif(canvas, size);
+
+    final grain = math.Random(hashString('$seed:grain'));
+    final grainPaint = Paint()..color = const Color(0x14FFFFFF);
+    for (var index = 0; index < 48; index++) {
+      canvas.drawCircle(
+        Offset(
+          grain.nextDouble() * size.width,
+          grain.nextDouble() * size.height,
+        ),
+        0.6,
+        grainPaint,
+      );
+    }
     if (subtle) {
       canvas.drawRect(rect, Paint()..color = const Color(0xD90B0B0D));
+    }
+  }
+
+  void _motif(Canvas canvas, Size size) {
+    final ink = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.6
+      ..strokeCap = StrokeCap.round
+      ..color = const Color(0xD9F6F1EA);
+    final soft = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.1
+      ..color = const Color(0x66F6F1EA);
+    final w = size.width;
+    final h = size.height;
+    switch (field) {
+      case Field.sports:
+        canvas.drawArc(
+          Rect.fromCircle(center: Offset(w * 0.28, h * 0.42), radius: w * 0.16),
+          -0.4,
+          2.4,
+          false,
+          ink,
+        );
+        canvas.drawArc(
+          Rect.fromCircle(center: Offset(w * 0.28, h * 0.42), radius: w * 0.08),
+          0.6,
+          2.2,
+          false,
+          soft,
+        );
+      case Field.business:
+        final base = h * 0.62;
+        for (var index = 0; index < 3; index++) {
+          final left = w * (0.16 + index * 0.08);
+          final top = h * (0.48 - index * 0.1);
+          canvas.drawRRect(
+            RRect.fromRectAndRadius(
+              Rect.fromLTRB(left, top, left + w * 0.045, base),
+              const Radius.circular(3),
+            ),
+            ink,
+          );
+        }
+      case Field.science:
+        final center = Offset(w * 0.26, h * 0.4);
+        for (final scale in [0.07, 0.13, 0.2]) {
+          canvas.drawCircle(center, w * scale, scale == 0.13 ? ink : soft);
+        }
+      case Field.arts:
+        canvas.drawCircle(Offset(w * 0.24, h * 0.38), w * 0.11, ink);
+        canvas.drawLine(
+          Offset(w * 0.1, h * 0.58),
+          Offset(w * 0.42, h * 0.22),
+          soft,
+        );
+      case Field.leadership:
+        canvas.drawLine(
+          Offset(w * 0.24, h * 0.22),
+          Offset(w * 0.24, h * 0.64),
+          ink,
+        );
+        canvas.drawArc(
+          Rect.fromCenter(
+            center: Offset(w * 0.24, h * 0.28),
+            width: w * 0.22,
+            height: h * 0.28,
+          ),
+          math.pi,
+          math.pi,
+          false,
+          soft,
+        );
+      case Field.resilience:
+        canvas.drawLine(
+          Offset(w * 0.1, h * 0.58),
+          Offset(w * 0.46, h * 0.58),
+          soft,
+        );
+        canvas.drawArc(
+          Rect.fromCircle(center: Offset(w * 0.28, h * 0.58), radius: w * 0.14),
+          math.pi,
+          math.pi,
+          false,
+          ink,
+        );
+      case Field.other:
+        canvas.drawCircle(Offset(w * 0.24, h * 0.4), w * 0.08, ink);
     }
   }
 
@@ -241,7 +328,7 @@ class _GeneratedCoverState extends State<GeneratedCover> {
           final scale = longest > 480 ? 480 / longest : 1.0;
           final raster = Size(bucket.width * scale, bucket.height * scale);
           final key =
-              '${widget.field.name}|${widget.seed}|${raster.width.round()}|${raster.height.round()}|${widget.subtle}';
+              'poster2|${widget.field.name}|${widget.seed}|${raster.width.round()}|${raster.height.round()}|${widget.subtle}';
           final image = CoverCache.peek(key);
           if (image == null && _loading != key) {
             _loading = key;

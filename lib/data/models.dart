@@ -1,5 +1,9 @@
 enum Field { sports, business, science, arts, leadership, resilience, other }
 
+extension FieldLabel on Field {
+  String get label => name[0].toUpperCase() + name.substring(1);
+}
+
 enum Mood {
   startingOver('Starting over'),
   badDay('Bad day'),
@@ -131,10 +135,63 @@ class Item {
 
   bool get isSpeech => type == 'speech';
 
+  /// Stored context when the import wrote one. Otherwise the person and
+  /// the source already saved with the line.
+  String get shownContext {
+    final stored = deeper.context.trim();
+    if (stored.isNotEmpty) return stored;
+    final where = source.line.trim();
+    if (where.isEmpty) return '$author is the person named with this line.';
+    return '$author is the person named with this line. The source listed with it is $where.';
+  }
+
+  /// A note saved with the line, or the role already on the catalog entry.
+  String get shownDidYouKnow {
+    final stored = deeper.didYouKnow.trim();
+    if (stored.isNotEmpty) return stored;
+    final role = authorRole.trim();
+    if (role.isNotEmpty) return '$author is described as $role.';
+    return '${fieldInfo[field]?.title ?? field.label} is the field this library files $author under.';
+  }
+
+  String get shownTakeaway => deeper.takeaway.trim();
+
   String get durationLabel {
     final seconds = speech?.durationSec ?? 0;
     final minutes = (seconds / 60).round().clamp(1, 999);
     return 'about $minutes min';
+  }
+}
+
+class AuthorProfile {
+  const AuthorProfile({
+    required this.id,
+    required this.name,
+    required this.role,
+    required this.field,
+    this.bornYear,
+    this.diedYear,
+    this.isLiving = false,
+    this.imageUrl,
+    this.imageCredit,
+  });
+
+  final String id;
+  final String name;
+  final String role;
+  final Field field;
+  final int? bornYear;
+  final int? diedYear;
+  final bool isLiving;
+  final String? imageUrl;
+  final ImageCredit? imageCredit;
+
+  String get years {
+    final born = bornYear;
+    final died = diedYear;
+    if (born != null && died != null) return '$born–$died';
+    if (born != null) return 'Born $born';
+    return '';
   }
 }
 
@@ -154,6 +211,34 @@ String initialsFor(String author) {
   if (parts.isEmpty) return '?';
   if (parts.length == 1) return parts.first[0].toUpperCase();
   return '${parts.first[0]}${parts.last[0]}'.toUpperCase();
+}
+
+String personKey(String name) =>
+    name.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]+'), '');
+
+/// Turns stored HTML entities into the characters they stand for.
+String decodeText(String value) {
+  var text = value;
+  for (var pass = 0; pass < 4; pass++) {
+    final next = text
+        .replaceAll('&amp;', '&')
+        .replaceAllMapped(RegExp(r'&#x([0-9a-fA-F]+);'), (match) {
+          final code = int.tryParse(match.group(1)!, radix: 16);
+          return code == null ? match.group(0)! : String.fromCharCode(code);
+        })
+        .replaceAllMapped(RegExp(r'&#(\d+);'), (match) {
+          final code = int.tryParse(match.group(1)!);
+          return code == null ? match.group(0)! : String.fromCharCode(code);
+        })
+        .replaceAll('&quot;', '"')
+        .replaceAll('&apos;', "'")
+        .replaceAll('&lt;', '<')
+        .replaceAll('&gt;', '>')
+        .replaceAll('&nbsp;', ' ');
+    if (next == text) break;
+    text = next;
+  }
+  return text;
 }
 
 String dayKey(DateTime date) {

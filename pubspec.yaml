@@ -50,6 +50,8 @@ dependencies:
   firebase_app_check: ^0.5.1
   firebase_crashlytics: ^6.0.1
   firebase_remote_config: ^7.0.1
+  home_widget: ^0.10.0
+  workmanager: ^0.10.10
 
 dev_dependencies:
   flutter_test:
@@ -72,6 +74,12 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  assets:
+    - assets/images/mark.png
+    - assets/onboarding/home.png
+    - assets/onboarding/discover.png
+    - assets/onboarding/feed.png
 
   fonts:
     - family: Playfair

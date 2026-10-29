@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../firebase_options.dart';
+import 'authors_page.dart';
 
 /// Editor queue. Run with `flutter run -t lib/admin/main_admin.dart`.
 /// The signed-in user needs the custom claim `editor: true`.
@@ -36,6 +37,96 @@ class AdminQueue extends StatefulWidget {
 
 class _AdminQueueState extends State<AdminQueue> {
   String? _message;
+  var _section = 0;
+
+  Future<List<QueryDocumentSnapshot<Map<String, dynamic>>>> _queue() async {
+    final snap = await FirebaseFirestore.instance
+        .collection('items')
+        .where('status', isEqualTo: 'needs_review')
+        .limit(30)
+        .get();
+    return snap.docs;
+  }
+
+  Future<void> _spotCheck() async {
+    final docs = await _queue();
+    docs.shuffle();
+    final sample = docs.take(5).toList();
+    if (!mounted) return;
+    await showDialog<void>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Spot-check sample'),
+        content: SizedBox(
+          width: 480,
+          child: ListView(
+            shrinkWrap: true,
+            children: [
+              for (final doc in sample) ...[
+                Text(doc.data()['text'] as String? ?? ''),
+                const SizedBox(height: 8),
+                FutureBuilder(
+                  future: doc.reference.collection('sources').get(),
+                  builder: (context, snapshot) {
+                    final sources = snapshot.data?.docs ?? const [];
+                    return Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        for (final source in sources)
+                          TextButton(
+                            onPressed: () {
+                              final url = source.data()['url'] as String? ?? '';
+                              final uri = Uri.tryParse(url);
+                              if (uri != null) {
+                                launchUrl(
+                                  uri,
+                                  mode: LaunchMode.externalApplication,
+                                );
+                              }
+                            },
+                            child: Text(
+                              'Open original: ${source.data()['title'] ?? source.id}',
+                            ),
+                          ),
+                      ],
+                    );
+                  },
+                ),
+                const Divider(),
+              ],
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _approveBatch() async {
+    try {
+      final docs = await _queue();
+      final ids = docs.take(25).map((doc) => doc.id).toList();
+      final result = await FirebaseFunctions.instance
+          .httpsCallable('approveBatch')
+          .call({'itemIds': ids});
+      final data = result.data;
+      final skipped = data is Map ? data['skipped'] : null;
+      setState(() {
+        _message = skipped is List && skipped.isNotEmpty
+            ? 'Some lines were skipped. Compare the spot-check sample with the original before trying again.'
+            : 'The batch was approved.';
+      });
+    } on FirebaseFunctionsException {
+      setState(() {
+        _message = 'The batch could not be approved. Spot-check the sources and try again.';
+      });
+    }
+  }
 
   Future<void> _signIn() async {
     await FirebaseAuth.instance.signInWithProvider(GoogleAuthProvider());
@@ -53,7 +144,24 @@ class _AdminQueueState extends State<AdminQueue> {
   Widget build(BuildContext context) {
     final user = FirebaseAuth.instance.currentUser;
     return Scaffold(
-      appBar: AppBar(title: const Text('Review')),
+      appBar: AppBar(title: Text(_section == 0 ? 'Review' : 'Authors')),
+      bottomNavigationBar: user == null
+          ? null
+          : NavigationBar(
+              selectedIndex: _section,
+              onDestinationSelected: (index) =>
+                  setState(() => _section = index),
+              destinations: const [
+                NavigationDestination(
+                  icon: Icon(Icons.fact_check_outlined),
+                  label: 'Review',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.people_outline),
+                  label: 'Authors',
+                ),
+              ],
+            ),
       body: user == null
           ? Center(
               child: FilledButton(
@@ -61,6 +169,8 @@ class _AdminQueueState extends State<AdminQueue> {
                 child: const Text('Sign in'),
               ),
             )
+          : _section == 1
+          ? const AuthorsPage()
           : Column(
               children: [
                 if (_message != null)
@@ -68,6 +178,22 @@ class _AdminQueueState extends State<AdminQueue> {
                     padding: const EdgeInsets.all(12),
                     child: Text(_message!),
                   ),
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(12, 0, 12, 8),
+                  child: Row(
+                    children: [
+                      OutlinedButton(
+                        onPressed: _spotCheck,
+                        child: const Text('Spot-check sample'),
+                      ),
+                      const SizedBox(width: 8),
+                      FilledButton(
+                        onPressed: _approveBatch,
+                        child: const Text('Approve batch'),
+                      ),
+                    ],
+                  ),
+                ),
                 Expanded(
                   child: StreamBuilder<QuerySnapshot<Map<String, dynamic>>>(
                     stream: FirebaseFirestore.instance
@@ -181,7 +307,10 @@ class _ReviewCardState extends State<_ReviewCard> {
                           final url = source.data()['url'] as String? ?? '';
                           final uri = Uri.tryParse(url);
                           if (uri != null) {
-                            launchUrl(uri, mode: LaunchMode.externalApplication);
+                            launchUrl(
+                              uri,
+                              mode: LaunchMode.externalApplication,
+                            );
                           }
                         },
                         child: Text(

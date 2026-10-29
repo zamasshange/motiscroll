@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- needs_review: machine translation, same standard as the app UI. -->
+    <string name="widgets">الودجات</string>
+    <string name="quoteOfTheDay">اقتباس اليوم</string>
+    <string name="translated">مترجم</string>
+    <string name="openToStart">افتح التطبيق للبدء</string>
+    <string name="openToRefresh">افتح Moti Scroll للتحديث</string>
+    <string name="streakLabel">أيام متتالية</string>
+    <string name="saveAQuote">احفظ اقتباسًا ليظهر هنا</string>
+    <string name="yourDailyQuote">يظهر اقتباس اليوم هنا</string>
+    <string name="choosePool">اختر مزاجًا أو مجالًا</string>
+    <string name="quote_widget_description">سطر اليوم على الشاشة الرئيسية</string>
+    <string name="streak_widget_name">سلسلة</string>
+    <string name="streak_widget_description">كم يومًا عدت فيه</string>
+    <string name="saved_widget_name">اقتباسات محفوظة</string>
+    <string name="saved_widget_description">السطور التي حفظتها، على الشاشة الرئيسية فقط</string>
+    <string name="pool_widget_name">مزاج أو مجال</string>
+    <string name="pool_widget_description">سطر من المزاج أو المجال الذي تختاره</string>
+    <string name="refreshWidgets">تحديث الودجات الآن</string>
+    <string name="showSavedLock">إظهار الاقتباسات المحفوظة على شاشة القفل</string>
+    <string name="showSavedLockDetail">متوقف افتراضيًا. الاقتباسات المحفوظة لا تظهر على شاشة القفل. يمكن لمن يقف بجانب الهاتف المقفل أن يقرأها.</string>
+    <string name="iosWidgetHelp">على iPhone، المس الشاشة الرئيسية مطولًا، ثم +، واختر Moti Scroll. يمكن إضافة الودجات نفسها من شاشة القفل. الاقتباسات المحفوظة لا تُعرض هناك.</string>
+    <string name="androidWidgetHelp">على Android، المس الشاشة الرئيسية مطولًا، وافتح الودجات، واختر Moti Scroll. لا تُعرض ودجات لشاشة القفل.</string>
+    <string name="field_sports">رياضة</string>
+    <string name="field_business">أعمال</string>
+    <string name="field_science">علم</string>
+    <string name="field_arts">فنون</string>
+    <string name="field_leadership">قيادة</string>
+    <string name="field_resilience">مرونة</string>
+    <string name="field_other">أخرى</string>
+    <string name="mood_startingOver">البداية من جديد</string>
+    <string name="mood_badDay">يوم صعب</string>
+    <string name="mood_needFocus">أحتاج تركيزًا</string>
+    <string name="mood_preWorkout">قبل التمرين</string>
+    <string name="mood_examStress">ضغط الامتحان</string>
+    <string name="mood_feelingStuck">أشعر بأنني عالق</string>
+</resources>

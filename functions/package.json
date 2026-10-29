@@ -9,6 +9,11 @@
     "build": "tsc",
     "serve": "npm run build && firebase emulators:start --only auth,functions,firestore,storage",
     "seed": "npm run build && node lib/seed.js",
+    "bootstrap": "npm run build && node lib/bootstrap.js",
+    "content:report": "npm run build && node lib/contentReport.js",
+    "roster:resolve": "npm run build && node lib/resolveRoster.js",
+    "roster:report": "npm run build && node lib/rosterReport.js",
+    "roster:publish": "npm run build && node lib/publishAuthors.js",
     "grant-editor": "node scripts/grant-editor.mjs",
     "test": "npm run build && node --test test/gate.test.mjs",
     "test:rules": "firebase emulators:exec --config ../firebase.json --only firestore \"node test/rules.test.mjs\""

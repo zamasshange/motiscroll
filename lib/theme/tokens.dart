@@ -111,7 +111,7 @@ double dockInset(BuildContext context) {
   return MediaQuery.paddingOf(context).bottom +
       kTabBarHeight +
       kTabBarFloat +
-      36;
+      56;
 }
 
 bool reduceMotion(BuildContext context) {

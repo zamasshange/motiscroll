@@ -29,6 +29,10 @@ class _AccountScreenState extends State<AccountScreen> {
       if (!mounted) return;
       ScaffoldMessenger.of(context)
           .showSnackBar(SnackBar(content: Text(success)));
+    } on AccountException catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(error.message)));
     } on Exception {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -59,9 +63,10 @@ class _AccountScreenState extends State<AccountScreen> {
           Text('Account', style: serif(palette, 40, height: 1.05)),
           const SizedBox(height: 12),
           Text(
-            state.remote
+            state.firebaseReady
                 ? 'You can read right away. Save your progress to keep the same library if you change phones.'
-                : 'This copy is using the lines stored on the phone. Connect Firebase to save them to an account.',
+                : (state.accountError ??
+                      'The account service is not connected yet.'),
             style: sans(palette, 15, color: palette.textMuted),
           ),
           const SizedBox(height: 8),
@@ -72,7 +77,7 @@ class _AccountScreenState extends State<AccountScreen> {
           const SizedBox(height: 24),
           PrimaryButton(
             label: 'Continue with Apple',
-            onPressed: !state.remote || _busy
+            onPressed: _busy
                 ? () {}
                 : () => _run(
                     () => linkApple(state),
@@ -82,7 +87,7 @@ class _AccountScreenState extends State<AccountScreen> {
           const SizedBox(height: 8),
           OutlineButton(
             label: 'Continue with Google',
-            onPressed: !state.remote || _busy
+            onPressed: _busy
                 ? () {}
                 : () => _run(
                     () => linkGoogle(state),
@@ -98,7 +103,7 @@ class _AccountScreenState extends State<AccountScreen> {
           const SizedBox(height: 8),
           OutlineButton(
             label: 'Email me a link',
-            onPressed: !state.remote || _busy
+            onPressed: _busy
                 ? () {}
                 : () => _run(
                     () => sendEmailLink(_email.text.trim()),
@@ -108,7 +113,7 @@ class _AccountScreenState extends State<AccountScreen> {
           const SizedBox(height: 24),
           OutlineButton(
             label: 'Sign out',
-            onPressed: !state.remote || _busy
+            onPressed: _busy
                 ? () {}
                 : () => _run(
                     () => signOutToAnonymous(state),
@@ -118,10 +123,11 @@ class _AccountScreenState extends State<AccountScreen> {
           const SizedBox(height: 8),
           OutlineButton(
             label: 'Delete account',
-            onPressed: !state.remote || _busy
+            onPressed: _busy
                 ? () {}
-                : () => _run(() async {
+                :                   () => _run(() async {
                     await deleteAccount();
+                    await state.clearWidgets();
                     if (!context.mounted) return;
                     Navigator.of(context).popUntil((route) => route.isFirst);
                   }, 'The account was deleted.'),

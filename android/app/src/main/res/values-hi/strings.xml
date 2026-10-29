@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- needs_review: machine translation, same standard as the app UI. -->
+    <string name="widgets">विजेट</string>
+    <string name="quoteOfTheDay">आज का उद्धरण</string>
+    <string name="translated">अनूदित</string>
+    <string name="openToStart">शुरू करने के लिए ऐप खोलें</string>
+    <string name="openToRefresh">ताज़ा करने के लिए Moti Scroll खोलें</string>
+    <string name="streakLabel">दिन की लकीर</string>
+    <string name="saveAQuote">यहाँ देखने के लिए एक उद्धरण सहेजें</string>
+    <string name="yourDailyQuote">आपका दैनिक उद्धरण यहाँ दिखेगा</string>
+    <string name="choosePool">मूड या क्षेत्र चुनें</string>
+    <string name="quote_widget_description">होम स्क्रीन पर आज की पंक्ति</string>
+    <string name="streak_widget_name">लकीर</string>
+    <string name="streak_widget_description">आप कितने दिन लौटे हैं</string>
+    <string name="saved_widget_name">सहेजे उद्धरण</string>
+    <string name="saved_widget_description">आपकी सहेजी पंक्तियाँ, केवल होम स्क्रीन पर</string>
+    <string name="pool_widget_name">मूड या क्षेत्र</string>
+    <string name="pool_widget_description">आपके चुने मूड या क्षेत्र की एक पंक्ति</string>
+    <string name="refreshWidgets">विजेट अभी ताज़ा करें</string>
+    <string name="showSavedLock">लॉक स्क्रीन विजेट पर सहेजे उद्धरण दिखाएँ</string>
+    <string name="showSavedLockDetail">डिफ़ॉल्ट रूप से बंद। सहेजे उद्धरण लॉक स्क्रीन पर नहीं आते। पास खड़ा कोई बंद फ़ोन पढ़ सकता है।</string>
+    <string name="iosWidgetHelp">iPhone पर होम स्क्रीन को दबाकर रखें, + छुएँ, और Moti Scroll चुनें। वही विजेट लॉक स्क्रीन से जोड़े जा सकते हैं। सहेजे उद्धरण वहाँ नहीं मिलते।</string>
+    <string name="androidWidgetHelp">Android पर होम स्क्रीन को दबाकर रखें, विजेट खोलें, और Moti Scroll चुनें। लॉक स्क्रीन विजेट नहीं मिलते।</string>
+    <string name="field_sports">खेल</string>
+    <string name="field_business">व्यवसाय</string>
+    <string name="field_science">विज्ञान</string>
+    <string name="field_arts">कला</string>
+    <string name="field_leadership">नेतृत्व</string>
+    <string name="field_resilience">लचीलापन</string>
+    <string name="field_other">अन्य</string>
+    <string name="mood_startingOver">फिर से शुरू</string>
+    <string name="mood_badDay">बुरा दिन</string>
+    <string name="mood_needFocus">एकाग्रता चाहिए</string>
+    <string name="mood_preWorkout">व्यायाम से पहले</string>
+    <string name="mood_examStress">परीक्षा का तनाव</string>
+    <string name="mood_feelingStuck">अटका हुआ महसूस</string>
+</resources>
