@@ -183,7 +183,7 @@ ThemeData _theme(Palette palette, Brightness brightness) {
       seedColor: palette.accent,
       brightness: brightness,
       surface: palette.bg,
-    ),
+    ).copyWith(surfaceTint: const Color(0x00000000)),
   );
   return base.copyWith(
     textTheme: base.textTheme.apply(
@@ -196,6 +196,18 @@ ThemeData _theme(Palette palette, Brightness brightness) {
       backgroundColor: palette.bg,
       foregroundColor: palette.text,
       elevation: 0,
+    ),
+    bottomSheetTheme: BottomSheetThemeData(
+      backgroundColor: palette.sheet,
+      surfaceTintColor: const Color(0x00000000),
+      elevation: 0,
+      modalElevation: 0,
+      clipBehavior: Clip.antiAlias,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(kSheetRadius),
+        ),
+      ),
     ),
   );
 }

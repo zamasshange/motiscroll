@@ -89,6 +89,20 @@ void main() {
     expect(find.text('Already have an account? Sign in'), findsOneWidget);
   });
 
+  testWidgets('notes done closes the sheet', (tester) async {
+    final state = await _pumpPage(tester, const HomeScreen());
+    await tester.tap(find.byIcon(Icons.more_horiz_rounded).first);
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('Done'), findsOneWidget);
+    await tester.enterText(find.byType(TextField), 'come back to this');
+    await tester.tap(find.text('Done'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('Done'), findsNothing);
+    expect(state.notes['fixture-quote'], 'come back to this');
+  });
+
   testWidgets('line finder hides the next field and number', (tester) async {
     await _pumpPage(tester, const HomeScreen());
     expect(find.text('Line finder'), findsOneWidget);
