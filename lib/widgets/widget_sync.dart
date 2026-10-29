@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 import 'dart:typed_data';
@@ -42,7 +43,13 @@ class WidgetSyncService {
       await _update('SavedWidgetProvider', 'MotiSavedWidget');
       await _update('PoolWidgetProvider', 'MotiPoolWidget');
       if (source != null) {
-        await _savePortraits(source);
+        final lines = source;
+        unawaited(
+          Future<void>.delayed(
+            const Duration(seconds: 2),
+            () => _savePortraits(lines),
+          ),
+        );
       }
     } on Object {
       return;

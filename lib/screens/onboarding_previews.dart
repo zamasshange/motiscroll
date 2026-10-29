@@ -244,15 +244,17 @@ class OnboardWidgetPreview extends StatelessWidget {
                                   : onboardPortrait(state, item),
                             ),
                             const SizedBox(height: 10),
-                            Text(
-                              item?.text ?? 'Your daily quote appears here',
-                              maxLines: 5,
-                              overflow: TextOverflow.ellipsis,
-                              style: serif(
-                                palette,
-                                22,
-                                height: 1.25,
-                                color: kCream,
+                            Flexible(
+                              child: Text(
+                                item?.text ?? 'Your daily quote appears here',
+                                maxLines: 5,
+                                overflow: TextOverflow.ellipsis,
+                                style: serif(
+                                  palette,
+                                  22,
+                                  height: 1.25,
+                                  color: kCream,
+                                ),
                               ),
                             ),
                             const SizedBox(height: 8),
@@ -280,7 +282,6 @@ class OnboardWidgetPreview extends StatelessWidget {
                                 ),
                               ),
                             ],
-                            const Spacer(),
                           ],
                         ),
                       ),

@@ -688,6 +688,7 @@ class AppState extends ChangeNotifier {
     catalogLoading = false;
     _ensureLines();
     if (discoverItems.isEmpty) discoverItems = _items;
+    unawaited(CatalogCache.write(_items));
     notifyListeners();
   }
 

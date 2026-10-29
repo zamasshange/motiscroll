@@ -93,6 +93,14 @@ Future<void> _attachBackend(AppState state) async {
     } on Exception {
       // A failed cache setting must not block the library read.
     }
+    state.repository = FirestoreItemRepository(FirebaseFirestore.instance);
+    if (state.items.isEmpty) {
+      try {
+        state.adoptCatalog(await state.repository!.previewOpening());
+      } on Object {
+        // Sign-in below retries the library read.
+      }
+    }
     if (kReleaseMode) {
       try {
         await FirebaseAppCheck.instance
@@ -106,8 +114,12 @@ Future<void> _attachBackend(AppState state) async {
       }
     }
     try {
-      FlutterError.onError =
-          FirebaseCrashlytics.instance.recordFlutterFatalError;
+      final record = FirebaseCrashlytics.instance.recordFlutterFatalError;
+      final previous = FlutterError.onError;
+      FlutterError.onError = (details) {
+        if (kReleaseMode) record(details);
+        previous?.call(details);
+      };
     } on Exception {
       // Crashlytics needs the native Google config. The rest of the session still runs.
     }
@@ -155,14 +167,7 @@ Future<void> _attachBackend(AppState state) async {
         state.contentReady = false;
       }
     };
-    state.repository = FirestoreItemRepository(FirebaseFirestore.instance);
-    if (state.items.isEmpty) {
-      try {
-        state.adoptCatalog(await state.repository!.previewOpening());
-      } on Exception {
-        // Sign-in below retries the library read.
-      }
-    }
+    state.repository ??= FirestoreItemRepository(FirebaseFirestore.instance);
     final existing = FirebaseAuth.instance.currentUser;
     if (existing == null || existing.isAnonymous) {
       try {

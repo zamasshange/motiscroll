@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart' hide Field, Source;
 
 import 'catalog.dart';
 import 'discover_deck.dart';
+import 'firestore_opening.dart';
 import 'models.dart';
 
 class PageChunk {
@@ -192,7 +193,7 @@ class FirestoreItemRepository implements ItemRepository {
 
   @override
   Future<PageChunk> previewOpening() async {
-    final snap = await _db.collection('publishedItems').limit(48).get();
+    final snap = await openingSnapshot(_db);
     return PageChunk(rotateAuthors(_itemsFrom(snap)));
   }
 
@@ -216,9 +217,15 @@ class FirestoreItemRepository implements ItemRepository {
   }
 
   List<Item> _itemsFrom(QuerySnapshot<Map<String, dynamic>> snap) {
-    return snap.docs
-        .map((doc) => itemFromPublished(doc.id, doc.data()))
-        .toList();
+    final items = <Item>[];
+    for (final doc in snap.docs) {
+      try {
+        items.add(itemFromPublished(doc.id, doc.data()));
+      } on Object {
+        // One unreadable line must not take the rest of the library down.
+      }
+    }
+    return items;
   }
 }
 

@@ -47,9 +47,7 @@ class CatalogCache {
   }
 
   static Future<File> _file() async {
-    final dir = await getApplicationDocumentsDirectory().timeout(
-      const Duration(milliseconds: 400),
-    );
+    final dir = await getApplicationDocumentsDirectory();
     return File('${dir.path}/catalog_snapshot.json');
   }
 }

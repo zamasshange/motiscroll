@@ -395,7 +395,8 @@ class NotificationService {
       minute: row.minute,
     );
     if (!when.isAfter(tz.TZDateTime.now(location))) return;
-    final imagePath = await _portraitPath(row.imageUrl);
+    final soon = when.difference(tz.TZDateTime.now(location)).inHours < 36;
+    final imagePath = soon ? await _portraitPath(row.imageUrl) : null;
     if (await _showOnIos(
       id: row.id,
       title: row.title,
@@ -456,13 +457,13 @@ class NotificationService {
       final client = HttpClient();
       final request = await client
           .getUrl(Uri.parse(url))
-          .timeout(const Duration(seconds: 6));
+          .timeout(const Duration(seconds: 3));
       request.headers.set(
         HttpHeaders.userAgentHeader,
         'MotiScroll/1.0 (educational app; freely licensed Wikimedia portraits)',
       );
       final response = await request.close().timeout(
-        const Duration(seconds: 6),
+        const Duration(seconds: 3),
       );
       if (response.statusCode != 200) return null;
       final builder = BytesBuilder(copy: false);
