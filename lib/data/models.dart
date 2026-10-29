@@ -117,6 +117,7 @@ class Item {
     this.speech,
     this.imageUrl,
     this.imageCredit,
+    this.isTranslated = false,
   });
 
   final String id;
@@ -132,6 +133,7 @@ class Item {
   final SpeechMeta? speech;
   final String? imageUrl;
   final ImageCredit? imageCredit;
+  final bool isTranslated;
 
   bool get isSpeech => type == 'speech';
 

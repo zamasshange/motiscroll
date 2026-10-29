@@ -356,6 +356,7 @@ Item itemFromPublished(String id, Map<String, dynamic> data) {
             durationSec: (speechMap['durationSec'] as num?)?.toInt() ?? 0,
             watchUrl: speechMap['watchUrl'] as String? ?? '',
           ),
+    isTranslated: data['isTranslated'] == true,
     imageUrl: data['authorImageUrl'] as String?,
     imageCredit: creditMap == null
         ? null

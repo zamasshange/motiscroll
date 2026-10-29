@@ -53,6 +53,8 @@ dependencies:
   home_widget: ^0.10.0
   workmanager: ^0.10.10
   intl: ^0.20.2
+  path_provider: ^2.1.5
+  gal: ^2.3.2
 
 dev_dependencies:
   flutter_test:
