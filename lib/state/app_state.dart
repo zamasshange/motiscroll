@@ -92,6 +92,10 @@ class AppState extends ChangeNotifier {
   List<Item> get items =>
       kReleaseMode && !_fromPublished ? const <Item>[] : _items;
 
+  /// True while the first catalog page is still opening and nothing is on screen.
+  bool get catalogOpening =>
+      items.isEmpty && catalogLoading && catalogError == null;
+
   /// Roster people who have no published line yet.
   List<AuthorProfile> get authorsAwaitingLines {
     final quoted = {for (final item in items) personKey(item.author)};

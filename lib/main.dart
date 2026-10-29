@@ -37,15 +37,22 @@ void registerPreviewNotifyExtension(AppState state) {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await QuoteCardRenderer.cleanupTemp();
   final state = AppState();
   await state.load();
-  await attachBackend(state);
-  await WidgetSyncService.registerRefresh();
+  if (useFirebase) {
+    state.catalogLoading = true;
+  }
   if (!kReleaseMode) {
     registerPreviewNotifyExtension(state);
   }
   runApp(MotiApp(state: state));
+  unawaited(_startServices(state));
+}
+
+Future<void> _startServices(AppState state) async {
+  unawaited(QuoteCardRenderer.cleanupTemp());
+  unawaited(WidgetSyncService.registerRefresh());
+  await attachBackend(state);
 }
 
 class MotiApp extends StatefulWidget {

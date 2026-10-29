@@ -156,7 +156,10 @@ void main() {
     await tester.pump();
 
     final shown =
-        find.text('A fixture line for the home screen test.').evaluate().isNotEmpty ||
+        find
+            .text('A fixture line for the home screen test.')
+            .evaluate()
+            .isNotEmpty ||
         find
             .text('A fixture speech line for the home screen test.')
             .evaluate()
@@ -201,10 +204,7 @@ void main() {
       AppScope(
         state: state,
         child: const MaterialApp(
-          home: Scaffold(
-            resizeToAvoidBottomInset: false,
-            body: FeedScreen(),
-          ),
+          home: Scaffold(resizeToAvoidBottomInset: false, body: FeedScreen()),
         ),
       ),
     );
@@ -226,5 +226,20 @@ void main() {
     await tester.tap(find.bySemanticsLabel('Like').first);
     await tester.pump();
     expect(state.liked, contains('other-person'));
+  });
+
+  testWidgets('home stays open while the catalog is still loading', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final state = AppState();
+    await state.load();
+    state.onboardingComplete = true;
+    state.catalogLoading = true;
+    await tester.pumpWidget(MotiApp(state: state));
+    await tester.pump();
+
+    expect(find.text('Nothing is published yet.'), findsNothing);
+    expect(find.byKey(const Key('catalog-opening')), findsWidgets);
   });
 }

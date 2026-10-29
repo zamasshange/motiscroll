@@ -8,8 +8,10 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Build
+import android.os.Bundle
 import android.provider.Settings
 import androidx.core.content.FileProvider
+import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
@@ -18,6 +20,17 @@ import java.io.ByteArrayOutputStream
 import java.io.File
 
 class MainActivity : FlutterActivity() {
+    override fun onCreate(savedInstanceState: Bundle?) {
+        val splash = installSplashScreen()
+        super.onCreate(savedInstanceState)
+        // The system splash otherwise holds the mark until Dart draws.
+        splash.setKeepOnScreenCondition { false }
+        splash.setOnExitAnimationListener { screen ->
+            screen.remove()
+            updateSystemUiOverlays()
+        }
+    }
+
     override fun configureFlutterEngine(flutterEngine: FlutterEngine) {
         super.configureFlutterEngine(flutterEngine)
         MethodChannel(

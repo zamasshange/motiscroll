@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
@@ -31,18 +33,42 @@ bool firebaseOptionsMatchPlatform() {
   };
 }
 
+Future<void>? _attaching;
+
+void _applyRemoteFlags(AppState state, FirebaseRemoteConfig config) {
+  state.contentReady = config.getBool('contentReady');
+  state.setWidgetsEnabled(config.getBool('widgetsEnabled'));
+  state.applyNotificationFlags(
+    enabled: config.getBool('notificationsEnabled'),
+    maxPerDay: config.getInt('maxNotificationsPerDay'),
+  );
+}
+
 /// Connects [AppState] to Firebase. The local catalog is not a fallback.
 /// Pass `--dart-define=USE_FIREBASE=false` only for a widget test that never
 /// calls this. Analytics is not started.
-Future<void> attachBackend(AppState state) async {
+Future<void> attachBackend(AppState state) {
   if (!useFirebase) {
     state.accountError = 'This build is not connected to the library.';
-    return;
+    state.catalogLoading = false;
+    state.notifyAccount();
+    return Future.value();
   }
+  if (state.firebaseReady && state.repository != null) {
+    return Future.value();
+  }
+  return _attaching ??= _attachBackend(state);
+}
+
+Future<void> _attachBackend(AppState state) async {
   if (!firebaseOptionsMatchPlatform()) {
     state.accountError = 'Sign-in is off until this phone is registered in Firebase. The rest of the app still opens.';
+    state.catalogLoading = false;
+    state.notifyAccount();
     return;
   }
+  state.catalogLoading = true;
+  state.notifyAccount();
   try {
     if (Firebase.apps.isEmpty) {
       try {
@@ -69,10 +95,12 @@ Future<void> attachBackend(AppState state) async {
     }
     if (kReleaseMode) {
       try {
-        await FirebaseAppCheck.instance.activate(
-          providerAndroid: const AndroidPlayIntegrityProvider(),
-          providerApple: const AppleAppAttestProvider(),
-        );
+        await FirebaseAppCheck.instance
+            .activate(
+              providerAndroid: const AndroidPlayIntegrityProvider(),
+              providerApple: const AppleAppAttestProvider(),
+            )
+            .timeout(const Duration(seconds: 3));
       } on Exception {
         // A debug install has no App Attest token. Release builds still try.
       }
@@ -85,6 +113,14 @@ Future<void> attachBackend(AppState state) async {
     }
     try {
       final config = FirebaseRemoteConfig.instance;
+      await config.setConfigSettings(
+        RemoteConfigSettings(
+          fetchTimeout: const Duration(seconds: 5),
+          minimumFetchInterval: kReleaseMode
+              ? const Duration(hours: 1)
+              : Duration.zero,
+        ),
+      );
       await config.setDefaults(const {
         'charactersEnabled': false,
         'livingFiguresEnabled': true,
@@ -93,13 +129,17 @@ Future<void> attachBackend(AppState state) async {
         'notificationsEnabled': true,
         'maxNotificationsPerDay': 2,
       });
-      await config.fetchAndActivate();
-      state.contentReady = config.getBool('contentReady');
-      state.setWidgetsEnabled(config.getBool('widgetsEnabled'));
-      state.applyNotificationFlags(
-        enabled: config.getBool('notificationsEnabled'),
-        maxPerDay: config.getInt('maxNotificationsPerDay'),
-      );
+      _applyRemoteFlags(state, config);
+      unawaited(() async {
+        try {
+          await config.fetchAndActivate();
+          _applyRemoteFlags(state, config);
+          state.notifyAccount();
+          await state.syncNotifications();
+        } on Exception {
+          // Keep the defaults already on the state.
+        }
+      }());
     } on Exception {
       state.contentReady = false;
     }
@@ -108,12 +148,7 @@ Future<void> attachBackend(AppState state) async {
       try {
         final config = FirebaseRemoteConfig.instance;
         await config.fetchAndActivate();
-        state.contentReady = config.getBool('contentReady');
-        state.setWidgetsEnabled(config.getBool('widgetsEnabled'));
-        state.applyNotificationFlags(
-          enabled: config.getBool('notificationsEnabled'),
-          maxPerDay: config.getInt('maxNotificationsPerDay'),
-        );
+        _applyRemoteFlags(state, config);
         state.notifyAccount();
         await state.syncNotifications();
       } on Exception {
@@ -121,14 +156,19 @@ Future<void> attachBackend(AppState state) async {
       }
     };
     try {
-      await FirebaseAuth.instance.signInAnonymously();
+      await FirebaseAuth.instance.signInAnonymously().timeout(
+        const Duration(seconds: 8),
+      );
     } on FirebaseAuthException catch (error) {
       state.accountError = _authMessage(error);
+    } on TimeoutException {
+      // A previous session can still have a user; the uid check below decides.
     }
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) {
       state.accountError ??=
           'Sign-in did not start. You can try Google from Account.';
+      state.catalogLoading = false;
       state.notifyAccount();
       return;
     }
@@ -160,6 +200,7 @@ Future<void> attachBackend(AppState state) async {
     state.catalogError = libraryFailure(error);
     state.accountError = 'The account service could not be reached.';
     state.remote = false;
+    state.catalogLoading = false;
     state.notifyAccount();
   }
 }

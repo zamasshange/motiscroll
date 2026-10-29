@@ -20,6 +20,16 @@ class TabShell extends StatefulWidget {
 class _TabShellState extends State<TabShell> {
   var _index = AppTab.home;
   var _askShown = false;
+  var _restBuilt = false;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || _restBuilt) return;
+      setState(() => _restBuilt = true);
+    });
+  }
 
   @override
   void didChangeDependencies() {
@@ -49,6 +59,11 @@ class _TabShellState extends State<TabShell> {
     }
   }
 
+  Widget _page(int index, Widget child) {
+    if (_restBuilt || index == _index) return child;
+    return const SizedBox.shrink();
+  }
+
   void _select(int index) {
     if (index == _index) return;
     setState(() => _index = index);
@@ -62,7 +77,8 @@ class _TabShellState extends State<TabShell> {
   Widget build(BuildContext context) {
     final state = AppScope.of(context);
     final palette = state.palette;
-    final code = state.uiLanguage ??
+    final code =
+        state.uiLanguage ??
         state.resolvedContentLanguage(
           View.of(context).platformDispatcher.locale,
         );
@@ -75,11 +91,11 @@ class _TabShellState extends State<TabShell> {
         children: [
           IndexedStack(
             index: _index,
-            children: const [
-              HomeScreen(),
-              FeedScreen(),
-              DiscoverScreen(),
-              CollectionsScreen(),
+            children: [
+              _page(AppTab.home, const HomeScreen()),
+              _page(AppTab.feed, const FeedScreen()),
+              _page(AppTab.discover, const DiscoverScreen()),
+              _page(AppTab.collections, const CollectionsScreen()),
             ],
           ),
           Positioned(

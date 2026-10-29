@@ -94,10 +94,12 @@ class _DailyScreenState extends State<DailyScreen> {
       backgroundColor: palette.bg,
       body: today == null
           ? Center(
-              child: Text(
-                state.catalogError ?? 'Nothing is published yet.',
-                style: sans(palette, 16, color: palette.textMuted),
-              ),
+              child: state.catalogOpening
+                  ? const CatalogOpening()
+                  : Text(
+                      state.catalogError ?? 'Nothing is published yet.',
+                      style: sans(palette, 16, color: palette.textMuted),
+                    ),
             )
           : ListView(
               padding: EdgeInsets.only(
@@ -126,9 +128,7 @@ class _DailyScreenState extends State<DailyScreen> {
                       Positioned(
                         top: MediaQuery.paddingOf(context).top + 8,
                         left: 16,
-                        child: _Close(
-                          onTap: () => Navigator.of(context).pop(),
-                        ),
+                        child: _Close(onTap: () => Navigator.of(context).pop()),
                       ),
                     ],
                   ),
@@ -191,10 +191,7 @@ class _DailyScreenState extends State<DailyScreen> {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Icon(
-                                Icons.play_arrow_rounded,
-                                color: palette.bg,
-                              ),
+                              Icon(Icons.play_arrow_rounded, color: palette.bg),
                               const SizedBox(width: 6),
                               Text(
                                 "Start today's line",
@@ -377,21 +374,30 @@ class _DayCard extends StatelessWidget {
                       imageUrl!,
                       fit: BoxFit.cover,
                       headers: imageHeaders,
-                      errorBuilder: (context, error, stack) =>
-                          GeneratedCover(field: field, seed: seed, subtle: locked),
+                      errorBuilder: (context, error, stack) => GeneratedCover(
+                        field: field,
+                        seed: seed,
+                        subtle: locked,
+                      ),
                     )
                   else
                     GeneratedCover(field: field, seed: seed, subtle: locked),
                   if (locked)
                     ColoredBox(
                       color: kInk.withValues(alpha: 0.45),
-                      child: const Icon(Icons.lock_rounded, color: Colors.white),
+                      child: const Icon(
+                        Icons.lock_rounded,
+                        color: Colors.white,
+                      ),
                     ),
                   if (done)
                     const Positioned(
                       top: 8,
                       right: 8,
-                      child: Icon(Icons.check_circle_rounded, color: Colors.white),
+                      child: Icon(
+                        Icons.check_circle_rounded,
+                        color: Colors.white,
+                      ),
                     ),
                 ],
               ),

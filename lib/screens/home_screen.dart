@@ -84,13 +84,18 @@ class _HomeScreenState extends State<HomeScreen> {
             _greeting(),
             style: sans(palette, 32, height: 1.1, weight: FontWeight.w700),
           ),
-          const SizedBox(height: 24),
-          Text(
-            state.catalogError ?? 'Nothing is published yet.',
-            style: sans(palette, 16, color: palette.textMuted),
-          ),
-          const SizedBox(height: 16),
-          PrimaryButton(label: 'Try again', onPressed: state.refreshCatalog),
+          if (state.catalogOpening) ...[
+            const SizedBox(height: 80),
+            const CatalogOpening(),
+          ] else ...[
+            const SizedBox(height: 24),
+            Text(
+              state.catalogError ?? 'Nothing is published yet.',
+              style: sans(palette, 16, color: palette.textMuted),
+            ),
+            const SizedBox(height: 16),
+            PrimaryButton(label: 'Try again', onPressed: state.refreshCatalog),
+          ],
         ],
       );
     }

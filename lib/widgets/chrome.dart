@@ -654,6 +654,15 @@ class SourceLine extends StatelessWidget {
   }
 }
 
+class CatalogOpening extends StatelessWidget {
+  const CatalogOpening({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return const Center(child: MotiMark(key: Key('catalog-opening'), size: 44));
+  }
+}
+
 class MotiMark extends StatelessWidget {
   const MotiMark({super.key, this.size = 32, this.color});
 

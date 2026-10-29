@@ -83,6 +83,12 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
     final items = _visible(state);
     final top = MediaQuery.paddingOf(context).top;
     if (items.isEmpty) {
+      if (state.catalogOpening) {
+        return Padding(
+          padding: EdgeInsets.fromLTRB(24, top + 24, 24, dockInset(context)),
+          child: const CatalogOpening(),
+        );
+      }
       return Padding(
         padding: EdgeInsets.fromLTRB(24, top + 24, 24, dockInset(context)),
         child: Column(
@@ -141,237 +147,245 @@ class _DiscoverCard extends StatelessWidget {
       behavior: HitTestBehavior.opaque,
       onTap: () => openStudy(context, item),
       child: RiseIn(
-      play: active,
-      child: Container(
-        decoration: BoxDecoration(
-          color: palette.card,
-          borderRadius: BorderRadius.circular(28),
-          boxShadow: [
-            BoxShadow(
-              color: palette.backdrop.withValues(alpha: 0.08),
-              blurRadius: 18,
-              offset: const Offset(0, 8),
-            ),
-          ],
-        ),
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(20, 14, 20, 4),
-          child: Column(
-            children: [
-              Expanded(
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    return FittedBox(
-                      fit: BoxFit.scaleDown,
-                      alignment: Alignment.topCenter,
-                      child: SizedBox(
-                        width: constraints.maxWidth,
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-            Center(
-              child: Pressable(
-                semanticLabel: fieldInfo[item.field]!.title,
-                onPressed: () => state.focusCollection(item.field),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 12,
-                    vertical: 6,
-                  ),
-                  decoration: BoxDecoration(
-                    color: palette.cardAlt,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Text(
-                    fieldInfo[item.field]!.title,
-                    style: sans(
-                      palette,
-                      12,
-                      weight: FontWeight.w600,
-                      color: palette.textMuted,
-                    ),
-                  ),
-                ),
+        play: active,
+        child: Container(
+          decoration: BoxDecoration(
+            color: palette.card,
+            borderRadius: BorderRadius.circular(28),
+            boxShadow: [
+              BoxShadow(
+                color: palette.backdrop.withValues(alpha: 0.08),
+                blurRadius: 18,
+                offset: const Offset(0, 8),
               ),
-            ),
-            const SizedBox(height: 10),
-            if (imageUrl != null && imageUrl.isNotEmpty) ...[
-              AuthorAvatar(
-                author: item.author,
-                size: 64,
-                imageUrl: imageUrl,
-                imageCredit: credit,
-              ),
-              const SizedBox(height: 8),
             ],
-            Text(
-              item.author,
-              textAlign: TextAlign.center,
-              style: serif(palette, 36, height: 1.08),
-            ),
-            const SizedBox(height: 10),
-            QuoteTap(
-              itemId: item.id,
-              onOpen: () => openStudy(context, item),
-              child: Text(
-                item.text,
-                textAlign: TextAlign.center,
-                style: serif(
-                  palette,
-                  26,
-                  height: 1.28,
-                  style: FontStyle.italic,
-                  weight: FontWeight.w500,
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(20, 14, 20, 4),
+            child: Column(
+              children: [
+                Expanded(
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      return FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.topCenter,
+                        child: SizedBox(
+                          width: constraints.maxWidth,
+                          child: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Center(
+                                child: Pressable(
+                                  semanticLabel: fieldInfo[item.field]!.title,
+                                  onPressed: () =>
+                                      state.focusCollection(item.field),
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 6,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: palette.cardAlt,
+                                      borderRadius: BorderRadius.circular(999),
+                                    ),
+                                    child: Text(
+                                      fieldInfo[item.field]!.title,
+                                      style: sans(
+                                        palette,
+                                        12,
+                                        weight: FontWeight.w600,
+                                        color: palette.textMuted,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 10),
+                              if (imageUrl != null && imageUrl.isNotEmpty) ...[
+                                AuthorAvatar(
+                                  author: item.author,
+                                  size: 64,
+                                  imageUrl: imageUrl,
+                                  imageCredit: credit,
+                                ),
+                                const SizedBox(height: 8),
+                              ],
+                              Text(
+                                item.author,
+                                textAlign: TextAlign.center,
+                                style: serif(palette, 36, height: 1.08),
+                              ),
+                              const SizedBox(height: 10),
+                              QuoteTap(
+                                itemId: item.id,
+                                onOpen: () => openStudy(context, item),
+                                child: Text(
+                                  item.text,
+                                  textAlign: TextAlign.center,
+                                  style: serif(
+                                    palette,
+                                    26,
+                                    height: 1.28,
+                                    style: FontStyle.italic,
+                                    weight: FontWeight.w500,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                'CONTEXT',
+                                style: sans(
+                                  palette,
+                                  12,
+                                  weight: FontWeight.w700,
+                                  color: palette.textFaint,
+                                ),
+                              ),
+                              const SizedBox(height: 4),
+                              Text(
+                                item.shownContext,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: sans(palette, 17, height: 1.35),
+                              ),
+                              const SizedBox(height: 12),
+                              Container(
+                                padding: const EdgeInsets.fromLTRB(
+                                  14,
+                                  12,
+                                  14,
+                                  12,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: palette.cardAlt,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Icon(
+                                          Icons.lightbulb_outline,
+                                          size: 16,
+                                          color: palette.accent,
+                                        ),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          'DID YOU KNOW?',
+                                          style: sans(
+                                            palette,
+                                            12,
+                                            weight: FontWeight.w700,
+                                            color: palette.textMuted,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    Text(
+                                      item.shownDidYouKnow,
+                                      maxLines: 2,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: sans(palette, 17, height: 1.3),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              Wrap(
+                                spacing: 8,
+                                runSpacing: 8,
+                                children: [
+                                  for (final related
+                                      in item.deeper.related
+                                          .map(
+                                            (id) => itemById(id, state.items),
+                                          )
+                                          .whereType<Item>())
+                                    ChoiceChipButton(
+                                      label: related.author,
+                                      selected: false,
+                                      onTap: () => openStudy(context, related),
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
                 ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'CONTEXT',
-              style: sans(
-                palette,
-                12,
-                weight: FontWeight.w700,
-                color: palette.textFaint,
-              ),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              item.shownContext,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: sans(palette, 17, height: 1.35),
-            ),
-            const SizedBox(height: 12),
-            Container(
-              padding: const EdgeInsets.fromLTRB(14, 12, 14, 12),
-              decoration: BoxDecoration(
-                color: palette.cardAlt,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.lightbulb_outline,
-                        size: 16,
-                        color: palette.accent,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'DID YOU KNOW?',
+                Center(
+                  child: Pressable(
+                    onPressed: () => openStudy(context, item),
+                    semanticLabel: 'Go deeper',
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 8),
+                      child: Text(
+                        '${ui(AppScope.of(context).uiLanguage ?? AppScope.of(context).resolvedContentLanguage(View.of(context).platformDispatcher.locale), 'goDeeper')}  ›',
                         style: sans(
                           palette,
-                          12,
-                          weight: FontWeight.w700,
+                          15,
+                          weight: FontWeight.w600,
                           color: palette.textMuted,
                         ),
                       ),
-                    ],
+                    ),
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    item.shownDidYouKnow,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: sans(palette, 17, height: 1.3),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 8),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final related
-                    in item.deeper.related
-                        .map((id) => itemById(id, state.items))
-                        .whereType<Item>())
-                  ChoiceChipButton(
-                    label: related.author,
-                    selected: false,
-                    onTap: () => openStudy(context, related),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 8),
-                          ],
+                ),
+                if (item.imageCredit != null)
+                  PhotoCreditLine(credit: item.imageCredit!, maxLines: 1),
+                const SizedBox(height: 4),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      onPressed: () => state.toggleSave(item.id),
+                      icon: Icon(
+                        saved
+                            ? Icons.bookmark_rounded
+                            : Icons.bookmark_border_rounded,
+                        color: palette.textMuted,
+                      ),
+                    ),
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      tooltip: 'Notes',
+                      onPressed: () => showNotes(context, item),
+                      icon: Icon(
+                        Icons.chat_bubble_outline_rounded,
+                        color: palette.textMuted,
+                      ),
+                    ),
+                    Builder(
+                      builder: (context) => IconButton(
+                        visualDensity: VisualDensity.compact,
+                        onPressed: () => shareItem(context, item),
+                        icon: Icon(
+                          Icons.ios_share_rounded,
+                          color: palette.textMuted,
                         ),
                       ),
-                    );
-                  },
-                ),
-              ),
-            Center(
-              child: Pressable(
-                onPressed: () => openStudy(context, item),
-                semanticLabel: 'Go deeper',
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Text(
-                    '${ui(AppScope.of(context).uiLanguage ?? AppScope.of(context).resolvedContentLanguage(View.of(context).platformDispatcher.locale), 'goDeeper')}  ›',
-                    style: sans(
-                      palette,
-                      15,
-                      weight: FontWeight.w600,
-                      color: palette.textMuted,
                     ),
-                  ),
-                ),
-              ),
-            ),
-            if (item.imageCredit != null)
-              PhotoCreditLine(credit: item.imageCredit!, maxLines: 1),
-            const SizedBox(height: 4),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                IconButton(
-                  visualDensity: VisualDensity.compact,
-                  onPressed: () => state.toggleSave(item.id),
-                  icon: Icon(
-                    saved
-                        ? Icons.bookmark_rounded
-                        : Icons.bookmark_border_rounded,
-                    color: palette.textMuted,
-                  ),
-                ),
-                IconButton(
-                  visualDensity: VisualDensity.compact,
-                  tooltip: 'Notes',
-                  onPressed: () => showNotes(context, item),
-                  icon: Icon(
-                    Icons.chat_bubble_outline_rounded,
-                    color: palette.textMuted,
-                  ),
-                ),
-                Builder(
-                  builder: (context) => IconButton(
-                    visualDensity: VisualDensity.compact,
-                    onPressed: () => shareItem(context, item),
-                    icon: Icon(
-                      Icons.ios_share_rounded,
-                      color: palette.textMuted,
+                    IconButton(
+                      visualDensity: VisualDensity.compact,
+                      onPressed: () => state.toggleRead(item.id),
+                      icon: Icon(
+                        read ? Icons.check_circle : Icons.check_circle_outline,
+                        color: read ? palette.accent : palette.textMuted,
+                      ),
                     ),
-                  ),
-                ),
-                IconButton(
-                  visualDensity: VisualDensity.compact,
-                  onPressed: () => state.toggleRead(item.id),
-                  icon: Icon(
-                    read ? Icons.check_circle : Icons.check_circle_outline,
-                    color: read ? palette.accent : palette.textMuted,
-                  ),
+                  ],
                 ),
               ],
             ),
-          ],
           ),
         ),
-      ),
       ),
     );
   }

@@ -183,37 +183,43 @@ class _FeedScreenState extends State<FeedScreen> {
         Expanded(
           child: entries.isEmpty
               ? Center(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        state.items.isEmpty
-                            ? (state.catalogError ??
-                                  'Nothing is published yet.')
-                            : 'Nothing in this filter.',
-                        style: sans(palette, 16, color: palette.textMuted),
-                      ),
-                      const SizedBox(height: 16),
-                      OutlineButton(
-                        label: state.items.isEmpty
-                            ? 'Try again'
-                            : 'Clear filter',
-                        onPressed: () {
-                          if (state.items.isEmpty) {
-                            state.refreshCatalog();
-                            return;
-                          }
-                          state.showEverything();
-                          setState(() {
-                            _field = null;
-                            _mood = null;
-                            _forceAll = false;
-                            _index = 0;
-                          });
-                        },
-                      ),
-                    ],
-                  ),
+                  child: state.catalogOpening
+                      ? const CatalogOpening()
+                      : Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              state.items.isEmpty
+                                  ? (state.catalogError ??
+                                        'Nothing is published yet.')
+                                  : 'Nothing in this filter.',
+                              style: sans(
+                                palette,
+                                16,
+                                color: palette.textMuted,
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            OutlineButton(
+                              label: state.items.isEmpty
+                                  ? 'Try again'
+                                  : 'Clear filter',
+                              onPressed: () {
+                                if (state.items.isEmpty) {
+                                  state.refreshCatalog();
+                                  return;
+                                }
+                                state.showEverything();
+                                setState(() {
+                                  _field = null;
+                                  _mood = null;
+                                  _forceAll = false;
+                                  _index = 0;
+                                });
+                              },
+                            ),
+                          ],
+                        ),
                 )
               : Stack(
                   children: [
@@ -231,10 +237,10 @@ class _FeedScreenState extends State<FeedScreen> {
                       },
                       itemBuilder: (context, index) {
                         final line = entries[index].item;
-                        final portrait = AppScope.of(
-                          context,
-                        ).portraitFor(line.author);
-                        final credit = line.imageCredit ?? portrait?.imageCredit;
+                        final portrait = AppScope.of(context)
+                            .portraitFor(line.author);
+                        final credit =
+                            line.imageCredit ?? portrait?.imageCredit;
                         final imageUrl = line.imageUrl ?? portrait?.imageUrl;
                         final hasImage =
                             imageUrl != null && imageUrl.isNotEmpty;
@@ -608,53 +614,51 @@ class _PersonPickerState extends State<_PersonPicker> {
                   keyboardDismissBehavior:
                       ScrollViewKeyboardDismissBehavior.onDrag,
                   padding: EdgeInsets.fromLTRB(
-                      8,
-                      12,
-                      8,
-                      MediaQuery.paddingOf(context).bottom + 24,
-                    ),
-                    itemCount: rows.length,
-                    itemBuilder: (context, index) {
-                      final row = rows[index];
-                      if (row.header != null) {
-                        return Padding(
-                          padding: const EdgeInsets.fromLTRB(12, 16, 12, 6),
-                          child: Text(
-                            row.header!.toUpperCase(),
-                            style: sans(
-                              palette,
-                              12,
-                              weight: FontWeight.w600,
-                              color: palette.textFaint,
-                            ),
-                          ),
-                        );
-                      }
-                      final name = row.name!;
-                      final selected = name == widget.current;
-                      return ListTile(
-                        title: Text(
-                          name,
+                    8,
+                    12,
+                    8,
+                    MediaQuery.paddingOf(context).bottom + 24,
+                  ),
+                  itemCount: rows.length,
+                  itemBuilder: (context, index) {
+                    final row = rows[index];
+                    if (row.header != null) {
+                      return Padding(
+                        padding: const EdgeInsets.fromLTRB(12, 16, 12, 6),
+                        child: Text(
+                          row.header!.toUpperCase(),
                           style: sans(
                             palette,
-                            16,
-                            weight: selected
-                                ? FontWeight.w700
-                                : FontWeight.w400,
-                            color: selected ? palette.accent : palette.text,
+                            12,
+                            weight: FontWeight.w600,
+                            color: palette.textFaint,
                           ),
                         ),
-                        trailing: Text(
-                          row.count == 1 ? '1 line' : '${row.count} lines',
-                          style: sans(palette, 13, color: palette.textMuted),
-                        ),
-                        onTap: () {
-                          FocusManager.instance.primaryFocus?.unfocus();
-                          widget.onPick(row.index!);
-                        },
                       );
-                    },
-                  ),
+                    }
+                    final name = row.name!;
+                    final selected = name == widget.current;
+                    return ListTile(
+                      title: Text(
+                        name,
+                        style: sans(
+                          palette,
+                          16,
+                          weight: selected ? FontWeight.w700 : FontWeight.w400,
+                          color: selected ? palette.accent : palette.text,
+                        ),
+                      ),
+                      trailing: Text(
+                        row.count == 1 ? '1 line' : '${row.count} lines',
+                        style: sans(palette, 13, color: palette.textMuted),
+                      ),
+                      onTap: () {
+                        FocusManager.instance.primaryFocus?.unfocus();
+                        widget.onPick(row.index!);
+                      },
+                    );
+                  },
+                ),
         ),
       ],
     );
@@ -717,7 +721,6 @@ class _Rail extends StatelessWidget {
     );
   }
 }
-
 
 class _BareIcon extends StatelessWidget {
   const _BareIcon({
@@ -874,18 +877,18 @@ class _Pill extends StatelessWidget {
           borderRadius: BorderRadius.circular(999),
           border: Border.all(color: palette.border),
         ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Flexible(
-                child: Text(
-                  label,
-                  maxLines: 1,
-                  softWrap: false,
-                  overflow: TextOverflow.ellipsis,
-                  style: sans(palette, 13, weight: FontWeight.w600),
-                ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                softWrap: false,
+                overflow: TextOverflow.ellipsis,
+                style: sans(palette, 13, weight: FontWeight.w600),
               ),
+            ),
             if (trailing != null && onTrailing != null) ...[
               const SizedBox(width: 4),
               Pressable(
