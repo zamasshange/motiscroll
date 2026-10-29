@@ -11,7 +11,6 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import androidx.core.content.FileProvider
-import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import io.flutter.embedding.android.FlutterActivity
 import io.flutter.embedding.engine.FlutterEngine
 import io.flutter.plugin.common.MethodCall
@@ -21,13 +20,12 @@ import java.io.File
 
 class MainActivity : FlutterActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
-        val splash = installSplashScreen()
         super.onCreate(savedInstanceState)
-        // The system splash otherwise holds the mark until Dart draws.
-        splash.setKeepOnScreenCondition { false }
-        splash.setOnExitAnimationListener { screen ->
-            screen.remove()
-            updateSystemUiOverlays()
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            splashScreen.setOnExitAnimationListener { view ->
+                view.remove()
+                updateSystemUiOverlays()
+            }
         }
     }
 
