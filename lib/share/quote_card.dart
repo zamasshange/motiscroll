@@ -4,6 +4,7 @@ import 'package:intl/intl.dart' show Bidi;
 import '../data/models.dart';
 import '../l10n/languages.dart';
 import '../theme/tokens.dart';
+import '../widgets/chrome.dart';
 import '../widgets/generated_cover.dart';
 
 const shareStoryWidth = 1080.0;
@@ -180,6 +181,7 @@ class QuoteCardWidget extends StatelessWidget {
     required this.format,
     required this.language,
     this.translatedLabel = 'Translated',
+    this.portraitUrl,
   });
 
   final Item item;
@@ -187,6 +189,7 @@ class QuoteCardWidget extends StatelessWidget {
   final ShareFormat format;
   final String language;
   final String translatedLabel;
+  final String? portraitUrl;
 
   @override
   Widget build(BuildContext context) {
@@ -201,7 +204,7 @@ class QuoteCardWidget extends StatelessWidget {
     final direction = languageByCode(language)?.direction ?? TextDirection.ltr;
     final innerWidth = size.width - pad * 2;
     final innerHeight = size.height - top - bottom;
-    final reserved = template == ShareTemplate.minimal ? 160.0 : 220.0;
+    final reserved = template == ShareTemplate.minimal ? 360.0 : 420.0;
     final firstFit = fitQuoteFont(
       text: item.text,
       direction: direction,
@@ -250,55 +253,66 @@ class QuoteCardWidget extends StatelessWidget {
                         ),
                       ),
                     if (item.isTranslated) SizedBox(height: tall ? 8 : 16),
+                    _TopMark(item: item, portraitUrl: portraitUrl),
+                    const SizedBox(height: 28),
                     Expanded(
-                      child: Center(
-                        child: Text(
-                          item.text,
-                          key: const Key('quote-card-quote'),
-                          textAlign: TextAlign.center,
-                          style: _quoteStyle(
-                            firstFit.fontSize,
-                            language,
-                            quoteColor,
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            item.text,
+                            key: const Key('quote-card-quote'),
+                            textAlign: TextAlign.center,
+                            style: _quoteStyle(
+                              firstFit.fontSize,
+                              language,
+                              quoteColor,
+                            ),
                           ),
-                        ),
+                          SizedBox(height: tall ? 18 : 28),
+                          Text(
+                            '— ${item.author}',
+                            key: const Key('quote-card-author'),
+                            textAlign: TextAlign.center,
+                            textDirection: mixedDirection(
+                              item.author,
+                              direction,
+                            ),
+                            style: TextStyle(
+                              fontFamily: 'DMSans',
+                              fontFamilyFallback: shareFontFallbacks,
+                              fontSize: (firstFit.fontSize * 0.62).clamp(
+                                32,
+                                46,
+                              ),
+                              height: 1.25,
+                              fontWeight: FontWeight.w600,
+                              color: quoteColor,
+                              decoration: TextDecoration.none,
+                            ),
+                          ),
+                          const SizedBox(height: 10),
+                          Text(
+                            item.source.line,
+                            key: const Key('quote-card-source'),
+                            textAlign: TextAlign.center,
+                            textDirection: mixedDirection(
+                              item.source.line,
+                              direction,
+                            ),
+                            style: TextStyle(
+                              fontFamily: 'DMSans',
+                              fontFamilyFallback: shareFontFallbacks,
+                              fontSize: 22,
+                              height: 1.3,
+                              color: metaColor,
+                              decoration: TextDecoration.none,
+                            ),
+                          ),
+                        ],
                       ),
                     ),
-                    SizedBox(height: tall ? 16 : 24),
-                    Text(
-                      '— ${item.author}',
-                      key: const Key('quote-card-author'),
-                      textAlign: TextAlign.center,
-                      textDirection: mixedDirection(item.author, direction),
-                      style: TextStyle(
-                        fontFamily: 'DMSans',
-                        fontFamilyFallback: shareFontFallbacks,
-                        fontSize: 22,
-                        height: 1.3,
-                        fontWeight: FontWeight.w600,
-                        color: quoteColor,
-                        decoration: TextDecoration.none,
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      item.source.line,
-                      key: const Key('quote-card-source'),
-                      textAlign: TextAlign.center,
-                      textDirection: mixedDirection(
-                        item.source.line,
-                        direction,
-                      ),
-                      style: TextStyle(
-                        fontFamily: 'DMSans',
-                        fontFamilyFallback: shareFontFallbacks,
-                        fontSize: 16,
-                        height: 1.3,
-                        color: metaColor,
-                        decoration: TextDecoration.none,
-                      ),
-                    ),
-                    SizedBox(height: tall ? 16 : 32),
+                    SizedBox(height: tall ? 16 : 28),
                     Directionality(
                       textDirection: TextDirection.ltr,
                       child: _Wordmark(light: light),
@@ -344,6 +358,66 @@ class _Background extends StatelessWidget {
           ],
         );
     }
+  }
+}
+
+class _TopMark extends StatelessWidget {
+  const _TopMark({required this.item, this.portraitUrl});
+
+  final Item item;
+  final String? portraitUrl;
+
+  static const size = 132.0;
+
+  @override
+  Widget build(BuildContext context) {
+    final own = item.imageUrl;
+    final url = (own != null && own.isNotEmpty) ? own : portraitUrl;
+    final radius = BorderRadius.circular(size * 0.22);
+    if (url != null && url.isNotEmpty) {
+      return ClipRRect(
+        key: const Key('quote-card-portrait'),
+        borderRadius: radius,
+        child: Image.network(
+          url,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          headers: imageHeaders,
+          errorBuilder: (_, _, _) => const _AppIcon(size: size),
+        ),
+      );
+    }
+    return const _AppIcon(size: size);
+  }
+}
+
+class _AppIcon extends StatelessWidget {
+  const _AppIcon({required this.size});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const Key('quote-card-app-icon'),
+      width: size,
+      height: size,
+      decoration: BoxDecoration(
+        color: const Color(0xFF0B0B0D),
+        borderRadius: BorderRadius.circular(size * 0.22),
+      ),
+      alignment: Alignment.center,
+      child: ColorFiltered(
+        colorFilter: const ColorFilter.mode(kCream, BlendMode.srcIn),
+        child: Image.asset(
+          'assets/images/mark.png',
+          width: size * 0.62,
+          height: size * 0.62,
+          filterQuality: FilterQuality.high,
+        ),
+      ),
+    );
   }
 }
 

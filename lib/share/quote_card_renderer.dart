@@ -9,6 +9,7 @@ import 'package:flutter/services.dart';
 import 'package:path_provider/path_provider.dart';
 
 import '../data/models.dart';
+import '../widgets/chrome.dart';
 import 'quote_card.dart';
 import 'share_bridge.dart';
 
@@ -73,6 +74,7 @@ class QuoteCardRenderer {
     required ShareFormat format,
     required String language,
     required String translatedLabel,
+    String? portraitUrl,
   }) async {
     final key = shareCacheKey(
       itemId: item.id,
@@ -89,6 +91,7 @@ class QuoteCardRenderer {
       format: format,
       language: language,
       translatedLabel: translatedLabel,
+      portraitUrl: portraitUrl,
     );
     _cache[cacheId] = bytes;
 
@@ -118,6 +121,7 @@ class QuoteCardRenderer {
     required ShareFormat format,
     required String language,
     required String translatedLabel,
+    String? portraitUrl,
   }) {
     return _capture(
       context: context,
@@ -126,6 +130,7 @@ class QuoteCardRenderer {
       format: format,
       language: language,
       translatedLabel: translatedLabel,
+      portraitUrl: portraitUrl,
     );
   }
 
@@ -136,12 +141,25 @@ class QuoteCardRenderer {
     required ShareFormat format,
     required String language,
     required String translatedLabel,
+    String? portraitUrl,
   }) async {
     await ensureFonts();
     if (!context.mounted) {
       throw StateError('Share card context went away.');
     }
     await precacheImage(const AssetImage('assets/images/mark.png'), context);
+    final own = item.imageUrl;
+    final portrait = (own != null && own.isNotEmpty) ? own : portraitUrl;
+    if (portrait != null && portrait.isNotEmpty && context.mounted) {
+      try {
+        await precacheImage(
+          NetworkImage(portrait, headers: imageHeaders),
+          context,
+        );
+      } on Object {
+        // The card falls back to the app icon when the portrait cannot load.
+      }
+    }
     if (!context.mounted) {
       throw StateError('Share card context went away.');
     }
@@ -171,6 +189,7 @@ class QuoteCardRenderer {
                   format: format,
                   language: language,
                   translatedLabel: translatedLabel,
+                  portraitUrl: portraitUrl,
                 ),
               ),
             ),

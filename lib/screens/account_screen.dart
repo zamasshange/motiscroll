@@ -13,6 +13,7 @@ class AccountScreen extends StatefulWidget {
 }
 
 class _AccountScreenState extends State<AccountScreen> {
+  final _name = TextEditingController();
   final _email = TextEditingController();
   final _password = TextEditingController();
   var _busy = false;
@@ -21,6 +22,7 @@ class _AccountScreenState extends State<AccountScreen> {
 
   @override
   void dispose() {
+    _name.dispose();
     _email.dispose();
     _password.dispose();
     super.dispose();
@@ -38,14 +40,12 @@ class _AccountScreenState extends State<AccountScreen> {
     try {
       await action();
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(success)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(success)));
     } on AccountException catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(error.message)));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(error.message)));
     } on Exception {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -93,9 +93,16 @@ class _AccountScreenState extends State<AccountScreen> {
           if (signedIn) ...[
             const SizedBox(height: 8),
             Text(
-              state.accountLabel!,
-              style: sans(palette, 13, color: palette.textFaint),
+              state.accountName ?? state.accountLabel!,
+              style: serif(palette, 28, height: 1.15),
             ),
+            if (state.accountEmail != null) ...[
+              const SizedBox(height: 6),
+              Text(
+                state.accountEmail!,
+                style: sans(palette, 14, color: palette.textMuted),
+              ),
+            ],
             const SizedBox(height: 24),
             OutlineButton(
               label: 'Sign out',
@@ -121,16 +128,10 @@ class _AccountScreenState extends State<AccountScreen> {
             ),
           ] else ...[
             const SizedBox(height: 24),
-            PrimaryButton(
-              label: 'Continue with Google',
-              onPressed: _busy
-                  ? () {}
-                  : () => _run(
-                      () => linkGoogle(state),
-                      'Google is linked to this library.',
-                    ),
-            ),
-            const SizedBox(height: 20),
+            if (_creating) ...[
+              _Field(controller: _name, label: 'Name'),
+              const SizedBox(height: 12),
+            ],
             _Field(
               controller: _email,
               label: 'Email',
@@ -162,6 +163,7 @@ class _AccountScreenState extends State<AccountScreen> {
                               state,
                               _email.text.trim(),
                               _password.text,
+                              _name.text.trim(),
                             )
                           : signInWithEmailPassword(
                               state,
@@ -169,6 +171,16 @@ class _AccountScreenState extends State<AccountScreen> {
                               _password.text,
                             ),
                       _creating ? 'The account was created.' : 'Signed in.',
+                    ),
+            ),
+            const SizedBox(height: 12),
+            OutlineButton(
+              label: 'Continue with Google',
+              onPressed: _busy
+                  ? () {}
+                  : () => _run(
+                      () => linkGoogle(state),
+                      'Google is linked to this library.',
                     ),
             ),
             const SizedBox(height: 16),

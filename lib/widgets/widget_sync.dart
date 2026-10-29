@@ -1,5 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
+import 'dart:typed_data';
 
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter/widgets.dart';
 import 'package:home_widget/home_widget.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -8,6 +12,8 @@ import 'package:workmanager/workmanager.dart';
 import '../data/models.dart';
 import '../l10n/languages.dart';
 import 'widget_payload.dart';
+
+const _portraits = MethodChannel('motiscroll/portraits');
 
 /// Writes the versioned payload into the App Group / HomeWidget preferences.
 /// The widget extension never talks to the network. Failures stay quiet so a
@@ -27,13 +33,72 @@ class WidgetSyncService {
         );
       }
       await HomeWidget.setAppGroupId(widgetAppGroup);
-      await HomeWidget.saveWidgetData<String>(widgetPayloadKey, payload.encode());
+      await HomeWidget.saveWidgetData<String>(
+        widgetPayloadKey,
+        payload.encode(),
+      );
       await _update('QuoteWidgetProvider', 'MotiQuoteWidget');
       await _update('StreakWidgetProvider', 'MotiStreakWidget');
       await _update('SavedWidgetProvider', 'MotiSavedWidget');
       await _update('PoolWidgetProvider', 'MotiPoolWidget');
+      if (source != null) {
+        await _savePortraits(source);
+      }
     } on Object {
       return;
+    }
+  }
+
+  /// The widget extension never talks to the network. Portraits are written
+  /// into the App Group here, and the widget reads the file or draws the mark.
+  static Future<void> _savePortraits(List<WidgetSource> source) async {
+    if (kIsWeb || Platform.environment['FLUTTER_TEST'] == 'true') return;
+    final seen = <String>{};
+    var saved = 0;
+    for (final item in source) {
+      if (saved >= 40) break;
+      final url = item.imageUrl;
+      if (url == null || url.isEmpty || !seen.add(item.id)) continue;
+      final bytes = await _download(url);
+      if (bytes == null || bytes.isEmpty) continue;
+      try {
+        final ok = await _portraits.invokeMethod<bool>('save', {
+          'name': widgetPortraitName(item.id),
+          'bytes': bytes,
+        });
+        if (ok == true) saved += 1;
+      } on Object {
+        return;
+      }
+    }
+    if (saved == 0) return;
+    await _update('QuoteWidgetProvider', 'MotiQuoteWidget');
+    await _update('StreakWidgetProvider', 'MotiStreakWidget');
+    await _update('SavedWidgetProvider', 'MotiSavedWidget');
+    await _update('PoolWidgetProvider', 'MotiPoolWidget');
+  }
+
+  static Future<Uint8List?> _download(String url) async {
+    try {
+      final client = HttpClient();
+      final request = await client
+          .getUrl(Uri.parse(url))
+          .timeout(const Duration(seconds: 6));
+      request.headers.set(
+        HttpHeaders.userAgentHeader,
+        'MotiScroll/1.0 (educational app; freely licensed Wikimedia portraits)',
+      );
+      final response = await request.close().timeout(
+        const Duration(seconds: 6),
+      );
+      if (response.statusCode != 200) return null;
+      final builder = BytesBuilder(copy: false);
+      await for (final chunk in response) {
+        builder.add(chunk);
+      }
+      return builder.takeBytes();
+    } on Object {
+      return null;
     }
   }
 
@@ -107,8 +172,8 @@ WidgetPayload payloadForLibrary({
   required bool widgetsEnabled,
   required bool showSavedOnLockScreen,
 }) {
-  final content = contentLanguage ??
-      resolveContentLanguage(saved: null, device: device);
+  final content =
+      contentLanguage ?? resolveContentLanguage(saved: null, device: device);
   final ui = uiLanguage ?? content;
   if (!widgetsEnabled) {
     return widgetPayloadDisabled(

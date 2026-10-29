@@ -24,6 +24,7 @@ class PlannedNotification {
     required this.hour,
     required this.minute,
     this.status = 'scheduled',
+    this.imageUrl,
   });
 
   final String date;
@@ -37,6 +38,7 @@ class PlannedNotification {
   final int hour;
   final int minute;
   final String status;
+  final String? imageUrl;
 
   int get id => motiNotificationId(date, slot);
 
@@ -55,6 +57,7 @@ class PlannedNotification {
     'hour': hour,
     'minute': minute,
     'status': status,
+    'imageUrl': imageUrl,
   };
 
   factory PlannedNotification.fromJson(Map<String, dynamic> map) {
@@ -72,6 +75,7 @@ class PlannedNotification {
       hour: (map['hour'] as num?)?.toInt() ?? 9,
       minute: (map['minute'] as num?)?.toInt() ?? 30,
       status: map['status'] as String? ?? 'scheduled',
+      imageUrl: map['imageUrl'] as String?,
     );
   }
 }
@@ -88,6 +92,7 @@ class PlannerInput {
     required this.viewedToday,
     required this.language,
     required this.usualMood,
+    this.portraitOf,
     this.permissionGranted = true,
     this.notificationsEnabled = true,
     this.maxPerDay = maxNotificationsPerDayHardCap,
@@ -103,6 +108,7 @@ class PlannerInput {
   final bool viewedToday;
   final String language;
   final Mood? usualMood;
+  final String? Function(Item item)? portraitOf;
   final bool permissionGranted;
   final bool notificationsEnabled;
   final int maxPerDay;
@@ -180,6 +186,7 @@ class NotificationPlanner {
             payload: 'motiscroll://item/${item.id}?slot=${slot.name}&date=$key',
             hour: clock.hour,
             minute: clock.minute,
+            imageUrl: input.portraitOf?.call(item) ?? item.imageUrl,
           ),
         );
         blockedItems[item.id] = date;
@@ -253,13 +260,15 @@ class NotificationPlanner {
     ];
     final ranked = [...pool]
       ..sort((a, b) {
-        final score = _score(a, input, slot, offset).compareTo(
-          _score(b, input, slot, offset),
-        );
+        final score = _score(
+          a,
+          input,
+          slot,
+          offset,
+        ).compareTo(_score(b, input, slot, offset));
         if (score != 0) return score;
-        return hashString('$dateKey:${slot.name}:${a.id}').compareTo(
-          hashString('$dateKey:${slot.name}:${b.id}'),
-        );
+        return hashString('$dateKey:${slot.name}:${a.id}')
+            .compareTo(hashString('$dateKey:${slot.name}:${b.id}'));
       });
     for (final item in ranked) {
       if (_itemBlocked(item.id, date, blockedItems)) continue;

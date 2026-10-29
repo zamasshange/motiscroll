@@ -21,6 +21,7 @@
 		E7W100022F20000100C636F2 /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = E7W100F02F20000100C636F2 /* Localizable.strings */; };
 		E7W100032F20000100C636F2 /* PlayfairDisplay-SemiBold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E7W100132F20000100C636F2 /* PlayfairDisplay-SemiBold.ttf */; };
 		E7W100042F20000100C636F2 /* DMSans-Medium.ttf in Resources */ = {isa = PBXBuildFile; fileRef = E7W100142F20000100C636F2 /* DMSans-Medium.ttf */; };
+		E7W100062F20000100C636F2 /* mark.png in Resources */ = {isa = PBXBuildFile; fileRef = E7W100162F20000100C636F2 /* mark.png */; };
 		E7W100052F20000100C636F2 /* MotiWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = E7W100152F20000100C636F2 /* MotiWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
@@ -89,6 +90,7 @@
 		E7W100122F20000100C636F2 /* MotiWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MotiWidgets.entitlements; sourceTree = "<group>"; };
 		E7W100132F20000100C636F2 /* PlayfairDisplay-SemiBold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "PlayfairDisplay-SemiBold.ttf"; sourceTree = "<group>"; };
 		E7W100142F20000100C636F2 /* DMSans-Medium.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; path = "DMSans-Medium.ttf"; sourceTree = "<group>"; };
+		E7W100162F20000100C636F2 /* mark.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = mark.png; sourceTree = "<group>"; };
 		E7W100152F20000100C636F2 /* MotiWidgets.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = MotiWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		E7W100302F20000100C636F2 /* af */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = af; path = af.lproj/Localizable.strings; sourceTree = "<group>"; };
 		E7W100312F20000100C636F2 /* ar */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = ar; path = ar.lproj/Localizable.strings; sourceTree = "<group>"; };
@@ -195,6 +197,7 @@
 				E7W100122F20000100C636F2 /* MotiWidgets.entitlements */,
 				E7W100132F20000100C636F2 /* PlayfairDisplay-SemiBold.ttf */,
 				E7W100142F20000100C636F2 /* DMSans-Medium.ttf */,
+				E7W100162F20000100C636F2 /* mark.png */,
 				E7W100F02F20000100C636F2 /* Localizable.strings */,
 			);
 			path = MotiWidgets;
@@ -353,6 +356,7 @@
 				E7W100022F20000100C636F2 /* Localizable.strings in Resources */,
 				E7W100032F20000100C636F2 /* PlayfairDisplay-SemiBold.ttf in Resources */,
 				E7W100042F20000100C636F2 /* DMSans-Medium.ttf in Resources */,
+				E7W100062F20000100C636F2 /* mark.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

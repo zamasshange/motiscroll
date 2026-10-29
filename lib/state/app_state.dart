@@ -82,6 +82,8 @@ class AppState extends ChangeNotifier {
   String? catalogError;
   String? accountError;
   String? accountLabel;
+  String? accountName;
+  String? accountEmail;
   Map<Field, int> collectionCounts = const {};
   List<AuthorProfile> authors = const [];
   ItemRepository? repository;
@@ -103,6 +105,12 @@ class AppState extends ChangeNotifier {
     return authors
         .where((author) => !quoted.contains(personKey(author.name)))
         .toList();
+  }
+
+  String? _portraitUrl(Item item) {
+    final own = item.imageUrl;
+    if (own != null && own.isNotEmpty) return own;
+    return portraitFor(item.author)?.imageUrl;
   }
 
   /// Portrait already stored for this speaker, when the line itself has none.
@@ -433,7 +441,13 @@ class AppState extends ChangeNotifier {
       widgetsEnabled: widgetsEnabled,
       showSavedOnLockScreen: showSavedOnLockScreen,
     );
-    final source = [for (final item in _items) widgetSourceFromItem(item)];
+    final source = [
+      for (final item in _items)
+        widgetSourceFromItem(
+          item,
+          imageUrl: portraitFor(item.author)?.imageUrl,
+        ),
+    ];
     unawaited(WidgetSyncService.publish(payload, source: source));
   }
 
@@ -558,6 +572,11 @@ class AppState extends ChangeNotifier {
       language: contentLanguage ?? 'en',
       uiLanguage: uiLanguage ?? contentLanguage ?? 'en',
       usualMood: usualMood,
+      portraitOf: (item) {
+        final own = item.imageUrl;
+        if (own != null && own.isNotEmpty) return own;
+        return portraitFor(item.author)?.imageUrl;
+      },
       notificationsEnabled: notificationsEnabled,
       maxPerDay: maxNotificationsPerDay,
     );
@@ -602,6 +621,7 @@ class AppState extends ChangeNotifier {
       body: notificationBody(chosen.first.text, chosen.first.author),
       payload: 'motiscroll://item/${chosen.first.id}',
       uiLang: lang,
+      imageUrl: _portraitUrl(chosen.first),
     );
     if (chosen.length == 1) return 1;
     await service.showIn(
@@ -611,6 +631,7 @@ class AppState extends ChangeNotifier {
       payload: 'motiscroll://item/${chosen[1].id}',
       uiLang: lang,
       delay: const Duration(seconds: 12),
+      imageUrl: _portraitUrl(chosen[1]),
     );
     return 2;
   }

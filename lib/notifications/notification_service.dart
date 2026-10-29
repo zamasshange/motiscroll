@@ -1,5 +1,9 @@
+import 'dart:io';
+import 'dart:typed_data';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:intl/intl.dart';
@@ -195,6 +199,7 @@ class NotificationService {
     required String language,
     required String uiLanguage,
     required Mood? usualMood,
+    String? Function(Item item)? portraitOf,
     required bool notificationsEnabled,
     required int maxPerDay,
   }) async {
@@ -241,6 +246,7 @@ class NotificationService {
           viewedToday: viewedToday,
           language: language,
           usualMood: usualMood,
+          portraitOf: portraitOf,
           permissionGranted: granted,
           notificationsEnabled: notificationsEnabled,
           maxPerDay: maxPerDay,
@@ -264,12 +270,17 @@ class NotificationService {
 
   Future<List<PlannedNotification>> loadPlan() => _store.loadPlan();
 
-  NotificationDetails _bannerDetails(String uiLang, String body) {
+  NotificationDetails _bannerDetails(
+    String uiLang,
+    String body, {
+    String? imagePath,
+  }) {
     return NotificationDetails(
       android: AndroidNotificationDetails(
         'motiscroll_preview',
         notifyUi(uiLang, 'notifications'),
         icon: '@drawable/ic_stat_motiscroll',
+        largeIcon: imagePath == null ? null : FilePathAndroidBitmap(imagePath),
         channelShowBadge: false,
         importance: Importance.high,
         priority: Priority.high,
@@ -292,6 +303,7 @@ class NotificationService {
     required String body,
     required String payload,
     int? fireAtMillis,
+    String? imagePath,
   }) async {
     if (kIsWeb || defaultTargetPlatform != TargetPlatform.iOS) return false;
     try {
@@ -301,6 +313,7 @@ class NotificationService {
         'body': body,
         'payload': payload,
         'fireAtMillis': fireAtMillis,
+        'imagePath': imagePath,
       });
       return true;
     } on Object {
@@ -314,9 +327,17 @@ class NotificationService {
     required String body,
     required String payload,
     required String uiLang,
+    String? imageUrl,
   }) async {
     await initialize();
-    if (await _showOnIos(id: id, title: title, body: body, payload: payload)) {
+    final imagePath = await _portraitPath(imageUrl);
+    if (await _showOnIos(
+      id: id,
+      title: title,
+      body: body,
+      payload: payload,
+      imagePath: imagePath,
+    )) {
       return;
     }
     await _plugin.show(
@@ -324,7 +345,7 @@ class NotificationService {
       title: title,
       body: body,
       payload: payload,
-      notificationDetails: _bannerDetails(uiLang, body),
+      notificationDetails: _bannerDetails(uiLang, body, imagePath: imagePath),
     );
   }
 
@@ -335,16 +356,19 @@ class NotificationService {
     required String payload,
     required String uiLang,
     required Duration delay,
+    String? imageUrl,
   }) async {
     await initialize();
     await prepareZones();
     final when = tz.TZDateTime.now(tz.local).add(delay);
+    final imagePath = await _portraitPath(imageUrl);
     if (await _showOnIos(
       id: id,
       title: title,
       body: body,
       payload: payload,
       fireAtMillis: when.millisecondsSinceEpoch,
+      imagePath: imagePath,
     )) {
       return;
     }
@@ -355,7 +379,7 @@ class NotificationService {
       payload: payload,
       scheduledDate: when,
       androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
-      notificationDetails: _bannerDetails(uiLang, body),
+      notificationDetails: _bannerDetails(uiLang, body, imagePath: imagePath),
     );
   }
 
@@ -371,12 +395,14 @@ class NotificationService {
       minute: row.minute,
     );
     if (!when.isAfter(tz.TZDateTime.now(location))) return;
+    final imagePath = await _portraitPath(row.imageUrl);
     if (await _showOnIos(
       id: row.id,
       title: row.title,
       body: row.body,
       payload: row.payload,
       fireAtMillis: when.millisecondsSinceEpoch,
+      imagePath: imagePath,
     )) {
       return;
     }
@@ -403,6 +429,9 @@ class NotificationService {
                 : 'channelEveningDetail',
           ),
           icon: '@drawable/ic_stat_motiscroll',
+          largeIcon: imagePath == null
+              ? null
+              : FilePathAndroidBitmap(imagePath),
           channelShowBadge: false,
           styleInformation: BigTextStyleInformation(row.body),
         ),
@@ -419,6 +448,36 @@ class NotificationService {
         ),
       ),
     );
+  }
+
+  Future<String?> _portraitPath(String? url) async {
+    if (url == null || url.isEmpty || kIsWeb) return null;
+    try {
+      final client = HttpClient();
+      final request = await client
+          .getUrl(Uri.parse(url))
+          .timeout(const Duration(seconds: 6));
+      request.headers.set(
+        HttpHeaders.userAgentHeader,
+        'MotiScroll/1.0 (educational app; freely licensed Wikimedia portraits)',
+      );
+      final response = await request.close().timeout(
+        const Duration(seconds: 6),
+      );
+      if (response.statusCode != 200) return null;
+      final builder = BytesBuilder(copy: false);
+      await for (final chunk in response) {
+        builder.add(chunk);
+      }
+      final bytes = builder.takeBytes();
+      if (bytes.isEmpty) return null;
+      final dir = await getTemporaryDirectory();
+      final file = File('${dir.path}/notify_${url.hashCode.abs()}.jpg');
+      await file.writeAsBytes(bytes, flush: true);
+      return file.path;
+    } on Object {
+      return null;
+    }
   }
 }
 

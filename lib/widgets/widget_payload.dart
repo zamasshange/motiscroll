@@ -19,6 +19,13 @@ const widgetPoolSize = 15;
 const widgetSavedLimit = 20;
 const widgetPayloadBudget = 200 * 1024;
 const widgetAppGroup = 'group.com.example.motiScroll';
+
+/// File name the app writes and the widget reads. No path characters.
+String widgetPortraitName(String id) {
+  final safe = id.replaceAll(RegExp(r'[^A-Za-z0-9._-]'), '_');
+  return '${safe.isEmpty ? 'line' : safe}.jpg';
+}
+
 const widgetPayloadKey = 'widget_payload';
 const widgetSourceKey = 'widget_source_v1';
 const widgetRefreshTask = 'moti-widget-refresh';
@@ -90,7 +97,10 @@ class WidgetQuote {
       isTranslated: raw['isTranslated'] == true,
       field: raw['field'] as String? ?? 'other',
       colors: colors is List
-          ? [for (final color in colors) if (color is String) color]
+          ? [
+              for (final color in colors)
+                if (color is String) color,
+            ]
           : const ['#17191E', '#3A4150'],
       takeaway: raw['takeaway'] as String?,
     );
@@ -107,6 +117,7 @@ class WidgetSource {
     required this.moods,
     required this.sourceTitle,
     this.sourceYear,
+    this.imageUrl,
   });
 
   final String id;
@@ -117,6 +128,7 @@ class WidgetSource {
   final List<String> moods;
   final String sourceTitle;
   final int? sourceYear;
+  final String? imageUrl;
 
   Map<String, Object?> toJson() => {
     'id': id,
@@ -127,6 +139,7 @@ class WidgetSource {
     'moods': moods,
     'sourceTitle': sourceTitle,
     'sourceYear': sourceYear,
+    'imageUrl': imageUrl,
   };
 
   static WidgetSource? fromJson(Object? raw) {
@@ -143,15 +156,21 @@ class WidgetSource {
       authorRole: raw['authorRole'] as String? ?? '',
       field: raw['field'] as String? ?? 'other',
       moods: moods is List
-          ? [for (final mood in moods) if (mood is String) mood]
+          ? [
+              for (final mood in moods)
+                if (mood is String) mood,
+            ]
           : const [],
       sourceTitle: raw['sourceTitle'] as String? ?? '',
       sourceYear: (raw['sourceYear'] as num?)?.toInt(),
+      imageUrl: raw['imageUrl'] as String?,
     );
   }
 }
 
-WidgetSource widgetSourceFromItem(Item item) {
+WidgetSource widgetSourceFromItem(Item item, {String? imageUrl}) {
+  final own = item.imageUrl;
+  final portrait = (own != null && own.isNotEmpty) ? own : imageUrl;
   return WidgetSource(
     id: item.id,
     text: item.text,
@@ -161,6 +180,7 @@ WidgetSource widgetSourceFromItem(Item item) {
     moods: [for (final mood in item.moods) mood.name],
     sourceTitle: item.source.title,
     sourceYear: item.source.year,
+    imageUrl: portrait,
   );
 }
 
@@ -329,12 +349,12 @@ WidgetPayload buildWidgetPayload({
     lastActiveDate: lastActiveDate,
     localizedStrings: widgetRuntimeStrings(uiLanguage),
     daily: daily,
-    moodPools: _namedPools(pool, (quote) => _moodsOf(items, quote.itemId), 'mood'),
-    fieldPools: _namedPools(
+    moodPools: _namedPools(
       pool,
-      (quote) => [quote.field],
-      'field',
+      (quote) => _moodsOf(items, quote.itemId),
+      'mood',
     ),
+    fieldPools: _namedPools(pool, (quote) => [quote.field], 'field'),
     saved: saved,
     followedFields: followedFields,
     widgetsEnabled: true,
@@ -519,8 +539,10 @@ WidgetPayload? payloadFromStored({
       user = const {};
     }
   }
-  final language = languageByCode(user['contentLanguage'] as String?)?.code ?? 'en';
-  final uiLanguage = languageByCode(user['uiLanguage'] as String?)?.code ?? language;
+  final language =
+      languageByCode(user['contentLanguage'] as String?)?.code ?? 'en';
+  final uiLanguage =
+      languageByCode(user['uiLanguage'] as String?)?.code ?? language;
   if (user['widgetsEnabled'] == false) {
     return widgetPayloadDisabled(
       now: now,
@@ -533,9 +555,7 @@ WidgetPayload? payloadFromStored({
   try {
     final decoded = jsonDecode(sourceJson);
     if (decoded is! List) return null;
-    sources = [
-      for (final row in decoded) ?WidgetSource.fromJson(row),
-    ];
+    sources = [for (final row in decoded) ?WidgetSource.fromJson(row)];
   } on FormatException {
     return null;
   }
@@ -550,10 +570,16 @@ WidgetPayload? payloadFromStored({
     streakCount: (user['streak'] as num?)?.toInt() ?? 0,
     lastActiveDate: user['lastStreakDate'] as String?,
     savedIds: saved is List
-        ? [for (final id in saved) if (id is String) id]
+        ? [
+            for (final id in saved)
+              if (id is String) id,
+          ]
         : const [],
     followedFields: followed is List
-        ? [for (final field in followed) if (field is String) field]
+        ? [
+            for (final field in followed)
+              if (field is String) field,
+          ]
         : const [],
     showSavedOnLockScreen: user['showSavedOnLockScreen'] == true,
   );

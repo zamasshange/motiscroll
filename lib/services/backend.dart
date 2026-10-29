@@ -163,14 +163,17 @@ Future<void> _attachBackend(AppState state) async {
         // Sign-in below retries the library read.
       }
     }
-    try {
-      await FirebaseAuth.instance.signInAnonymously().timeout(
-        const Duration(seconds: 8),
-      );
-    } on FirebaseAuthException catch (error) {
-      state.accountError = _authMessage(error);
-    } on TimeoutException {
-      // A previous session can still have a user; the uid check below decides.
+    final existing = FirebaseAuth.instance.currentUser;
+    if (existing == null || existing.isAnonymous) {
+      try {
+        await FirebaseAuth.instance.signInAnonymously().timeout(
+          const Duration(seconds: 8),
+        );
+      } on FirebaseAuthException catch (error) {
+        state.accountError = _authMessage(error);
+      } on TimeoutException {
+        // A previous session can still have a user; the uid check below decides.
+      }
     }
     final uid = FirebaseAuth.instance.currentUser?.uid;
     if (uid == null) {
@@ -183,7 +186,14 @@ Future<void> _attachBackend(AppState state) async {
     state.remote = true;
     state.repository ??= FirestoreItemRepository(FirebaseFirestore.instance);
     state.directory = FirestoreUserDirectory(FirebaseFirestore.instance, uid);
-    state.accountLabel = 'Saved on this device';
+    final signedIn = FirebaseAuth.instance.currentUser;
+    if (signedIn != null && !signedIn.isAnonymous) {
+      _rememberAccount(state, signedIn);
+    } else {
+      state.accountName = null;
+      state.accountEmail = null;
+      state.accountLabel = 'Saved on this device';
+    }
     state.accountError = null;
     state.syncView = (itemId) async {
       final result = await FirebaseFunctions.instance
@@ -255,8 +265,13 @@ Future<void> createEmailAccount(
   AppState state,
   String email,
   String password,
+  String name,
 ) async {
   await _ensureReady(state);
+  final trimmed = name.trim();
+  if (trimmed.length < 2) {
+    throw AccountException('Enter the name for this account.');
+  }
   _requireEmailPassword(email, password);
   try {
     final credential = EmailAuthProvider.credential(
@@ -275,6 +290,9 @@ Future<void> createEmailAccount(
   } on FirebaseAuthException catch (error) {
     throw AccountException(_authMessage(error));
   }
+  final created = FirebaseAuth.instance.currentUser;
+  await created?.updateDisplayName(trimmed);
+  await created?.reload();
   await _afterAuth(state);
 }
 
@@ -324,10 +342,17 @@ Future<void> _afterAuth(AppState state) async {
     state.directory = FirestoreUserDirectory(FirebaseFirestore.instance, uid);
     await state.refreshCatalog();
   }
-  state.accountLabel = signedIn?.email ?? 'Signed in';
+  if (signedIn != null) _rememberAccount(state, signedIn);
   state.accountError = null;
   state.notifyAccount();
   await state.syncNotifications();
+}
+
+void _rememberAccount(AppState state, User user) {
+  final name = user.displayName?.trim();
+  state.accountName = name == null || name.isEmpty ? null : name;
+  state.accountEmail = user.email;
+  state.accountLabel = state.accountName ?? user.email ?? 'Signed in';
 }
 
 String _authMessage(FirebaseAuthException error) {

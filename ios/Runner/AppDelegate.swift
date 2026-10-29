@@ -43,6 +43,13 @@ import workmanager_apple
     notify.setMethodCallHandler { call, result in
       NotifyChannel.handle(call, result: result)
     }
+    let portraits = FlutterMethodChannel(
+      name: "motiscroll/portraits",
+      binaryMessenger: engineBridge.applicationRegistrar.messenger()
+    )
+    portraits.setMethodCallHandler { call, result in
+      PortraitChannel.handle(call, result: result)
+    }
   }
 
   override func userNotificationCenter(
@@ -87,7 +94,13 @@ private enum NotifyChannel {
       "presentList": true,
       "payload": payload,
     ]
-    let branded = brandedContent(content, title: title, body: body)
+    let imagePath = args["imagePath"] as? String
+    let branded = brandedContent(
+      content,
+      title: title,
+      body: body,
+      imagePath: imagePath
+    )
     let trigger = triggerFor(fireAtMillis: fireAt)
     let request = UNNotificationRequest(
       identifier: "\(id)",
@@ -127,10 +140,11 @@ private enum NotifyChannel {
   static func brandedContent(
     _ content: UNMutableNotificationContent,
     title: String,
-    body: String
+    body: String,
+    imagePath: String?
   ) -> UNNotificationContent {
     guard #available(iOS 15.0, *),
-          let data = iconData()
+          let data = portraitData(imagePath) ?? iconData()
     else { return content }
     let avatar = INImage(imageData: data)
     let sender = INPerson(
@@ -160,6 +174,14 @@ private enum NotifyChannel {
     return updated
   }
 
+  static func portraitData(_ path: String?) -> Data? {
+    guard let path, !path.isEmpty else { return nil }
+    guard let data = try? Data(contentsOf: URL(fileURLWithPath: path)),
+          !data.isEmpty
+    else { return nil }
+    return data
+  }
+
   static func iconData() -> Data? {
     let names = ["AppIcon60x60@3x", "AppIcon60x60@2x", "AppIcon60x60"]
     for name in names {
@@ -169,6 +191,40 @@ private enum NotifyChannel {
       }
     }
     return nil
+  }
+}
+
+private enum PortraitChannel {
+  static let group = "group.com.example.motiScroll"
+
+  static func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    guard call.method == "save" else {
+      result(FlutterMethodNotImplemented)
+      return
+    }
+    let args = call.arguments as? [String: Any] ?? [:]
+    guard let name = args["name"] as? String,
+          name.range(of: "^[A-Za-z0-9._-]+\\.jpg$", options: .regularExpression) != nil,
+          let bytes = args["bytes"] as? FlutterStandardTypedData,
+          !bytes.data.isEmpty,
+          let container = FileManager.default.containerURL(
+            forSecurityApplicationGroupIdentifier: group
+          )
+    else {
+      result(false)
+      return
+    }
+    let dir = container.appendingPathComponent("portraits", isDirectory: true)
+    do {
+      try FileManager.default.createDirectory(
+        at: dir,
+        withIntermediateDirectories: true
+      )
+      try bytes.data.write(to: dir.appendingPathComponent(name), options: .atomic)
+      result(true)
+    } catch {
+      result(false)
+    }
   }
 }
 

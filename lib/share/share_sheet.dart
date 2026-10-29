@@ -69,6 +69,12 @@ class _ShareSheetState extends State<ShareSheet> {
   var _whatsAppHintShown = false;
   String? _status;
 
+  String? _portrait(BuildContext context) {
+    final own = widget.item.imageUrl;
+    if (own != null && own.isNotEmpty) return own;
+    return AppScope.of(context).portraitFor(widget.item.author)?.imageUrl;
+  }
+
   @override
   void initState() {
     super.initState();
@@ -190,6 +196,7 @@ class _ShareSheetState extends State<ShareSheet> {
                                               content,
                                               'translated',
                                             ),
+                                            portraitUrl: _portrait(context),
                                           ),
                                         ),
                                     ],
@@ -407,6 +414,7 @@ class _ShareSheetState extends State<ShareSheet> {
         format: format,
         language: content,
         translatedLabel: widgetString(content, 'translated'),
+        portraitUrl: _portrait(context),
       );
       if (!mounted) return;
       setState(() => _busy = false);

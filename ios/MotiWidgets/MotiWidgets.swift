@@ -1,6 +1,7 @@
 import WidgetKit
 import SwiftUI
 import AppIntents
+import UIKit
 
 // Reads only the JSON the app writes into the App Group. No network, no Firebase.
 // Add this file, the font files, and the .lproj folders to the MotiWidgets extension
@@ -81,6 +82,34 @@ struct MotiPayload: Codable {
         let day = daily.first { $0.date == key } ?? daily.first
         return day?.quote(for: family)
     }
+}
+
+private func portraitFileName(_ id: String) -> String {
+    let allowed = CharacterSet.alphanumerics.union(CharacterSet(charactersIn: "._-"))
+    let safe = String(id.unicodeScalars.map { scalar in
+        allowed.contains(scalar) ? Character(scalar) : "_"
+    })
+    return (safe.isEmpty ? "line" : safe) + ".jpg"
+}
+
+private func portraitImage(_ id: String) -> UIImage? {
+    guard let container = FileManager.default.containerURL(
+        forSecurityApplicationGroupIdentifier: appGroup
+    ) else { return nil }
+    let file = container
+        .appendingPathComponent("portraits", isDirectory: true)
+        .appendingPathComponent(portraitFileName(id))
+    guard let data = try? Data(contentsOf: file),
+          let image = UIImage(data: data)
+    else { return nil }
+    return image
+}
+
+private func bundledMark() -> UIImage? {
+    guard let url = Bundle.main.url(forResource: "mark", withExtension: "png"),
+          let data = try? Data(contentsOf: url)
+    else { return nil }
+    return UIImage(data: data)
 }
 
 enum WidgetStore {
@@ -188,6 +217,59 @@ struct QuoteView: View {
         }
     }
 
+    private var showsPortrait: Bool {
+        switch family {
+        case .systemSmall, .systemMedium, .systemLarge:
+            return true
+        default:
+            return false
+        }
+    }
+
+    private var portraitSide: CGFloat {
+        switch family {
+        case .systemLarge: return 52
+        case .systemMedium: return 44
+        default: return 36
+        }
+    }
+
+    private var authorSize: CGFloat {
+        switch family {
+        case .systemSmall: return 15
+        case .accessoryRectangular: return 13
+        default: return 18
+        }
+    }
+
+    private func portrait(_ quote: MotiQuote) -> some View {
+        let side = portraitSide
+        return Group {
+            if let image = portraitImage(quote.itemId) {
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(width: side, height: side)
+                    .clipShape(RoundedRectangle(cornerRadius: side * 0.22, style: .continuous))
+            } else {
+                ZStack {
+                    RoundedRectangle(cornerRadius: side * 0.22, style: .continuous)
+                        .fill(Color(red: 0.043, green: 0.043, blue: 0.051))
+                    if let mark = bundledMark() {
+                        Image(uiImage: mark)
+                            .resizable()
+                            .renderingMode(.template)
+                            .foregroundStyle(Color(red: 0.957, green: 0.945, blue: 0.918))
+                            .scaledToFit()
+                            .frame(width: side * 0.62, height: side * 0.62)
+                    }
+                }
+                .frame(width: side, height: side)
+            }
+        }
+        .accessibilityHidden(true)
+    }
+
     var body: some View {
         content
             .environment(\.layoutDirection, entry.direction)
@@ -209,6 +291,9 @@ struct QuoteView: View {
                 .minimumScaleFactor(0.7)
         } else if let quote = entry.quote {
             VStack(alignment: .leading, spacing: 8) {
+                if showsPortrait {
+                    portrait(quote)
+                }
                 if entry.showField {
                     Text(fieldName(quote.field))
                         .font(labelFont(12))
@@ -223,9 +308,9 @@ struct QuoteView: View {
                     .widgetAccentable()
                     .lineLimit(lineLimit)
                     .minimumScaleFactor(0.7)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+                    .frame(maxWidth: .infinity, alignment: .topLeading)
                 Text(quote.authorName)
-                    .font(labelFont(13))
+                    .font(labelFont(authorSize))
                     .foregroundStyle(Color(red: 0.88, green: 0.48, blue: 0.29))
                     .widgetAccentable()
                 if entry.showSource, !quote.sourceTitle.isEmpty {
@@ -245,6 +330,7 @@ struct QuoteView: View {
                         .foregroundStyle(Color(red: 0.88, green: 0.48, blue: 0.29))
                         .widgetAccentable()
                 }
+                Spacer(minLength: 0)
             }
             .padding(accessory ? 0 : 4)
             .accessibilityElement(children: .ignore)
@@ -281,7 +367,7 @@ struct QuoteView: View {
         case .systemLarge: return 8
         case .systemMedium: return 5
         case .accessoryRectangular: return 3
-        default: return 5
+        default: return 4
         }
     }
 
