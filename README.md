@@ -1,6 +1,6 @@
 # Moti Scroll
 
-Flutter app of public-domain quotes and short speech excerpts. Four tabs: Collections, Discover, Home, Feed. The visual design is fixed. Phase 2 adds Firebase behind that design.
+Flutter app of public-domain quotes and short speech excerpts. Four tabs: Home, Feed, Discover, Collections. The visual design is fixed. Phase 2 adds Firebase behind that design.
 
 The app reads `publishedItems` only. There is no local quote catalog. Feed and Discover stay on the preparing screen until Remote Config `contentReady` is true.
 

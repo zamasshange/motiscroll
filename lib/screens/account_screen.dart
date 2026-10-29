@@ -17,12 +17,20 @@ class _AccountScreenState extends State<AccountScreen> {
   final _password = TextEditingController();
   var _busy = false;
   var _hidePassword = true;
+  var _creating = false;
 
   @override
   void dispose() {
     _email.dispose();
     _password.dispose();
     super.dispose();
+  }
+
+  bool _signedIn(AppState state) {
+    final label = state.accountLabel;
+    return label != null &&
+        label != 'Saved on this device' &&
+        label != 'Not signed in';
   }
 
   Future<void> _run(Future<void> Function() action, String success) async {
@@ -55,6 +63,10 @@ class _AccountScreenState extends State<AccountScreen> {
   Widget build(BuildContext context) {
     final state = AppScope.of(context);
     final palette = state.palette;
+    final signedIn = _signedIn(state);
+    final title = signedIn
+        ? 'Account'
+        : (_creating ? 'Create account' : 'Sign in');
     return Scaffold(
       backgroundColor: palette.bg,
       appBar: AppBar(
@@ -65,101 +77,119 @@ class _AccountScreenState extends State<AccountScreen> {
       body: ListView(
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
         children: [
-          Text('Account', style: serif(palette, 40, height: 1.05)),
+          Text(title, style: serif(palette, 40, height: 1.05)),
           const SizedBox(height: 12),
           Text(
-            state.firebaseReady
-                ? 'You can read right away. Save your progress to keep the same library if you change phones.'
-                : (state.accountError ??
-                      'The account service is not connected yet.'),
+            signedIn
+                ? 'This library stays with this sign-in if you change phones.'
+                : (state.firebaseReady
+                      ? (_creating
+                            ? 'Make an account so this library follows you to another phone.'
+                            : 'Sign in to keep this library if you change phones.')
+                      : (state.accountError ??
+                            'The account service is not connected yet.')),
             style: sans(palette, 15, color: palette.textMuted),
           ),
-          const SizedBox(height: 8),
-          Text(
-            state.accountLabel ?? 'Not signed in',
-            style: sans(palette, 13, color: palette.textFaint),
-          ),
-          const SizedBox(height: 24),
-          PrimaryButton(
-            label: 'Continue with Google',
-            onPressed: _busy
-                ? () {}
-                : () => _run(
-                    () => linkGoogle(state),
-                    'Google is linked to this library.',
-                  ),
-          ),
-          const SizedBox(height: 20),
-          _Field(
-            controller: _email,
-            label: 'Email',
-            keyboardType: TextInputType.emailAddress,
-          ),
-          const SizedBox(height: 12),
-          _Field(
-            controller: _password,
-            label: 'Password',
-            obscure: _hidePassword,
-            trailing: IconButton(
-              onPressed: () => setState(() => _hidePassword = !_hidePassword),
-              icon: Icon(
-                _hidePassword
-                    ? Icons.visibility_outlined
-                    : Icons.visibility_off_outlined,
-                color: palette.textMuted,
+          if (signedIn) ...[
+            const SizedBox(height: 8),
+            Text(
+              state.accountLabel!,
+              style: sans(palette, 13, color: palette.textFaint),
+            ),
+            const SizedBox(height: 24),
+            OutlineButton(
+              label: 'Sign out',
+              onPressed: _busy
+                  ? () {}
+                  : () => _run(
+                      () => signOutToAnonymous(state),
+                      'Signed out. A new device library was started.',
+                    ),
+            ),
+            const SizedBox(height: 8),
+            OutlineButton(
+              label: 'Delete account',
+              onPressed: _busy
+                  ? () {}
+                  : () => _run(() async {
+                      await deleteAccount();
+                      await state.clearWidgets();
+                      if (!context.mounted) return;
+                      Navigator.of(context).popUntil((route) => route.isFirst);
+                    }, 'The account was deleted.'),
+            ),
+          ] else ...[
+            const SizedBox(height: 24),
+            PrimaryButton(
+              label: 'Continue with Google',
+              onPressed: _busy
+                  ? () {}
+                  : () => _run(
+                      () => linkGoogle(state),
+                      'Google is linked to this library.',
+                    ),
+            ),
+            const SizedBox(height: 20),
+            _Field(
+              controller: _email,
+              label: 'Email',
+              keyboardType: TextInputType.emailAddress,
+            ),
+            const SizedBox(height: 12),
+            _Field(
+              controller: _password,
+              label: 'Password',
+              obscure: _hidePassword,
+              trailing: IconButton(
+                onPressed: () => setState(() => _hidePassword = !_hidePassword),
+                icon: Icon(
+                  _hidePassword
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                  color: palette.textMuted,
+                ),
               ),
             ),
-          ),
-          const SizedBox(height: 16),
-          PrimaryButton(
-            label: 'Sign in',
-            onPressed: _busy
-                ? () {}
-                : () => _run(
-                    () => signInWithEmailPassword(
-                      state,
-                      _email.text.trim(),
-                      _password.text,
+            const SizedBox(height: 16),
+            PrimaryButton(
+              label: _creating ? 'Create account' : 'Sign in',
+              onPressed: _busy
+                  ? () {}
+                  : () => _run(
+                      () => _creating
+                          ? createEmailAccount(
+                              state,
+                              _email.text.trim(),
+                              _password.text,
+                            )
+                          : signInWithEmailPassword(
+                              state,
+                              _email.text.trim(),
+                              _password.text,
+                            ),
+                      _creating ? 'The account was created.' : 'Signed in.',
                     ),
-                    'Signed in.',
-                  ),
-          ),
-          const SizedBox(height: 8),
-          OutlineButton(
-            label: 'Create account',
-            onPressed: _busy
-                ? () {}
-                : () => _run(
-                    () => createEmailAccount(
-                      state,
-                      _email.text.trim(),
-                      _password.text,
-                    ),
-                    'The account was created.',
-                  ),
-          ),
-          const SizedBox(height: 24),
-          OutlineButton(
-            label: 'Sign out',
-            onPressed: _busy
-                ? () {}
-                : () => _run(
-                    () => signOutToAnonymous(state),
-                    'Signed out. A new device library was started.',
-                  ),
-          ),
-          const SizedBox(height: 8),
-          OutlineButton(
-            label: 'Delete account',
-            onPressed: _busy
-                ? () {}
-                : () => _run(() async {
-                    await deleteAccount();
-                    await state.clearWidgets();
-                    if (!context.mounted) return;
-                    Navigator.of(context).popUntil((route) => route.isFirst);
-                  }, 'The account was deleted.'),
-          ),
+            ),
+            const SizedBox(height: 16),
+            Pressable(
+              semanticLabel: _creating
+                  ? 'Already have an account? Sign in'
+                  : 'Need an account? Create one',
+              onPressed: _busy
+                  ? null
+                  : () => setState(() => _creating = !_creating),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                child: Text(
+                  _creating
+                      ? 'Already have an account? Sign in'
+                      : 'Need an account? Create one',
+                  textAlign: TextAlign.center,
+                  style: sans(palette, 15, weight: FontWeight.w600),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

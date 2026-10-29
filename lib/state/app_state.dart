@@ -12,6 +12,7 @@ import '../data/models.dart';
 import '../data/repositories.dart';
 import '../data/roster_lines.dart';
 import '../l10n/languages.dart';
+import '../tabs.dart';
 import '../theme/tokens.dart';
 import '../widgets/widget_payload.dart';
 import '../widgets/widget_sync.dart';
@@ -269,7 +270,7 @@ class AppState extends ChangeNotifier {
   void openCollection(Field field) {
     collectionFocus = field;
     browseAll = false;
-    pendingTab = 3;
+    pendingTab = AppTab.feed;
     _touch();
   }
 
@@ -291,7 +292,7 @@ class AppState extends ChangeNotifier {
     browseAll = false;
     if (on) {
       collectionFocus = field;
-      pendingTab = 3;
+      pendingTab = AppTab.feed;
     } else if (collectionFocus == field) {
       collectionFocus = followed.length == 1 ? followed.first : null;
     }
@@ -407,7 +408,7 @@ class AppState extends ChangeNotifier {
       openInFeed(id);
       return;
     }
-    pendingTab = 2;
+    pendingTab = AppTab.home;
     notifyListeners();
   }
 

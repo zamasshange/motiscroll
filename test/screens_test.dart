@@ -48,7 +48,7 @@ void main() {
   ) async {
     final state = await _pumpPage(tester, const SettingsScreen());
     expect(find.text(kAppVersion), findsOneWidget);
-    expect(find.text('Sign up or log in'), findsOneWidget);
+    expect(find.text('Sign in'), findsOneWidget);
 
     await tester.tap(find.text('General'));
     await tester.pumpAndSettle();
@@ -71,17 +71,22 @@ void main() {
     expect(find.text('Photo credits'), findsOneWidget);
   });
 
-  testWidgets('account offers Google, email, and delete only', (tester) async {
+  testWidgets('account signs in, then offers create', (tester) async {
     await _pumpPage(tester, const AccountScreen());
+    expect(find.text('Sign in'), findsWidgets);
     expect(find.text('Continue with Google'), findsOneWidget);
     expect(find.text('Email'), findsOneWidget);
     expect(find.text('Password'), findsOneWidget);
-    expect(find.text('Sign in'), findsOneWidget);
-    expect(find.text('Create account'), findsOneWidget);
-    expect(find.text('Sign out'), findsOneWidget);
-    expect(find.text('Delete account'), findsOneWidget);
+    expect(find.text('Need an account? Create one'), findsOneWidget);
+    expect(find.text('Sign out'), findsNothing);
+    expect(find.text('Delete account'), findsNothing);
     expect(find.text('Continue with Apple'), findsNothing);
     expect(find.text('Email me a link'), findsNothing);
+
+    await tester.tap(find.text('Need an account? Create one'));
+    await tester.pump();
+    expect(find.text('Create account'), findsWidgets);
+    expect(find.text('Already have an account? Sign in'), findsOneWidget);
   });
 
   testWidgets('line finder hides the next field and number', (tester) async {

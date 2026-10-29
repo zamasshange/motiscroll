@@ -56,7 +56,7 @@ class SettingsScreen extends StatelessWidget {
         const SizedBox(height: 32),
         if (!linked)
           PrimaryButton(
-            label: 'Sign up or log in',
+            label: 'Sign in',
             onPressed: () => _push(context, const AccountScreen()),
           ),
         const SizedBox(height: 24),

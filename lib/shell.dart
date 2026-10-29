@@ -6,6 +6,7 @@ import 'screens/discover_screen.dart';
 import 'screens/feed_screen.dart';
 import 'screens/home_screen.dart';
 import 'state/app_state.dart';
+import 'tabs.dart';
 import 'theme/tokens.dart';
 
 class TabShell extends StatefulWidget {
@@ -16,7 +17,7 @@ class TabShell extends StatefulWidget {
 }
 
 class _TabShellState extends State<TabShell> {
-  var _index = 2;
+  var _index = AppTab.home;
 
   @override
   void didChangeDependencies() {
@@ -28,8 +29,8 @@ class _TabShellState extends State<TabShell> {
       if (_index != tab) setState(() => _index = tab);
     }
     final target = state.feedTarget;
-    if (target != null && _index != 3) {
-      setState(() => _index = 3);
+    if (target != null && _index != AppTab.feed) {
+      setState(() => _index = AppTab.feed);
     }
   }
 
@@ -37,9 +38,9 @@ class _TabShellState extends State<TabShell> {
     if (index == _index) return;
     setState(() => _index = index);
     final state = AppScope.of(context);
-    if (index == 1) state.reshuffleDiscover();
-    if (index == 3) state.reshuffleFeed();
-    if (index == 1 || index == 3) state.noteVisit();
+    if (index == AppTab.discover) state.reshuffleDiscover();
+    if (index == AppTab.feed) state.reshuffleFeed();
+    if (index == AppTab.discover || index == AppTab.feed) state.noteVisit();
   }
 
   @override
@@ -60,10 +61,10 @@ class _TabShellState extends State<TabShell> {
           IndexedStack(
             index: _index,
             children: const [
-              CollectionsScreen(),
-              DiscoverScreen(),
               HomeScreen(),
               FeedScreen(),
+              DiscoverScreen(),
+              CollectionsScreen(),
             ],
           ),
           Positioned(
@@ -87,28 +88,28 @@ class _TabShellState extends State<TabShell> {
                 child: Row(
                   children: [
                     _Tab(
-                      icon: Icons.grid_view_rounded,
-                      label: ui(code, 'collections'),
-                      selected: _index == 0,
-                      onTap: () => _select(0),
-                    ),
-                    _Tab(
-                      icon: Icons.auto_awesome,
-                      label: ui(code, 'discover'),
-                      selected: _index == 1,
-                      onTap: () => _select(1),
-                    ),
-                    _Tab(
                       icon: Icons.home_rounded,
                       label: ui(code, 'home'),
-                      selected: _index == 2,
-                      onTap: () => _select(2),
+                      selected: _index == AppTab.home,
+                      onTap: () => _select(AppTab.home),
                     ),
                     _Tab(
                       icon: Icons.menu_book_rounded,
                       label: ui(code, 'feed'),
-                      selected: _index == 3,
-                      onTap: () => _select(3),
+                      selected: _index == AppTab.feed,
+                      onTap: () => _select(AppTab.feed),
+                    ),
+                    _Tab(
+                      icon: Icons.auto_awesome,
+                      label: ui(code, 'discover'),
+                      selected: _index == AppTab.discover,
+                      onTap: () => _select(AppTab.discover),
+                    ),
+                    _Tab(
+                      icon: Icons.grid_view_rounded,
+                      label: ui(code, 'collections'),
+                      selected: _index == AppTab.collections,
+                      onTap: () => _select(AppTab.collections),
                     ),
                   ],
                 ),
