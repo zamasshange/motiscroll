@@ -290,16 +290,24 @@ struct QuoteView: View {
                 .lineLimit(1)
                 .minimumScaleFactor(0.7)
         } else if let quote = entry.quote {
-            VStack(alignment: .leading, spacing: 8) {
-                if showsPortrait {
-                    portrait(quote)
-                }
+            VStack(alignment: .leading, spacing: 10) {
                 if entry.showField {
                     Text(fieldName(quote.field))
-                        .font(labelFont(12))
+                        .font(labelFont(11))
                         .foregroundStyle(Color(red: 0.88, green: 0.48, blue: 0.29))
                         .widgetAccentable()
                         .accessibilityHidden(true)
+                }
+                if showsPortrait {
+                    HStack(alignment: .center, spacing: 8) {
+                        portrait(quote)
+                        Text(quote.authorName)
+                            .font(labelFont(authorSize))
+                            .foregroundStyle(textColor)
+                            .widgetAccentable()
+                            .lineLimit(2)
+                            .minimumScaleFactor(0.8)
+                    }
                 }
                 Text(quote.text)
                     .font(quoteFont(quoteSize))
@@ -309,10 +317,12 @@ struct QuoteView: View {
                     .lineLimit(lineLimit)
                     .minimumScaleFactor(0.7)
                     .frame(maxWidth: .infinity, alignment: .topLeading)
-                Text(quote.authorName)
-                    .font(labelFont(authorSize))
-                    .foregroundStyle(Color(red: 0.88, green: 0.48, blue: 0.29))
-                    .widgetAccentable()
+                if !showsPortrait {
+                    Text(quote.authorName)
+                        .font(labelFont(authorSize))
+                        .foregroundStyle(textColor)
+                        .widgetAccentable()
+                }
                 if entry.showSource, !quote.sourceTitle.isEmpty {
                     Text(sourceLine(quote))
                         .font(labelFont(12))

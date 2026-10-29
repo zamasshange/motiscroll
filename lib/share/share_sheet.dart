@@ -18,6 +18,7 @@ import 'share_bridge.dart';
 import 'share_caption.dart';
 import 'share_config.dart';
 import 'share_destinations.dart';
+import 'share_marks.dart';
 import 'share_prefs.dart';
 import 'share_text.dart';
 
@@ -68,6 +69,11 @@ class _ShareSheetState extends State<ShareSheet> {
   var _busy = false;
   var _whatsAppHintShown = false;
   String? _status;
+  var _scale = 1.0;
+  var _baseScale = 1.0;
+  var _pan = Offset.zero;
+
+  bool get _pictureMoved => _scale != 1 || _pan != Offset.zero;
 
   String? _portrait(BuildContext context) {
     final own = widget.item.imageUrl;
@@ -173,33 +179,59 @@ class _ShareSheetState extends State<ShareSheet> {
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(16),
                             child: _ready
-                                ? PageView(
-                                    controller: _page,
-                                    physics: reduce
-                                        ? const NeverScrollableScrollPhysics()
-                                        : null,
-                                    onPageChanged: (index) {
-                                      final next = ShareTemplate.values[index];
-                                      setState(() => _template = next);
-                                      unawaited(SharePrefs.setTemplate(next));
+                                ? GestureDetector(
+                                    onScaleStart: (_) {
+                                      _baseScale = _scale;
                                     },
-                                    children: [
-                                      for (final template
-                                          in ShareTemplate.values)
-                                        FittedBox(
-                                          child: QuoteCardWidget(
-                                            item: widget.item,
-                                            template: template,
-                                            format: _format,
-                                            language: content,
-                                            translatedLabel: widgetString(
-                                              content,
-                                              'translated',
+                                    onScaleUpdate: (details) {
+                                      setState(() {
+                                        _scale = (_baseScale * details.scale)
+                                            .clamp(0.85, 1.7);
+                                        _pan += details.focalPointDelta;
+                                      });
+                                    },
+                                    child: Transform(
+                                      alignment: Alignment.center,
+                                      transform: Matrix4.identity()
+                                        ..translateByDouble(
+                                          _pan.dx,
+                                          _pan.dy,
+                                          0,
+                                          1,
+                                        )
+                                        ..scaleByDouble(_scale, _scale, 1, 1),
+                                      child: PageView(
+                                        controller: _page,
+                                        physics: reduce
+                                            ? const NeverScrollableScrollPhysics()
+                                            : null,
+                                        onPageChanged: (index) {
+                                          final next =
+                                              ShareTemplate.values[index];
+                                          setState(() => _template = next);
+                                          unawaited(
+                                            SharePrefs.setTemplate(next),
+                                          );
+                                        },
+                                        children: [
+                                          for (final template
+                                              in ShareTemplate.values)
+                                            FittedBox(
+                                              child: QuoteCardWidget(
+                                                item: widget.item,
+                                                template: template,
+                                                format: _format,
+                                                language: content,
+                                                translatedLabel: widgetString(
+                                                  content,
+                                                  'translated',
+                                                ),
+                                                portraitUrl: _portrait(context),
+                                              ),
                                             ),
-                                            portraitUrl: _portrait(context),
-                                          ),
-                                        ),
-                                    ],
+                                        ],
+                                      ),
+                                    ),
                                   )
                                 : const ColoredBox(color: Color(0xFF16161A)),
                           ),
@@ -220,7 +252,35 @@ class _ShareSheetState extends State<ShareSheet> {
                   ],
                 ),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      shareUi(ui, 'playHint'),
+                      style: sans(palette, 13, color: palette.textMuted),
+                    ),
+                  ),
+                  if (_pictureMoved)
+                    Pressable(
+                      onPressed: () => setState(() {
+                        _scale = 1;
+                        _pan = Offset.zero;
+                      }),
+                      semanticLabel: shareUi(ui, 'resetPicture'),
+                      child: Text(
+                        shareUi(ui, 'resetPicture'),
+                        style: sans(
+                          palette,
+                          13,
+                          weight: FontWeight.w700,
+                          color: palette.accent,
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 8),
               SingleChildScrollView(
                 scrollDirection: Axis.horizontal,
                 child: Row(
@@ -279,54 +339,63 @@ class _ShareSheetState extends State<ShareSheet> {
                 builder: (context, constraints) {
                   final width = (constraints.maxWidth - 16) / 3;
                   final buttons = <Widget>[
-                    if (ig.visible)
-                      _DestButton(
-                        width: width,
-                        icon: Icons.camera_alt_outlined,
-                        label: shareUi(ui, 'instagramStory'),
-                        enabled: ig.enabled,
-                        notInstalled: shareUi(ui, 'notInstalled'),
-                        onTap: () => _send(
-                          ShareDestination.instagramStory,
-                          forceStory: true,
-                          systemShare: ig.systemShare,
-                        ),
-                      ),
-                    if (fb.visible)
-                      _DestButton(
-                        width: width,
-                        icon: Icons.public_rounded,
-                        label: shareUi(ui, 'facebook'),
-                        enabled: fb.enabled,
-                        notInstalled: shareUi(ui, 'notInstalled'),
-                        onTap: () => _send(
-                          ShareDestination.facebook,
-                          forceStory: !fb.systemShare,
-                          systemShare: fb.systemShare,
-                        ),
-                      ),
                     _DestButton(
                       width: width,
-                      icon: Icons.chat_rounded,
+                      mark: const ShareBrandMark(ShareMark.whatsapp),
                       label: shareUi(ui, 'whatsapp'),
-                      enabled: wa.enabled,
-                      notInstalled: shareUi(ui, 'notInstalled'),
                       onTap: () => _sendWhatsApp(wa),
                     ),
                     _DestButton(
                       width: width,
-                      icon: Icons.download_rounded,
+                      mark: const ShareBrandMark(ShareMark.instagram),
+                      label: shareUi(ui, 'instagramStory'),
+                      onTap: () => _send(
+                        ShareDestination.instagramStory,
+                        forceStory: !ig.systemShare,
+                        systemShare: ig.systemShare,
+                      ),
+                    ),
+                    _DestButton(
+                      width: width,
+                      mark: const ShareBrandMark(ShareMark.facebook),
+                      label: shareUi(ui, 'facebook'),
+                      onTap: () => _send(
+                        ShareDestination.facebook,
+                        forceStory: !fb.systemShare,
+                        systemShare: fb.systemShare,
+                      ),
+                    ),
+                    _DestButton(
+                      width: width,
+                      mark: const ShareBrandMark(ShareMark.tiktok),
+                      label: shareUi(ui, 'tiktok'),
+                      onTap: () =>
+                          _send(ShareDestination.tiktok, systemShare: true),
+                    ),
+                    _DestButton(
+                      width: width,
+                      mark: const ShareBrandMark(ShareMark.x),
+                      label: shareUi(ui, 'x'),
+                      onTap: () => _send(ShareDestination.x, systemShare: true),
+                    ),
+                    _DestButton(
+                      width: width,
+                      mark: Icon(
+                        Icons.download_rounded,
+                        size: 26,
+                        color: palette.text,
+                      ),
                       label: shareUi(ui, 'savePicture'),
-                      enabled: true,
-                      notInstalled: shareUi(ui, 'notInstalled'),
                       onTap: () => _send(ShareDestination.save),
                     ),
                     _DestButton(
                       width: width,
-                      icon: Icons.ios_share_rounded,
+                      mark: Icon(
+                        Icons.ios_share_rounded,
+                        size: 26,
+                        color: palette.text,
+                      ),
                       label: shareUi(ui, 'more'),
-                      enabled: true,
-                      notInstalled: shareUi(ui, 'notInstalled'),
                       onTap: () =>
                           _send(ShareDestination.more, systemShare: true),
                     ),
@@ -415,6 +484,8 @@ class _ShareSheetState extends State<ShareSheet> {
         language: content,
         translatedLabel: widgetString(content, 'translated'),
         portraitUrl: _portrait(context),
+        scale: _scale,
+        pan: _pan,
       );
       if (!mounted) return;
       setState(() => _busy = false);
@@ -435,6 +506,7 @@ class _ShareSheetState extends State<ShareSheet> {
             _note(shareUi(ui, 'couldntOpenInstagram'));
             await _systemShare(image, caption);
           }
+          break;
         case ShareDestination.facebook:
           if (systemShare) {
             await _systemShare(image, caption);
@@ -447,6 +519,11 @@ class _ShareSheetState extends State<ShareSheet> {
             _note(shareUi(ui, 'couldntOpenFacebook'));
             await _systemShare(image, caption);
           }
+          break;
+        case ShareDestination.tiktok:
+        case ShareDestination.x:
+          await _systemShare(image, caption);
+          break;
         case ShareDestination.whatsapp:
           if (systemShare || !Platform.isAndroid) {
             await _systemShare(image, caption);
@@ -460,10 +537,13 @@ class _ShareSheetState extends State<ShareSheet> {
             _note(shareUi(ui, 'couldntOpenWhatsApp'));
             await _systemShare(image, caption);
           }
+          break;
         case ShareDestination.save:
           await _save(image);
+          break;
         case ShareDestination.more:
           await _systemShare(image, caption);
+          break;
       }
     } on Object {
       _note(shareUi(ui, 'couldntRender'));
@@ -573,18 +653,14 @@ class _ShareSheetState extends State<ShareSheet> {
 class _DestButton extends StatelessWidget {
   const _DestButton({
     required this.width,
-    required this.icon,
+    required this.mark,
     required this.label,
-    required this.enabled,
-    required this.notInstalled,
     required this.onTap,
   });
 
   final double width;
-  final IconData icon;
+  final Widget mark;
   final String label;
-  final bool enabled;
-  final String notInstalled;
   final VoidCallback onTap;
 
   @override
@@ -592,41 +668,30 @@ class _DestButton extends StatelessWidget {
     final palette = AppScope.of(context).palette;
     return SizedBox(
       width: width,
-      child: Opacity(
-        opacity: enabled ? 1 : 0.4,
-        child: Pressable(
-          onPressed: onTap,
-          semanticLabel: enabled ? label : '$label, $notInstalled',
-          child: Container(
-            height: 88,
-            padding: const EdgeInsets.symmetric(horizontal: 8),
-            decoration: BoxDecoration(
-              color: palette.card,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: palette.border),
-            ),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(icon, size: 22, color: palette.text),
-                const SizedBox(height: 8),
-                Text(
-                  label,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: sans(palette, 12, weight: FontWeight.w600),
-                ),
-                if (!enabled)
-                  Text(
-                    notInstalled,
-                    textAlign: TextAlign.center,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: sans(palette, 10, color: palette.textMuted),
-                  ),
-              ],
-            ),
+      child: Pressable(
+        onPressed: onTap,
+        semanticLabel: label,
+        child: Container(
+          height: 84,
+          padding: const EdgeInsets.symmetric(horizontal: 8),
+          decoration: BoxDecoration(
+            color: palette.card,
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(color: palette.border),
+          ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              mark,
+              const SizedBox(height: 8),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: sans(palette, 12, weight: FontWeight.w600),
+              ),
+            ],
           ),
         ),
       ),

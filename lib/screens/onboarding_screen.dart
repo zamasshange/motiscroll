@@ -165,8 +165,6 @@ class _Welcome extends StatelessWidget {
       padding: EdgeInsets.fromLTRB(24, top + 16, 24, bottom + 24),
       child: Column(
         children: [
-          const MotiMark(size: 44),
-          const SizedBox(height: 20),
           Text(
             'Short lines and speeches, with the source still attached.',
             textAlign: TextAlign.center,
@@ -179,8 +177,14 @@ class _Welcome extends StatelessWidget {
             style: sans(palette, 15, color: palette.textMuted),
           ),
           const SizedBox(height: 20),
-          const Expanded(
-            child: OnboardDeviceFrame(child: OnboardHomePreview()),
+          Expanded(
+            child: OnboardDeviceFrame(
+              child: Image.asset(
+                'assets/onboarding/welcome_home.png',
+                fit: BoxFit.cover,
+                alignment: Alignment.topCenter,
+              ),
+            ),
           ),
           const SizedBox(height: 20),
           PrimaryButton(label: 'Get started', onPressed: onStart),

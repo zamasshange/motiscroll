@@ -1,6 +1,14 @@
 import 'share_config.dart';
 
-enum ShareDestination { instagramStory, facebook, whatsapp, save, more }
+enum ShareDestination {
+  instagramStory,
+  facebook,
+  whatsapp,
+  tiktok,
+  x,
+  save,
+  more,
+}
 
 class ShareButtonView {
   const ShareButtonView({
@@ -17,74 +25,34 @@ class ShareButtonView {
 }
 
 ShareButtonView instagramStoryView(ShareApps apps, {required bool metaReady}) {
-  if (!metaReady) {
-    return const ShareButtonView(
-      visible: false,
-      enabled: false,
-      systemShare: true,
-    );
-  }
-  if (!apps.instagram) {
+  if (metaReady && apps.instagram) {
     return const ShareButtonView(
       visible: true,
-      enabled: false,
-      systemShare: true,
+      enabled: true,
+      systemShare: false,
     );
   }
-  return const ShareButtonView(
-    visible: true,
-    enabled: true,
-    systemShare: false,
-  );
+  return const ShareButtonView(visible: true, enabled: true, systemShare: true);
 }
 
 ShareButtonView facebookView(ShareApps apps, {required bool metaReady}) {
-  if (!metaReady) {
-    return const ShareButtonView(
-      visible: false,
-      enabled: false,
-      systemShare: true,
-    );
-  }
-  if (apps.facebook) {
+  if (metaReady && apps.facebook) {
     return const ShareButtonView(
       visible: true,
       enabled: true,
       systemShare: false,
     );
   }
-  if (apps.facebookLite) {
-    return const ShareButtonView(
-      visible: true,
-      enabled: true,
-      systemShare: true,
-    );
-  }
-  return const ShareButtonView(
-    visible: true,
-    enabled: false,
-    systemShare: true,
-  );
+  return const ShareButtonView(visible: true, enabled: true, systemShare: true);
 }
 
 ShareButtonView whatsappView(ShareApps apps) {
-  if (!apps.probed) {
-    return const ShareButtonView(
-      visible: true,
-      enabled: true,
-      systemShare: true,
-    );
-  }
-  if (apps.anyWhatsApp) {
+  if (apps.probed && apps.anyWhatsApp) {
     return const ShareButtonView(
       visible: true,
       enabled: true,
       systemShare: false,
     );
   }
-  return const ShareButtonView(
-    visible: true,
-    enabled: false,
-    systemShare: true,
-  );
+  return const ShareButtonView(visible: true, enabled: true, systemShare: true);
 }

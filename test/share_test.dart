@@ -159,7 +159,7 @@ void main() {
     expect(squeezed.fontSize, shareQuoteFontMin);
   });
 
-  test('destination buttons hide when META_APP_ID is missing', () {
+  test('destination buttons stay available without META_APP_ID', () {
     const none = ShareApps();
     const all = ShareApps(
       instagram: true,
@@ -168,14 +168,15 @@ void main() {
       whatsapp: true,
       whatsappBusiness: false,
     );
-    expect(instagramStoryView(none, metaReady: false).visible, isFalse);
-    expect(facebookView(none, metaReady: false).visible, isFalse);
-    expect(instagramStoryView(all, metaReady: false).visible, isFalse);
+    expect(instagramStoryView(none, metaReady: false).visible, isTrue);
+    expect(facebookView(none, metaReady: false).visible, isTrue);
+    expect(instagramStoryView(all, metaReady: false).visible, isTrue);
+    expect(instagramStoryView(all, metaReady: false).systemShare, isTrue);
     expect(facebookView(all, metaReady: false).systemShare, isTrue);
 
     final dimIg = instagramStoryView(none, metaReady: true);
     expect(dimIg.visible, isTrue);
-    expect(dimIg.enabled, isFalse);
+    expect(dimIg.enabled, isTrue);
     expect(dimIg.systemShare, isTrue);
 
     final liveIg = instagramStoryView(all, metaReady: true);
@@ -189,7 +190,8 @@ void main() {
     expect(liteOnly.enabled, isTrue);
     expect(liteOnly.systemShare, isTrue);
 
-    expect(whatsappView(none).enabled, isFalse);
+    expect(whatsappView(none).enabled, isTrue);
+    expect(whatsappView(none).systemShare, isTrue);
     expect(whatsappView(all).enabled, isTrue);
     expect(whatsappView(ShareApps.unknown).enabled, isTrue);
     expect(whatsappView(ShareApps.unknown).systemShare, isTrue);

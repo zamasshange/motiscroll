@@ -75,6 +75,8 @@ class QuoteCardRenderer {
     required String language,
     required String translatedLabel,
     String? portraitUrl,
+    double scale = 1,
+    Offset pan = Offset.zero,
   }) async {
     final key = shareCacheKey(
       itemId: item.id,
@@ -82,7 +84,10 @@ class QuoteCardRenderer {
       format: format,
       language: language,
     );
-    final cacheId = '$key@${shareExportPixelRatio.toStringAsFixed(0)}';
+    final moved = scale != 1 || pan != Offset.zero;
+    final cacheId = moved
+        ? '$key@${shareExportPixelRatio.toStringAsFixed(0)}@${scale.toStringAsFixed(2)}@${pan.dx.round()}@${pan.dy.round()}'
+        : '$key@${shareExportPixelRatio.toStringAsFixed(0)}';
     var bytes = _cache[cacheId];
     bytes ??= await _capture(
       context: context,
@@ -92,6 +97,8 @@ class QuoteCardRenderer {
       language: language,
       translatedLabel: translatedLabel,
       portraitUrl: portraitUrl,
+      scale: scale,
+      pan: pan,
     );
     _cache[cacheId] = bytes;
 
@@ -122,6 +129,8 @@ class QuoteCardRenderer {
     required String language,
     required String translatedLabel,
     String? portraitUrl,
+    double scale = 1,
+    Offset pan = Offset.zero,
   }) {
     return _capture(
       context: context,
@@ -131,6 +140,8 @@ class QuoteCardRenderer {
       language: language,
       translatedLabel: translatedLabel,
       portraitUrl: portraitUrl,
+      scale: scale,
+      pan: pan,
     );
   }
 
@@ -142,6 +153,8 @@ class QuoteCardRenderer {
     required String language,
     required String translatedLabel,
     String? portraitUrl,
+    double scale = 1,
+    Offset pan = Offset.zero,
   }) async {
     await ensureFonts();
     if (!context.mounted) {
@@ -182,14 +195,22 @@ class QuoteCardRenderer {
             ),
             child: RepaintBoundary(
               key: boundaryKey,
-              child: ExcludeSemantics(
-                child: QuoteCardWidget(
-                  item: item,
-                  template: template,
-                  format: format,
-                  language: language,
-                  translatedLabel: translatedLabel,
-                  portraitUrl: portraitUrl,
+              child: ClipRect(
+                child: Transform(
+                  alignment: Alignment.center,
+                  transform: Matrix4.identity()
+                    ..translateByDouble(pan.dx, pan.dy, 0, 1)
+                    ..scaleByDouble(scale, scale, 1, 1),
+                  child: ExcludeSemantics(
+                    child: QuoteCardWidget(
+                      item: item,
+                      template: template,
+                      format: format,
+                      language: language,
+                      translatedLabel: translatedLabel,
+                      portraitUrl: portraitUrl,
+                    ),
+                  ),
                 ),
               ),
             ),

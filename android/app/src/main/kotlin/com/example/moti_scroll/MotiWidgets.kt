@@ -333,6 +333,7 @@ private fun bindQuote(
     }
     if (message != null || quote == null) {
         views.setViewVisibility(R.id.widget_quote, View.GONE)
+        views.setViewVisibility(R.id.widget_byline, View.GONE)
         views.setViewVisibility(R.id.widget_author, View.GONE)
         views.setViewVisibility(R.id.widget_source, View.GONE)
         views.setViewVisibility(R.id.widget_field, View.GONE)
@@ -348,7 +349,10 @@ private fun bindQuote(
     val author = quote.optString("authorName")
     views.setViewVisibility(R.id.widget_empty, View.GONE)
     views.setViewVisibility(R.id.widget_quote, View.VISIBLE)
+    views.setViewVisibility(R.id.widget_byline, View.VISIBLE)
     views.setViewVisibility(R.id.widget_author, View.VISIBLE)
+    views.setViewVisibility(R.id.widget_mark, View.VISIBLE)
+    views.setImageViewBitmap(R.id.widget_mark, markBitmap(context))
     views.setTextViewText(R.id.widget_quote, text)
     views.setTextViewText(R.id.widget_author, author)
     val showSource = size == "medium" || size == "large"
@@ -409,9 +413,26 @@ private fun paintField(context: Context, views: RemoteViews, quote: JSONObject) 
     val end = parseColor(colors?.optString(1), Color.parseColor("#3A4150"))
     views.setImageViewBitmap(R.id.widget_bg, fieldBitmap(start, end))
     views.setTextColor(R.id.widget_quote, Color.parseColor("#F4F1EA"))
-    views.setTextColor(R.id.widget_author, Color.parseColor("#E07A4A"))
+    views.setTextColor(R.id.widget_author, Color.parseColor("#F4F1EA"))
     views.setTextColor(R.id.widget_source, Color.parseColor("#C8C2B8"))
     views.setTextColor(R.id.widget_empty, Color.parseColor("#F4F1EA"))
+}
+
+private fun markBitmap(context: Context): Bitmap {
+    val size = (40 * context.resources.displayMetrics.density).toInt().coerceAtLeast(40)
+    val bitmap = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
+    val canvas = Canvas(bitmap)
+    val paint = Paint(Paint.ANTI_ALIAS_FLAG)
+    paint.color = Color.parseColor("#0B0B0D")
+    val radius = size * 0.22f
+    canvas.drawRoundRect(0f, 0f, size.toFloat(), size.toFloat(), radius, radius, paint)
+    paint.color = Color.parseColor("#F4F1EA")
+    paint.strokeWidth = size * 0.08f
+    paint.strokeCap = Paint.Cap.ROUND
+    val inset = size * 0.30f
+    canvas.drawLine(inset, inset, size - inset, size - inset, paint)
+    canvas.drawLine(size - inset, inset, inset, size - inset, paint)
+    return bitmap
 }
 
 private fun fieldBitmap(start: Int, end: Int): Bitmap {
