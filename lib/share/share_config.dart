@@ -4,6 +4,7 @@ bool get metaAppIdReady => metaAppId.isNotEmpty;
 
 class ShareApps {
   const ShareApps({
+    this.probed = true,
     this.instagram = false,
     this.facebook = false,
     this.facebookLite = false,
@@ -11,6 +12,9 @@ class ShareApps {
     this.whatsappBusiness = false,
   });
 
+  static const unknown = ShareApps(probed: false);
+
+  final bool probed;
   final bool instagram;
   final bool facebook;
   final bool facebookLite;

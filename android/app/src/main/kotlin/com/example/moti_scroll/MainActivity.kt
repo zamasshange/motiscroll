@@ -67,6 +67,14 @@ class MainActivity : FlutterActivity() {
                         call.argument<String>("caption") ?: "",
                     ),
                 )
+            "shareSystem" ->
+                result.success(
+                    shareSystem(
+                        call.argument<String>("path"),
+                        call.argument<String>("caption") ?: "",
+                    ),
+                )
+            "saveImage" -> result.success(false)
             "encodeJpeg" -> result.success(encodeJpeg(call.arguments))
             "openSettings" -> {
                 startActivity(
@@ -103,6 +111,29 @@ class MainActivity : FlutterActivity() {
                 }
             grantUriPermission(packageName, uri, Intent.FLAG_GRANT_READ_URI_PERMISSION)
             startActivity(intent)
+            true
+        } catch (_: ActivityNotFoundException) {
+            false
+        } catch (_: IllegalArgumentException) {
+            false
+        }
+    }
+
+    private fun shareSystem(path: String?, caption: String): Boolean {
+        if (path.isNullOrEmpty()) return false
+        return try {
+            val uri = fileUri(path)
+            val intent =
+                Intent(Intent.ACTION_SEND).apply {
+                    type = mimeOf(path)
+                    putExtra(Intent.EXTRA_STREAM, uri)
+                    if (caption.isNotEmpty()) {
+                        putExtra(Intent.EXTRA_TEXT, caption)
+                    }
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    clipData = ClipData.newUri(contentResolver, "share", uri)
+                }
+            startActivity(Intent.createChooser(intent, null))
             true
         } catch (_: ActivityNotFoundException) {
             false

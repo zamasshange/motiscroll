@@ -13,9 +13,14 @@ import 'quote_card.dart';
 import 'share_bridge.dart';
 
 class ShareImageFile {
-  const ShareImageFile({required this.file, required this.mime});
+  const ShareImageFile({
+    required this.file,
+    required this.bytes,
+    required this.mime,
+  });
 
   final File file;
+  final Uint8List bytes;
   final String mime;
 }
 
@@ -103,7 +108,26 @@ class QuoteCardRenderer {
     final stamp = DateTime.now().microsecondsSinceEpoch;
     final file = File('${share.path}/${item.id}_$stamp.$ext');
     await file.writeAsBytes(bytes, flush: true);
-    return ShareImageFile(file: file, mime: mime);
+    return ShareImageFile(file: file, bytes: bytes, mime: mime);
+  }
+
+  @visibleForTesting
+  Future<Uint8List> capturePng({
+    required BuildContext context,
+    required Item item,
+    required ShareTemplate template,
+    required ShareFormat format,
+    required String language,
+    required String translatedLabel,
+  }) {
+    return _capture(
+      context: context,
+      item: item,
+      template: template,
+      format: format,
+      language: language,
+      translatedLabel: translatedLabel,
+    );
   }
 
   Future<Uint8List> _capture({
@@ -130,21 +154,16 @@ class QuoteCardRenderer {
     final boundaryKey = GlobalKey();
     final entry = OverlayEntry(
       builder: (context) {
-        return IgnorePointer(
-          child: Opacity(
-            opacity: 0.01,
-            child: Transform.translate(
-              offset: const Offset(-4000, 0),
-              child: RepaintBoundary(
-                key: boundaryKey,
-                child: QuoteCardWidget(
-                  item: item,
-                  template: template,
-                  format: format,
-                  language: language,
-                  translatedLabel: translatedLabel,
-                ),
-              ),
+        return ShareCaptureHost(
+          size: size,
+          child: RepaintBoundary(
+            key: boundaryKey,
+            child: QuoteCardWidget(
+              item: item,
+              template: template,
+              format: format,
+              language: language,
+              translatedLabel: translatedLabel,
             ),
           ),
         );
@@ -153,18 +172,21 @@ class QuoteCardRenderer {
     overlay.insert(entry);
     try {
       RenderRepaintBoundary? boundary;
-      for (var i = 0; i < 24; i++) {
-        await WidgetsBinding.instance.endOfFrame;
+      for (var i = 0; i < 40; i++) {
+        await Future<void>.delayed(const Duration(milliseconds: 16));
         final object = boundaryKey.currentContext?.findRenderObject();
         if (object is RenderRepaintBoundary &&
             object.hasSize &&
-            object.size.width >= size.width - 1) {
+            (object.size.width - size.width).abs() < 1 &&
+            (object.size.height - size.height).abs() < 1) {
           boundary = object;
           if (i >= 2) break;
         }
       }
       if (boundary == null) {
-        throw StateError('Share card did not paint.');
+        throw StateError(
+          'Share card did not paint at ${size.width}x${size.height}.',
+        );
       }
       final image = await boundary.toImage(pixelRatio: 1);
       try {
@@ -179,6 +201,34 @@ class QuoteCardRenderer {
     } finally {
       entry.remove();
     }
+  }
+}
+
+/// Keeps a full-resolution card at [size] even when the Overlay is phone-sized.
+class ShareCaptureHost extends StatelessWidget {
+  const ShareCaptureHost({super.key, required this.size, required this.child});
+
+  final Size size;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Positioned(
+      left: -size.width - 64,
+      top: 0,
+      width: size.width,
+      height: size.height,
+      child: IgnorePointer(
+        child: OverflowBox(
+          alignment: Alignment.topLeft,
+          minWidth: size.width,
+          maxWidth: size.width,
+          minHeight: size.height,
+          maxHeight: size.height,
+          child: child,
+        ),
+      ),
+    );
   }
 }
 

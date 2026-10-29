@@ -16,10 +16,7 @@ class ShareButtonView {
   final bool systemShare;
 }
 
-ShareButtonView instagramStoryView(
-  ShareApps apps, {
-  required bool metaReady,
-}) {
+ShareButtonView instagramStoryView(ShareApps apps, {required bool metaReady}) {
   if (!metaReady) {
     return const ShareButtonView(
       visible: false,
@@ -71,6 +68,13 @@ ShareButtonView facebookView(ShareApps apps, {required bool metaReady}) {
 }
 
 ShareButtonView whatsappView(ShareApps apps) {
+  if (!apps.probed) {
+    return const ShareButtonView(
+      visible: true,
+      enabled: true,
+      systemShare: true,
+    );
+  }
   if (apps.anyWhatsApp) {
     return const ShareButtonView(
       visible: true,

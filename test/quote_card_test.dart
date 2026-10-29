@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:moti_scroll/data/models.dart';
 import 'package:moti_scroll/l10n/widget_gallery.dart';
 import 'package:moti_scroll/share/quote_card.dart';
+import 'package:moti_scroll/share/quote_card_renderer.dart';
 import 'package:moti_scroll/share/share_sheet.dart';
 import 'package:moti_scroll/share/share_text.dart';
 import 'package:moti_scroll/state/app_state.dart';
@@ -55,9 +56,7 @@ Future<void> _loadFonts() async {
     await loader.load();
   }
 
-  await load('Playfair', [
-    'assets/fonts/PlayfairDisplay_600SemiBold.ttf',
-  ]);
+  await load('Playfair', ['assets/fonts/PlayfairDisplay_600SemiBold.ttf']);
   await load('DMSans', [
     'assets/fonts/DMSans_400Regular.ttf',
     'assets/fonts/DMSans_600SemiBold.ttf',
@@ -154,41 +153,15 @@ void main() {
     final items = <(String, Item)>[
       (
         'ar',
-        _card(
-          id: 'card-ar',
-          text: 'هذا سطر للتجربة فقط.',
-          author: 'Fixture',
-        ),
+        _card(id: 'card-ar', text: 'هذا سطر للتجربة فقط.', author: 'Fixture'),
       ),
       (
         'fa',
-        _card(
-          id: 'card-fa',
-          text: 'این یک خط آزمایشی است.',
-          author: 'Fixture',
-        ),
+        _card(id: 'card-fa', text: 'این یک خط آزمایشی است.', author: 'Fixture'),
       ),
-      (
-        'ru',
-        _card(
-          id: 'card-ru',
-          text: 'Это строка только для проверки.',
-        ),
-      ),
-      (
-        'zh',
-        _card(
-          id: 'card-zh',
-          text: '这是一句用于测试的句子。',
-        ),
-      ),
-      (
-        'hi',
-        _card(
-          id: 'card-hi',
-          text: 'यह परीक्षण के लिए एक पंक्ति है।',
-        ),
-      ),
+      ('ru', _card(id: 'card-ru', text: 'Это строка только для проверки.')),
+      ('zh', _card(id: 'card-zh', text: '这是一句用于测试的句子。')),
+      ('hi', _card(id: 'card-hi', text: 'यह परीक्षण के लिए एक पंक्ति है।')),
     ];
     for (final entry in items) {
       await _pumpCard(
@@ -213,8 +186,7 @@ void main() {
       id: 'card-meta',
       text: 'Begin.',
       author: 'A Very Long Author Name With Many Particles von Something',
-      title:
-          'The Complete Collected Public Addresses of a Very Long Title',
+      title: 'The Complete Collected Public Addresses of a Very Long Title',
       translated: true,
     );
     await _pumpCard(
@@ -334,6 +306,44 @@ void main() {
     );
   });
 
+  testWidgets('share capture host keeps full card size on a phone window', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    const size = Size(shareSquareHeight, shareSquareHeight);
+    final key = GlobalKey();
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Overlay(
+          initialEntries: [
+            OverlayEntry(
+              builder: (context) {
+                return ShareCaptureHost(
+                  size: size,
+                  child: ColoredBox(
+                    key: key,
+                    color: const Color(0xFF000000),
+                    child: const SizedBox(
+                      width: shareSquareHeight,
+                      height: shareSquareHeight,
+                    ),
+                  ),
+                );
+              },
+            ),
+          ],
+        ),
+      ),
+    );
+    await tester.pump();
+    final box = key.currentContext!.findRenderObject()! as RenderBox;
+    expect(box.size.width, shareSquareHeight);
+    expect(box.size.height, shareSquareHeight);
+  });
+
   testWidgets('share sheet uses RTL for Arabic and Persian UI', (tester) async {
     tester.view.physicalSize = const Size(390, 844);
     tester.view.devicePixelRatio = 1;
@@ -350,9 +360,7 @@ void main() {
         AppScope(
           state: state,
           child: MaterialApp(
-            home: Scaffold(
-              body: ShareSheet(item: uiFixture().first),
-            ),
+            home: Scaffold(body: ShareSheet(item: uiFixture().first)),
           ),
         ),
       );

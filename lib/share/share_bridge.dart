@@ -30,7 +30,7 @@ class ShareBridge {
       final raw = await _channel.invokeMapMethod<String, dynamic>(
         'installedApps',
       );
-      if (raw == null) return const ShareApps();
+      if (raw == null) return ShareApps.unknown;
       return ShareApps(
         instagram: raw['instagram'] == true,
         facebook: raw['facebook'] == true,
@@ -39,9 +39,9 @@ class ShareBridge {
         whatsappBusiness: raw['whatsappBusiness'] == true,
       );
     } on MissingPluginException {
-      return const ShareApps();
+      return ShareApps.unknown;
     } on PlatformException {
-      return const ShareApps();
+      return ShareApps.unknown;
     }
   }
 
@@ -57,6 +57,14 @@ class ShareBridge {
 
   Future<bool> shareWhatsApp(String path, String caption) {
     return _bool('shareWhatsApp', {'path': path, 'caption': caption});
+  }
+
+  Future<bool> shareSystem(String path, String caption) {
+    return _bool('shareSystem', {'path': path, 'caption': caption});
+  }
+
+  Future<bool> saveImage(String path) {
+    return _bool('saveImage', {'path': path});
   }
 
   Future<Uint8List?> encodeJpeg(Uint8List png) async {

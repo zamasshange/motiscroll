@@ -1,4 +1,5 @@
 import Flutter
+import Photos
 import UIKit
 import workmanager_apple
 
@@ -37,8 +38,9 @@ private enum ShareChannel {
         "instagram": canOpen("instagram://"),
         "facebook": canOpen("fb://"),
         "facebookLite": canOpen("fb-lite://"),
-        "whatsapp": canOpen("whatsapp://"),
-        "whatsappBusiness": false,
+        "whatsapp": canOpen("whatsapp://send") || canOpen("whatsapp://"),
+        "whatsappBusiness": canOpen("whatsapp-business://send") ||
+          canOpen("whatsapp-business://"),
       ])
     case "shareInstagramStory":
       let args = call.arguments as? [String: String] ?? [:]
@@ -48,6 +50,12 @@ private enum ShareChannel {
       result(shareFacebookStory(path: args["path"], appId: args["appId"]))
     case "shareWhatsApp":
       result(false)
+    case "shareSystem":
+      let args = call.arguments as? [String: String] ?? [:]
+      shareSystem(path: args["path"], caption: args["caption"] ?? "", result: result)
+    case "saveImage":
+      let args = call.arguments as? [String: String] ?? [:]
+      saveImage(path: args["path"], result: result)
     case "encodeJpeg":
       result(encodeJpeg(call.arguments))
     case "openSettings":
@@ -102,6 +110,112 @@ private enum ShareChannel {
     )
     UIApplication.shared.open(url)
     return true
+  }
+
+  static func shareSystem(
+    path: String?,
+    caption: String,
+    result: @escaping FlutterResult
+  ) {
+    guard let path else {
+      result(false)
+      return
+    }
+    var items: [Any] = []
+    if let image = UIImage(contentsOfFile: path) {
+      items.append(image)
+    } else {
+      items.append(URL(fileURLWithPath: path))
+    }
+    if !caption.isEmpty {
+      items.append(caption)
+    }
+    guard !items.isEmpty, let presenter = topViewController() else {
+      result(false)
+      return
+    }
+    let activity = UIActivityViewController(
+      activityItems: items,
+      applicationActivities: nil
+    )
+    if UIDevice.current.userInterfaceIdiom == .pad,
+       let popover = activity.popoverPresentationController {
+      popover.sourceView = presenter.view
+      let bounds = presenter.view.bounds
+      popover.sourceRect = CGRect(
+        x: bounds.midX - 1,
+        y: bounds.midY - 1,
+        width: 2,
+        height: 2
+      )
+      popover.permittedArrowDirections = []
+    }
+    DispatchQueue.main.async {
+      presenter.present(activity, animated: true) {
+        result(true)
+      }
+    }
+  }
+
+  static func saveImage(path: String?, result: @escaping FlutterResult) {
+    guard let path,
+          let data = try? Data(contentsOf: URL(fileURLWithPath: path)),
+          let image = UIImage(data: data)
+    else {
+      result(false)
+      return
+    }
+    if #available(iOS 14, *) {
+      PHPhotoLibrary.requestAuthorization(for: .addOnly) { status in
+        guard status == .authorized || status == .limited else {
+          DispatchQueue.main.async { result(false) }
+          return
+        }
+        PHPhotoLibrary.shared().performChanges({
+          PHAssetChangeRequest.creationRequestForAsset(from: image)
+        }) { ok, _ in
+          DispatchQueue.main.async { result(ok) }
+        }
+      }
+      return
+    }
+    PHPhotoLibrary.requestAuthorization { status in
+      guard status == .authorized else {
+        DispatchQueue.main.async { result(false) }
+        return
+      }
+      PHPhotoLibrary.shared().performChanges({
+        PHAssetChangeRequest.creationRequestForAsset(from: image)
+      }) { ok, _ in
+        DispatchQueue.main.async { result(ok) }
+      }
+    }
+  }
+
+  static func topViewController() -> UIViewController? {
+    let scenes = UIApplication.shared.connectedScenes
+      .compactMap { $0 as? UIWindowScene }
+      .sorted { left, right in
+        let rank: (UIScene.ActivationState) -> Int = { state in
+          state == .foregroundActive ? 0 : 1
+        }
+        return rank(left.activationState) < rank(right.activationState)
+      }
+    for scene in scenes {
+      let windows = scene.windows.sorted { left, right in
+        left.isKeyWindow && !right.isKeyWindow
+      }
+      for window in windows {
+        guard var top = window.rootViewController else { continue }
+        while let presented = top.presentedViewController {
+          top = presented
+        }
+        if top.viewIfLoaded?.window != nil {
+          return top
+        }
+      }
+    }
+    return nil
   }
 
   static func encodeJpeg(_ raw: Any?) -> FlutterStandardTypedData? {

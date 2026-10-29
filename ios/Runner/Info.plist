@@ -53,6 +53,7 @@
 		<string>fb</string>
 		<string>fb-lite</string>
 		<string>whatsapp</string>
+		<string>whatsapp-business</string>
 	</array>
 	<key>NSPhotoLibraryAddUsageDescription</key>
 	<string>MotiScroll saves the quote card you chose to Photos. It does not read your library.</string>

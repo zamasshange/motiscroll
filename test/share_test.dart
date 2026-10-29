@@ -117,7 +117,8 @@ void main() {
 
   test('auto-fit never truncates and grows a short line', () {
     const short = 'Begin.';
-    const long = 'word word word word word word word word word word '
+    const long =
+        'word word word word word word word word word word '
         'word word word word word word word word word word '
         'word word word word word word word word word word '
         'word word word word word word word word word word';
@@ -190,8 +191,13 @@ void main() {
 
     expect(whatsappView(none).enabled, isFalse);
     expect(whatsappView(all).enabled, isTrue);
+    expect(whatsappView(ShareApps.unknown).enabled, isTrue);
+    expect(whatsappView(ShareApps.unknown).systemShare, isTrue);
     expect(metaAppIdReady, isFalse);
-    expect(formatForDestination(ShareDestination.instagramStory), ShareFormat.story);
+    expect(
+      formatForDestination(ShareDestination.instagramStory),
+      ShareFormat.story,
+    );
     expect(formatForDestination(ShareDestination.whatsapp), ShareFormat.square);
   });
 }

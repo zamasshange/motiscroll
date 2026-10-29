@@ -67,6 +67,7 @@ class _ShareSheetState extends State<ShareSheet> {
   var _ready = false;
   var _busy = false;
   var _whatsAppHintShown = false;
+  String? _status;
 
   @override
   void initState() {
@@ -115,8 +116,7 @@ class _ShareSheetState extends State<ShareSheet> {
     final palette = AppScope.of(context).palette;
     final ui = _uiLang;
     final content = _contentLang;
-    final direction =
-        languageByCode(ui)?.direction ?? TextDirection.ltr;
+    final direction = languageByCode(ui)?.direction ?? TextDirection.ltr;
     final reduce = reduceMotion(context);
     final cardSize = shareFormatSize(_format);
     final ig = instagramStoryView(_apps, metaReady: metaAppIdReady);
@@ -173,8 +173,7 @@ class _ShareSheetState extends State<ShareSheet> {
                                         ? const NeverScrollableScrollPhysics()
                                         : null,
                                     onPageChanged: (index) {
-                                      final next =
-                                          ShareTemplate.values[index];
+                                      final next = ShareTemplate.values[index];
                                       setState(() => _template = next);
                                       unawaited(SharePrefs.setTemplate(next));
                                     },
@@ -260,6 +259,14 @@ class _ShareSheetState extends State<ShareSheet> {
                     ),
                 ],
               ),
+              if (_status != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  _status!,
+                  textAlign: TextAlign.center,
+                  style: sans(palette, 14, height: 1.3, color: palette.accent),
+                ),
+              ],
               const SizedBox(height: 16),
               LayoutBuilder(
                 builder: (context, constraints) {
@@ -313,17 +320,11 @@ class _ShareSheetState extends State<ShareSheet> {
                       label: shareUi(ui, 'more'),
                       enabled: true,
                       notInstalled: shareUi(ui, 'notInstalled'),
-                      onTap: () => _send(
-                        ShareDestination.more,
-                        systemShare: true,
-                      ),
+                      onTap: () =>
+                          _send(ShareDestination.more, systemShare: true),
                     ),
                   ];
-                  return Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: buttons,
-                  );
+                  return Wrap(spacing: 8, runSpacing: 8, children: buttons);
                 },
               ),
             ],
@@ -389,7 +390,10 @@ class _ShareSheetState extends State<ShareSheet> {
     final ui = _uiLang;
     final content = _contentLang;
     final format = forceStory ? ShareFormat.story : _format;
-    setState(() => _busy = true);
+    setState(() {
+      _busy = true;
+      _status = null;
+    });
     ShareImageFile? image;
     try {
       await SharePrefs.setDestination(destination);
@@ -405,6 +409,7 @@ class _ShareSheetState extends State<ShareSheet> {
         translatedLabel: widgetString(content, 'translated'),
       );
       if (!mounted) return;
+      setState(() => _busy = false);
       final caption = shareCaption(
         widget.item,
         sharedFrom: shareUi(ui, 'sharedFrom'),
@@ -419,7 +424,7 @@ class _ShareSheetState extends State<ShareSheet> {
             image.file.path,
           );
           if (!ok) {
-            _toast(shareUi(ui, 'couldntOpenInstagram'));
+            _note(shareUi(ui, 'couldntOpenInstagram'));
             await _systemShare(image, caption);
           }
         case ShareDestination.facebook:
@@ -431,7 +436,7 @@ class _ShareSheetState extends State<ShareSheet> {
             image.file.path,
           );
           if (!ok) {
-            _toast(shareUi(ui, 'couldntOpenFacebook'));
+            _note(shareUi(ui, 'couldntOpenFacebook'));
             await _systemShare(image, caption);
           }
         case ShareDestination.whatsapp:
@@ -444,7 +449,7 @@ class _ShareSheetState extends State<ShareSheet> {
             caption,
           );
           if (!ok) {
-            _toast(shareUi(ui, 'couldntOpenWhatsApp'));
+            _note(shareUi(ui, 'couldntOpenWhatsApp'));
             await _systemShare(image, caption);
           }
         case ShareDestination.save:
@@ -453,33 +458,49 @@ class _ShareSheetState extends State<ShareSheet> {
           await _systemShare(image, caption);
       }
     } on Object {
-      _toast(shareUi(ui, 'couldntRender'));
+      _note(shareUi(ui, 'couldntRender'));
     } finally {
       if (image != null) scheduleShareTempDelete(image.file);
-      if (mounted) setState(() => _busy = false);
+      if (mounted && _busy) setState(() => _busy = false);
     }
   }
 
   Future<void> _save(ShareImageFile image) async {
     final ui = _uiLang;
     try {
-      await Gal.putImage(
-        image.file.path,
-        album: Platform.isAndroid ? 'MotiScroll' : null,
-      );
-      _toast(
-        shareUi(ui, 'savedToPhotos'),
-        action: shareUi(ui, 'open'),
-        onAction: Gal.open,
-      );
+      final allowed = await Gal.requestAccess();
+      if (!allowed) {
+        _denied();
+        return;
+      }
+      try {
+        await Gal.putImageBytes(
+          image.bytes,
+          name: 'motiscroll_${DateTime.now().millisecondsSinceEpoch}',
+        );
+      } on Object {
+        final ok = await ShareBridge.instance.saveImage(image.file.path);
+        if (!ok) rethrow;
+      }
+      _note(shareUi(ui, 'savedToPhotos'));
     } on GalException catch (error) {
       if (error.type == GalExceptionType.accessDenied) {
         _denied();
         return;
       }
-      _toast(shareUi(ui, 'couldntSave'));
+      final ok = await ShareBridge.instance.saveImage(image.file.path);
+      if (ok) {
+        _note(shareUi(ui, 'savedToPhotos'));
+      } else {
+        _note(shareUi(ui, 'couldntSave'));
+      }
     } on Object {
-      _toast(shareUi(ui, 'couldntSave'));
+      final ok = await ShareBridge.instance.saveImage(image.file.path);
+      if (ok) {
+        _note(shareUi(ui, 'savedToPhotos'));
+      } else {
+        _note(shareUi(ui, 'couldntSave'));
+      }
     }
   }
 
@@ -518,11 +539,15 @@ class _ShareSheetState extends State<ShareSheet> {
     );
   }
 
-  Future<void> _systemShare(ShareImageFile image, String caption) {
-    final origin =
-        widget.origin ??
-        (Offset.zero & MediaQuery.sizeOf(context));
-    return SharePlus.instance.share(
+  Future<void> _systemShare(ShareImageFile image, String caption) async {
+    final native = await ShareBridge.instance.shareSystem(
+      image.file.path,
+      caption,
+    );
+    if (native) return;
+    if (!mounted) return;
+    final origin = widget.origin ?? (Offset.zero & MediaQuery.sizeOf(context));
+    await SharePlus.instance.share(
       ShareParams(
         files: [XFile(image.file.path, mimeType: image.mime)],
         text: caption,
@@ -531,19 +556,9 @@ class _ShareSheetState extends State<ShareSheet> {
     );
   }
 
-  void _toast(String message, {String? action, Future<void> Function()? onAction}) {
-    final messenger = ScaffoldMessenger.maybeOf(context);
-    if (messenger == null) return;
-    messenger
-      ..hideCurrentSnackBar()
-      ..showSnackBar(
-        SnackBar(
-          content: Text(message),
-          action: action == null || onAction == null
-              ? null
-              : SnackBarAction(label: action, onPressed: () => onAction()),
-        ),
-      );
+  void _note(String message) {
+    if (!mounted) return;
+    setState(() => _status = message);
   }
 }
 
