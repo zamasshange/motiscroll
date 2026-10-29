@@ -4,15 +4,30 @@ import 'package:flutter/material.dart';
 
 import '../data/catalog.dart';
 import '../data/models.dart';
+import '../notifications/notification_text.dart';
 import '../state/app_state.dart';
 import '../theme/tokens.dart';
+import '../widgets/chrome.dart';
 import '../widgets/generated_cover.dart';
 
 Item? onboardPreviewItem(AppState state) {
+  final lines = onboardPreviewLines(state);
+  if (lines.isEmpty) return null;
+  return lines.first;
+}
+
+List<Item> onboardPreviewLines(AppState state) {
   final picks = dailyPicks(DateTime.now(), state.usualMood, state.items);
-  if (picks != null) return picks.quote;
-  if (state.items.isEmpty) return null;
-  return state.items.first;
+  if (picks == null) return state.items.take(2).toList();
+  final second = picks.speech ?? picks.boost;
+  if (second.id == picks.quote.id) return [picks.quote];
+  return [picks.quote, second];
+}
+
+String? onboardPortrait(AppState state, Item item) {
+  final own = item.imageUrl;
+  if (own != null && own.isNotEmpty) return own;
+  return state.portraitFor(item.author)?.imageUrl;
 }
 
 class OnboardDeviceFrame extends StatelessWidget {
@@ -218,13 +233,20 @@ class OnboardWidgetPreview extends StatelessWidget {
                         ),
                       const ColoredBox(color: Color(0xA10B0B0D)),
                       Padding(
-                        padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
+                        padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
+                            OnboardSpeakerMark(
+                              size: 40,
+                              imageUrl: item == null
+                                  ? null
+                                  : onboardPortrait(state, item),
+                            ),
+                            const SizedBox(height: 10),
                             Text(
                               item?.text ?? 'Your daily quote appears here',
-                              maxLines: 6,
+                              maxLines: 5,
                               overflow: TextOverflow.ellipsis,
                               style: serif(
                                 palette,
@@ -233,13 +255,15 @@ class OnboardWidgetPreview extends StatelessWidget {
                                 color: kCream,
                               ),
                             ),
-                            const Spacer(),
+                            const SizedBox(height: 8),
                             Text(
                               item?.author ?? kAppName,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
                               style: sans(
                                 palette,
-                                14,
-                                weight: FontWeight.w600,
+                                18,
+                                weight: FontWeight.w700,
                                 color: const Color(0xFFE07A4A),
                               ),
                             ),
@@ -251,11 +275,12 @@ class OnboardWidgetPreview extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                                 style: sans(
                                   palette,
-                                  12,
+                                  13,
                                   color: const Color(0x99F4F1EA),
                                 ),
                               ),
                             ],
+                            const Spacer(),
                           ],
                         ),
                       ),
@@ -285,6 +310,143 @@ class OnboardWidgetPreview extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class OnboardNotificationPreview extends StatelessWidget {
+  const OnboardNotificationPreview({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final state = AppScope.of(context);
+    final lang = state.uiLanguage ?? state.contentLanguage ?? 'en';
+    final lines = onboardPreviewLines(state);
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        _Notice(
+          title: morningTitle(lang, 0),
+          item: lines.isEmpty ? null : lines.first,
+        ),
+        if (lines.length > 1) ...[
+          const SizedBox(height: 10),
+          _Notice(title: eveningTitle(lang, 0), item: lines[1]),
+        ],
+      ],
+    );
+  }
+}
+
+class _Notice extends StatelessWidget {
+  const _Notice({required this.title, required this.item});
+
+  final String title;
+  final Item? item;
+
+  @override
+  Widget build(BuildContext context) {
+    final state = AppScope.of(context);
+    final palette = state.palette;
+    final quote = item?.text ?? 'Your daily quote appears here';
+    final author = item?.author ?? kAppName;
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: palette.card,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: palette.border),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          OnboardSpeakerMark(
+            size: 40,
+            imageUrl: item == null ? null : onboardPortrait(state, item!),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: sans(palette, 15, weight: FontWeight.w700),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  quote,
+                  maxLines: 3,
+                  overflow: TextOverflow.ellipsis,
+                  style: serif(palette, 16, height: 1.25),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  '— $author',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: sans(
+                    palette,
+                    15,
+                    weight: FontWeight.w700,
+                    color: palette.accent,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class OnboardSpeakerMark extends StatelessWidget {
+  const OnboardSpeakerMark({super.key, required this.size, this.imageUrl});
+
+  final double size;
+  final String? imageUrl;
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(size * 0.22);
+    final url = imageUrl;
+    if (url != null && url.isNotEmpty) {
+      return ClipRRect(
+        borderRadius: radius,
+        child: Image.network(
+          url,
+          width: size,
+          height: size,
+          fit: BoxFit.cover,
+          headers: imageHeaders,
+          errorBuilder: (_, _, _) => _AppMark(size: size),
+        ),
+      );
+    }
+    return _AppMark(size: size);
+  }
+}
+
+class _AppMark extends StatelessWidget {
+  const _AppMark({required this.size});
+
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: const Color(0xFF0B0B0D),
+        borderRadius: BorderRadius.circular(size * 0.22),
+      ),
+      child: MotiMark(size: size * 0.62, color: kCream),
     );
   }
 }
