@@ -77,6 +77,7 @@ flutter:
 
   assets:
     - assets/images/mark.png
+    - assets/images/covers/
     - assets/onboarding/home.png
     - assets/onboarding/discover.png
     - assets/onboarding/feed.png

@@ -261,7 +261,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 8),
               SizedBox(
-                height: 72,
+                height: _wheelExtent,
                 child: Row(
                   children: [
                     Expanded(
@@ -273,7 +273,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         onSelected: (i) => setState(() {
                           _fieldIndex = i;
                           _lineIndex = 0;
-                          _lines?.jumpToItem(0);
+                          if (_lines != null && _lines!.hasClients) {
+                            _lines!.jumpToItem(0);
+                          }
                         }),
                       ),
                     ),
@@ -292,7 +294,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ],
                 ),
-                ),
+              ),
               const SizedBox(height: 12),
               PrimaryButton(
                 label: 'Open this line',
@@ -464,6 +466,8 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 }
 
+const _wheelExtent = 44.0;
+
 class _Wheel extends StatelessWidget {
   const _Wheel({
     required this.controller,
@@ -484,37 +488,43 @@ class _Wheel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = AppScope.of(context).palette;
-    if (count == 0) return const SizedBox.shrink();
-    return ListWheelScrollView.useDelegate(
-      controller: controller,
-      itemExtent: 36,
-      diameterRatio: 2.2,
-      perspective: 0.003,
-      physics: const FixedExtentScrollPhysics(),
-      onSelectedItemChanged: onSelected,
-      childDelegate: ListWheelChildBuilderDelegate(
-        childCount: count,
-        builder: (context, index) {
-          final on = index == selected;
-          return Center(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-              decoration: BoxDecoration(
-                color: on ? palette.cardAlt : const Color(0x00000000),
-                borderRadius: BorderRadius.circular(circled ? 999 : 12),
-              ),
-              child: Text(
-                label(index),
-                style: sans(
-                  palette,
-                  on ? 18 : 15,
-                  weight: on ? FontWeight.w700 : FontWeight.w500,
-                  color: on ? palette.text : palette.textFaint,
+    if (count == 0) return const SizedBox(height: _wheelExtent);
+    return ClipRect(
+      child: ListWheelScrollView.useDelegate(
+        controller: controller,
+        itemExtent: _wheelExtent,
+        diameterRatio: 1.1,
+        perspective: 0.0001,
+        overAndUnderCenterOpacity: 0,
+        clipBehavior: Clip.hardEdge,
+        physics: const FixedExtentScrollPhysics(),
+        onSelectedItemChanged: onSelected,
+        childDelegate: ListWheelChildBuilderDelegate(
+          childCount: count,
+          builder: (context, index) {
+            final on = index == selected;
+            return Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                decoration: BoxDecoration(
+                  color: on ? palette.cardAlt : const Color(0x00000000),
+                  borderRadius: BorderRadius.circular(circled ? 999 : 12),
+                ),
+                child: Text(
+                  label(index),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: sans(
+                    palette,
+                    18,
+                    weight: FontWeight.w700,
+                    color: on ? palette.text : palette.textFaint,
+                  ),
                 ),
               ),
-            ),
-          );
-        },
+            );
+          },
+        ),
       ),
     );
   }

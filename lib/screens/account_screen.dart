@@ -14,11 +14,14 @@ class AccountScreen extends StatefulWidget {
 
 class _AccountScreenState extends State<AccountScreen> {
   final _email = TextEditingController();
+  final _password = TextEditingController();
   var _busy = false;
+  var _hidePassword = true;
 
   @override
   void dispose() {
     _email.dispose();
+    _password.dispose();
     super.dispose();
   }
 
@@ -27,12 +30,14 @@ class _AccountScreenState extends State<AccountScreen> {
     try {
       await action();
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(success)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(success)));
     } on AccountException catch (error) {
       if (!mounted) return;
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text(error.message)));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(error.message)));
     } on Exception {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -76,16 +81,6 @@ class _AccountScreenState extends State<AccountScreen> {
           ),
           const SizedBox(height: 24),
           PrimaryButton(
-            label: 'Continue with Apple',
-            onPressed: _busy
-                ? () {}
-                : () => _run(
-                    () => linkApple(state),
-                    'Apple is linked to this library.',
-                  ),
-          ),
-          const SizedBox(height: 8),
-          OutlineButton(
             label: 'Continue with Google',
             onPressed: _busy
                 ? () {}
@@ -94,20 +89,53 @@ class _AccountScreenState extends State<AccountScreen> {
                     'Google is linked to this library.',
                   ),
           ),
-          const SizedBox(height: 16),
-          TextField(
+          const SizedBox(height: 20),
+          _Field(
             controller: _email,
+            label: 'Email',
             keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(labelText: 'Email link'),
           ),
-          const SizedBox(height: 8),
-          OutlineButton(
-            label: 'Email me a link',
+          const SizedBox(height: 12),
+          _Field(
+            controller: _password,
+            label: 'Password',
+            obscure: _hidePassword,
+            trailing: IconButton(
+              onPressed: () => setState(() => _hidePassword = !_hidePassword),
+              icon: Icon(
+                _hidePassword
+                    ? Icons.visibility_outlined
+                    : Icons.visibility_off_outlined,
+                color: palette.textMuted,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+          PrimaryButton(
+            label: 'Sign in',
             onPressed: _busy
                 ? () {}
                 : () => _run(
-                    () => sendEmailLink(_email.text.trim()),
-                    'The link was sent.',
+                    () => signInWithEmailPassword(
+                      state,
+                      _email.text.trim(),
+                      _password.text,
+                    ),
+                    'Signed in.',
+                  ),
+          ),
+          const SizedBox(height: 8),
+          OutlineButton(
+            label: 'Create account',
+            onPressed: _busy
+                ? () {}
+                : () => _run(
+                    () => createEmailAccount(
+                      state,
+                      _email.text.trim(),
+                      _password.text,
+                    ),
+                    'The account was created.',
                   ),
           ),
           const SizedBox(height: 24),
@@ -125,7 +153,7 @@ class _AccountScreenState extends State<AccountScreen> {
             label: 'Delete account',
             onPressed: _busy
                 ? () {}
-                :                   () => _run(() async {
+                : () => _run(() async {
                     await deleteAccount();
                     await state.clearWidgets();
                     if (!context.mounted) return;
@@ -133,6 +161,47 @@ class _AccountScreenState extends State<AccountScreen> {
                   }, 'The account was deleted.'),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _Field extends StatelessWidget {
+  const _Field({
+    required this.controller,
+    required this.label,
+    this.keyboardType,
+    this.obscure = false,
+    this.trailing,
+  });
+
+  final TextEditingController controller;
+  final String label;
+  final TextInputType? keyboardType;
+  final bool obscure;
+  final Widget? trailing;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = AppScope.of(context).palette;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4),
+      decoration: BoxDecoration(
+        color: palette.card,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: palette.border),
+      ),
+      child: TextField(
+        controller: controller,
+        keyboardType: keyboardType,
+        obscureText: obscure,
+        style: sans(palette, 16),
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          labelText: label,
+          labelStyle: sans(palette, 13, color: palette.textMuted),
+          suffixIcon: trailing,
+        ),
       ),
     );
   }

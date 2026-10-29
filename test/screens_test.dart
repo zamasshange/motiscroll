@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:moti_scroll/screens/account_screen.dart';
 import 'package:moti_scroll/screens/daily_screen.dart';
 import 'package:moti_scroll/screens/habit_sheet.dart';
+import 'package:moti_scroll/screens/home_screen.dart';
 import 'package:moti_scroll/screens/paths_screen.dart';
 import 'package:moti_scroll/screens/saved_screen.dart';
 import 'package:moti_scroll/screens/settings_screen.dart';
@@ -67,6 +69,28 @@ void main() {
     await tester.tap(find.text('Legal'));
     await tester.pumpAndSettle();
     expect(find.text('Photo credits'), findsOneWidget);
+  });
+
+  testWidgets('account offers Google, email, and delete only', (tester) async {
+    await _pumpPage(tester, const AccountScreen());
+    expect(find.text('Continue with Google'), findsOneWidget);
+    expect(find.text('Email'), findsOneWidget);
+    expect(find.text('Password'), findsOneWidget);
+    expect(find.text('Sign in'), findsOneWidget);
+    expect(find.text('Create account'), findsOneWidget);
+    expect(find.text('Sign out'), findsOneWidget);
+    expect(find.text('Delete account'), findsOneWidget);
+    expect(find.text('Continue with Apple'), findsNothing);
+    expect(find.text('Email me a link'), findsNothing);
+  });
+
+  testWidgets('line finder hides the next field and number', (tester) async {
+    await _pumpPage(tester, const HomeScreen());
+    expect(find.text('Line finder'), findsOneWidget);
+    expect(find.text('Leadership'), findsWidgets);
+    expect(find.text('Sports'), findsNothing);
+    expect(find.text('Business'), findsNothing);
+    expect(find.text('2'), findsNothing);
   });
 
   testWidgets('library hub counts saved lines', (tester) async {

@@ -289,6 +289,44 @@ class CoverCache {
   }
 }
 
+const fieldCoverAssets = <Field, String>{
+  Field.sports: 'assets/images/covers/sports.jpg',
+  Field.business: 'assets/images/covers/business.jpg',
+  Field.science: 'assets/images/covers/science.jpg',
+  Field.arts: 'assets/images/covers/arts.jpg',
+  Field.leadership: 'assets/images/covers/leadership.jpg',
+  Field.resilience: 'assets/images/covers/resilience.jpg',
+};
+
+class FieldCover extends StatelessWidget {
+  const FieldCover({
+    super.key,
+    required this.field,
+    this.seed,
+  });
+
+  final Field field;
+  final String? seed;
+
+  @override
+  Widget build(BuildContext context) {
+    final asset = fieldCoverAssets[field];
+    final fallback = GeneratedCover(
+      field: field,
+      seed: seed ?? field.name,
+    );
+    if (asset == null) return fallback;
+    return Image.asset(
+      asset,
+      fit: BoxFit.cover,
+      width: double.infinity,
+      height: double.infinity,
+      alignment: Alignment.center,
+      errorBuilder: (_, _, _) => fallback,
+    );
+  }
+}
+
 class GeneratedCover extends StatefulWidget {
   const GeneratedCover({
     super.key,

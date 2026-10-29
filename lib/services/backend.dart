@@ -155,32 +155,70 @@ Future<void> attachBackend(AppState state) async {
 
 Future<void> linkGoogle(AppState state) => _link(state, GoogleAuthProvider());
 
-Future<void> linkApple(AppState state) =>
-    _link(state, OAuthProvider('apple.com'));
-
-Future<void> sendEmailLink(String email) async {
-  if (email.isEmpty || !email.contains('@')) {
-    throw AccountException(
-      'Enter the email address that should receive the link.',
-    );
-  }
+Future<void> signInWithEmailPassword(
+  AppState state,
+  String email,
+  String password,
+) async {
+  await _ensureReady(state);
+  _requireEmailPassword(email, password);
   try {
-    await FirebaseAuth.instance.sendSignInLinkToEmail(
+    final credential = EmailAuthProvider.credential(
       email: email,
-      actionCodeSettings: ActionCodeSettings(
-        url: 'https://motiscroll.firebaseapp.com/finishSignIn',
-        handleCodeInApp: true,
-        iOSBundleId: 'com.example.motiScroll',
-        androidPackageName: 'com.example.moti_scroll',
-        androidInstallApp: true,
-      ),
+      password: password,
     );
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      await FirebaseAuth.instance.signInWithCredential(credential);
+    } else if (user.isAnonymous) {
+      try {
+        await user.linkWithCredential(credential);
+      } on FirebaseAuthException catch (error) {
+        if (error.code == 'email-already-in-use' ||
+            error.code == 'credential-already-in-use' ||
+            error.code == 'account-exists-with-different-credential') {
+          await FirebaseAuth.instance.signInWithCredential(credential);
+        } else {
+          rethrow;
+        }
+      }
+    } else {
+      await FirebaseAuth.instance.signInWithCredential(credential);
+    }
   } on FirebaseAuthException catch (error) {
     throw AccountException(_authMessage(error));
   }
+  await _afterAuth(state);
 }
 
-Future<void> _link(AppState state, AuthProvider provider) async {
+Future<void> createEmailAccount(
+  AppState state,
+  String email,
+  String password,
+) async {
+  await _ensureReady(state);
+  _requireEmailPassword(email, password);
+  try {
+    final credential = EmailAuthProvider.credential(
+      email: email,
+      password: password,
+    );
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null && user.isAnonymous) {
+      await user.linkWithCredential(credential);
+    } else {
+      await FirebaseAuth.instance.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+    }
+  } on FirebaseAuthException catch (error) {
+    throw AccountException(_authMessage(error));
+  }
+  await _afterAuth(state);
+}
+
+Future<void> _ensureReady(AppState state) async {
   if (!state.firebaseReady) {
     await attachBackend(state);
   }
@@ -189,6 +227,19 @@ Future<void> _link(AppState state, AuthProvider provider) async {
       state.accountError ?? 'The account service could not be reached.',
     );
   }
+}
+
+void _requireEmailPassword(String email, String password) {
+  if (email.isEmpty || !email.contains('@')) {
+    throw AccountException('Enter the email address for this account.');
+  }
+  if (password.length < 6) {
+    throw AccountException('Use a password of at least six characters.');
+  }
+}
+
+Future<void> _link(AppState state, AuthProvider provider) async {
+  await _ensureReady(state);
   try {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
@@ -201,6 +252,10 @@ Future<void> _link(AppState state, AuthProvider provider) async {
   } on FirebaseAuthException catch (error) {
     throw AccountException(_authMessage(error));
   }
+  await _afterAuth(state);
+}
+
+Future<void> _afterAuth(AppState state) async {
   final signedIn = FirebaseAuth.instance.currentUser;
   final uid = signedIn?.uid;
   if (uid != null) {
@@ -225,7 +280,15 @@ String _authMessage(FirebaseAuthException error) {
     'popup-closed-by-user' => 'The sign-in window was closed.',
     'provider-already-linked' =>
       'That provider is already linked to this library.',
-    'invalid-credential' => 'Google did not accept this app. The iOS or Android client is not registered yet.',
+    'email-already-in-use' =>
+      'That email already has an account. Sign in instead.',
+    'weak-password' => 'Use a password of at least six characters.',
+    'wrong-password' ||
+    'user-not-found' ||
+    'invalid-email' ||
+    'invalid-credential' =>
+      'That sign-in was not accepted. Check the details and try again.',
+    'too-many-requests' => 'Too many tries. Wait a moment and try again.',
     _ => 'Sign-in could not be finished.',
   };
 }

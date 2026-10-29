@@ -76,7 +76,7 @@ class _FieldCard extends StatelessWidget {
               child: Stack(
                 fit: StackFit.expand,
                 children: [
-                  GeneratedCover(field: field, seed: field.name),
+                  FieldCover(field: field, seed: field.name),
                   const DecoratedBox(
                     decoration: BoxDecoration(
                       gradient: LinearGradient(
