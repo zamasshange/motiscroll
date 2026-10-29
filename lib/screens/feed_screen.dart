@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../l10n/ui_text.dart';
 import '../data/catalog.dart';
 import '../data/models.dart';
 import '../state/app_state.dart';
@@ -248,75 +247,53 @@ class _FeedScreenState extends State<FeedScreen> {
                           child: LayoutBuilder(
                             builder: (context, constraints) {
                               return Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
                                 children: [
                                   Pressable(
                                     onPressed: () => openStudy(context, line),
-                                    semanticLabel: 'Go deeper',
-                                    child: Column(
-                                      children: [
-                                        Container(
-                                          padding: const EdgeInsets.all(12),
-                                          decoration: BoxDecoration(
-                                            color: palette.card,
-                                            borderRadius: BorderRadius.circular(
-                                              22,
+                                    semanticLabel: 'Open the study',
+                                    child: Container(
+                                      padding: const EdgeInsets.all(12),
+                                      decoration: BoxDecoration(
+                                        color: palette.card,
+                                        borderRadius: BorderRadius.circular(22),
+                                        boxShadow: [
+                                          BoxShadow(
+                                            color: palette.backdrop.withValues(
+                                              alpha: 0.08,
                                             ),
-                                            boxShadow: [
-                                              BoxShadow(
-                                                color: palette.backdrop
-                                                    .withValues(alpha: 0.08),
-                                                blurRadius: 16,
-                                                offset: const Offset(0, 6),
+                                            blurRadius: 16,
+                                            offset: const Offset(0, 6),
+                                          ),
+                                        ],
+                                      ),
+                                      child: hasImage
+                                          ? AuthorAvatar(
+                                              author: line.author,
+                                              size: 72,
+                                              imageUrl: imageUrl,
+                                              imageCredit: credit,
+                                            )
+                                          : SizedBox(
+                                              width: 72,
+                                              height: 72,
+                                              child: Image.asset(
+                                                'assets/images/mark.png',
+                                                fit: BoxFit.contain,
+                                                color: palette.text,
+                                                colorBlendMode: BlendMode.srcIn,
                                               ),
-                                            ],
-                                          ),
-                                          child: hasImage
-                                              ? AuthorAvatar(
-                                                  author: line.author,
-                                                  size: 72,
-                                                  imageUrl: imageUrl,
-                                                  imageCredit: credit,
-                                                )
-                                              : SizedBox(
-                                                  width: 72,
-                                                  height: 72,
-                                                  child: Image.asset(
-                                                    'assets/images/mark.png',
-                                                    fit: BoxFit.contain,
-                                                    color: palette.text,
-                                                    colorBlendMode:
-                                                        BlendMode.srcIn,
-                                                  ),
-                                                ),
-                                        ),
-                                        const SizedBox(height: 8),
-                                        Text(
-                                          ui(
-                                            AppScope.of(context).uiLanguage ??
-                                                AppScope.of(context)
-                                                    .resolvedContentLanguage(
-                                                      View.of(context)
-                                                          .platformDispatcher
-                                                          .locale,
-                                                    ),
-                                            'goDeeper',
-                                          ),
-                                          style: sans(
-                                            palette,
-                                            12,
-                                            color: palette.textFaint,
-                                          ),
-                                        ),
-                                      ],
+                                            ),
                                     ),
                                   ),
-                                  Expanded(
+                                  const SizedBox(height: 20),
+                                  Flexible(
                                     child: LayoutBuilder(
                                       builder: (context, inner) {
                                         return FittedBox(
                                           fit: BoxFit.scaleDown,
                                           child: SizedBox(
-                                            width: inner.maxWidth,
+                                            width: constraints.maxWidth,
                                             child: Column(
                                               mainAxisSize: MainAxisSize.min,
                                               children: [
@@ -724,7 +701,7 @@ class _Rail extends StatelessWidget {
         const SizedBox(height: 18),
         _BareIcon(
           icon: Icons.chat_bubble_outline_rounded,
-          label: 'Go deeper',
+          label: 'Open the study',
           onTap: () => openStudy(context, item),
         ),
         const SizedBox(height: 18),
