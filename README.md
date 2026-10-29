@@ -121,7 +121,7 @@ Each card is one `publishedItems` read. Discover and Feed page 20 documents and 
 
 ## Privacy
 
-Settings includes Account (link, sign out, delete), Notifications, Rights and sources, Privacy, and Terms. Privacy and Terms are placeholders for a lawyer. Delete account removes the user subtree and the Auth user, and clears the widget copy and the local notification plan on the phone. App Check is enforced on callable functions outside the emulator. Turn on enforcement for Firestore and Storage in the console after Play Integrity and App Attest are configured.
+Settings includes Account (link, sign out, delete), Notifications, Rights and sources, Privacy, and Terms. Privacy and Terms are placeholders for a lawyer. Delete account removes the user subtree and the Auth user, and clears the widget copy and the local notification plan on the phone. Share cards are drawn on the phone. Saving a picture uses add-only Photos access. Instagram and Facebook Story hand-off uses the system pasteboard or a one-time Android intent; no Meta SDK is bundled. No share event is counted. App Check is enforced on callable functions outside the emulator. Turn on enforcement for Firestore and Storage in the console after Play Integrity and App Attest are configured.
 
 ## Notifications
 
@@ -217,5 +217,63 @@ On a real iPhone and an Android phone:
 `flutter analyze` should be clean. `flutter build ios` and `flutter build apk` build the app. The iOS widget extension is not part of that build until the Xcode target exists.
 
 An iOS 17 “Next quote” button was not added. Save and Like on the widget were not added. Android has no lock screen widget. Live Activities, Dynamic Island, watchOS, and Wear OS are out of scope. Field art on the widget is a gradient from the same colors as the in-app covers, with a dark scrim in dark mode. Pre-rendered cover images were not added.
+
+## Share
+
+Share draws a MotiScroll quote card on the phone, then hands that image to Instagram Story, Facebook Story, WhatsApp, Photos, or the system share sheet. The card is not a screenshot of the feed. Quote text is the published line, never shortened. Every card names the author and the primary source (and year). Translated lines show the localized “Translated” label. There are no author photos or logos on the card.
+
+Formats: Story 1080×1920, Portrait 1080×1350, Square 1080×1080. Story text stays inside the middle band (about 14% free at the top, about 20% free at the bottom) so Instagram and Facebook UI do not cover it. Templates: Dark (default), Light, Cover, Minimal.
+
+WhatsApp Status cannot be posted by the app. The button is labeled WhatsApp. The first time, a hint says to pick **My status** inside WhatsApp. On Android the image opens WhatsApp’s own picker (Status or a chat). On iOS it uses the system share sheet so WhatsApp is a target. If only WhatsApp Business is installed, that app is used.
+
+`shareLinkBase` is `https://example.com/motiscroll` until you replace it. Captions for chats and the system share sheet are the quoted line, `— Author`, “Shared from MotiScroll”, and `{shareLinkBase}/q/{itemId}`. Incoming `motiscroll://item/{itemId}` still opens that line. A `/q/{itemId}` path on the placeholder host is mapped onto the same in-app link. Universal links and a store landing page are a later step. Do not invent a real domain here.
+
+Streak share on Home remains text-only. Instagram “share as sticker” was not added.
+
+### Meta App ID
+
+Instagram and Facebook Story hand-off need a Meta app id as `source_application`. It is never committed. Pass it at build time:
+
+```bash
+flutter run --dart-define=META_APP_ID=your_id
+flutter build apk --dart-define=META_APP_ID=your_id
+flutter build ios --dart-define=META_APP_ID=your_id
+```
+
+If it is missing, the Instagram and Facebook Story buttons are hidden, those destinations use the system share sheet, and debug builds print a warning.
+
+Create a free app at [Meta for Developers](https://developers.facebook.com/). Add the iOS bundle id `com.example.motiScroll` and the Android application id `com.example.moti_scroll` in that app’s settings, then copy the App ID. Before a store release, re-read Meta’s current Stories documents and re-test the hand-off. The pasteboard keys and Android intent extras have changed before:
+
+- [Sharing to Stories (Instagram)](https://developers.facebook.com/docs/instagram-platform/sharing-to-feed/sharing-to-stories/)
+- [Sharing to Stories (Facebook)](https://developers.facebook.com/docs/sharing/sharing-to-stories/)
+
+No Facebook SDK, Instagram SDK, or analytics SDK is used.
+
+### What you still do in Xcode
+
+`project.pbxproj` is not edited by hand. Native share code lives in the existing `AppDelegate.swift` and `MainActivity.kt`.
+
+1. Confirm `ios/Runner/Info.plist` has `LSApplicationQueriesSchemes` (`instagram-stories`, `instagram`, `facebook-stories`, `fb`, `fb-lite`, `whatsapp`) and `NSPhotoLibraryAddUsageDescription` (add-only; MotiScroll does not read Photos).
+2. Optional: add `InfoPlist.strings` for other UI languages via Xcode File → New → Strings File. English is already in Info.plist.
+3. After pulling, `cd ios && pod install` if CocoaPods asks. No new iOS target is required for share.
+4. Re-test Instagram and Facebook Story after a major update of those apps.
+
+Android FileProvider (`${applicationId}.fileprovider`), `file_paths.xml`, package-visibility `<queries>`, and `WRITE_EXTERNAL_STORAGE` with `maxSdkVersion="28"` are already in the manifest. Android 10 and above save through MediaStore into `Pictures/MotiScroll` with no permission.
+
+### Manual check
+
+On a real iPhone (iOS 16 and current) and a real Android phone (9, 10, and 13+):
+
+- Open share from Feed, Discover, Home, the study page, and a Saved row (icon and long-press). Confirm the old text-only quote share is gone.
+- Open a notification, then share that line. Airplane mode: the card still renders and Save still works.
+- Instagram installed: Story uses the Story format and opens the IG Story composer with the card as the background. Instagram not installed: the button is dimmed “Not installed”; tapping it opens the system share sheet.
+- Facebook installed: Story opens, or if it fails, the system share sheet. Facebook Lite only, or no Facebook: the system share sheet. `META_APP_ID` missing: Instagram and Facebook buttons hidden.
+- WhatsApp installed: Android opens WhatsApp’s picker. iOS shows the system share sheet with WhatsApp as a target. WhatsApp Business only: that app is used. Not installed: dimmed, tap uses the system share sheet. Confirm the one-time “My status” hint.
+- Save picture, permission granted: “Saved to Photos” and Open. Permission denied: a message and Open system settings. Confirm MotiScroll is not asking to read the whole library.
+- More… opens the system share sheet with the image and caption. On iPad, it does not crash (share origin is set).
+- Switch content language to Arabic and Russian. The card uses that language’s direction. An Arabic quote with a Latin author name still reads correctly. Open the share sheet in Arabic and Persian and confirm the button grid starts from the right.
+- Dark / Light / Cover / Minimal, and Story / Portrait / Square. A short line and a ~40-word line both show in full. Source line includes the year when present.
+
+`flutter analyze` should be clean. `flutter build ios` and `flutter build apk` build the app.
 
 # motiscroll

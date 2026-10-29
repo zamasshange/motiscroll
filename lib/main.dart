@@ -8,6 +8,7 @@ import 'l10n/languages.dart';
 import 'notifications/notification_service.dart';
 import 'screens/onboarding_screen.dart';
 import 'services/backend.dart';
+import 'share/quote_card_renderer.dart';
 import 'shell.dart';
 import 'state/app_state.dart';
 import 'theme/tokens.dart';
@@ -16,6 +17,7 @@ import 'widgets/widget_sync.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await QuoteCardRenderer.cleanupTemp();
   final state = AppState();
   await state.load();
   await attachBackend(state);

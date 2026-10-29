@@ -175,63 +175,77 @@ class _ShelfScreen extends StatelessWidget {
               itemBuilder: (context, index) {
                 final item = items[index];
                 final note = state.notes[item.id];
-                return Pressable(
-                  onPressed: () => showGoDeeper(context, item),
-                  semanticLabel: item.author,
-                  child: Container(
-                    padding: const EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      color: palette.card,
-                      borderRadius: BorderRadius.circular(kCardRadius),
-                      border: Border.all(color: palette.border),
-                    ),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        AuthorAvatar(
-                          author: item.author,
-                          size: 56,
-                          imageUrl: item.imageUrl,
-                          imageCredit: item.imageCredit,
-                        ),
-                        const SizedBox(width: 16),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item.author,
-                                style: sans(
-                                  palette,
-                                  14,
-                                  weight: FontWeight.w600,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                item.text,
-                                maxLines: 3,
-                                overflow: TextOverflow.ellipsis,
-                                style: serif(palette, 16, height: 1.3),
-                              ),
-                              if (note != null && note.isNotEmpty) ...[
-                                const SizedBox(height: 8),
+                return GestureDetector(
+                  onLongPress: () => shareItem(context, item),
+                  child: Pressable(
+                    onPressed: () => showGoDeeper(context, item),
+                    semanticLabel: item.author,
+                    child: Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: palette.card,
+                        borderRadius: BorderRadius.circular(kCardRadius),
+                        border: Border.all(color: palette.border),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          AuthorAvatar(
+                            author: item.author,
+                            size: 56,
+                            imageUrl: item.imageUrl,
+                            imageCredit: item.imageCredit,
+                          ),
+                          const SizedBox(width: 16),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
                                 Text(
-                                  note,
+                                  item.author,
                                   style: sans(
                                     palette,
                                     14,
-                                    color: palette.accent,
+                                    weight: FontWeight.w600,
                                   ),
                                 ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  item.text,
+                                  maxLines: 3,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: serif(palette, 16, height: 1.3),
+                                ),
+                                if (note != null && note.isNotEmpty) ...[
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    note,
+                                    style: sans(
+                                      palette,
+                                      14,
+                                      color: palette.accent,
+                                    ),
+                                  ),
+                                ],
+                                if (item.imageCredit != null)
+                                  PhotoCreditLine(credit: item.imageCredit!),
+                                if (!item.verified) const UnverifiedMark(),
                               ],
-                              if (item.imageCredit != null)
-                                PhotoCreditLine(credit: item.imageCredit!),
-                              if (!item.verified) const UnverifiedMark(),
-                            ],
+                            ),
                           ),
-                        ),
-                      ],
+                          Builder(
+                            builder: (context) => IconButton(
+                              visualDensity: VisualDensity.compact,
+                              tooltip: 'Share',
+                              onPressed: () => shareItem(context, item),
+                              icon: Icon(
+                                Icons.ios_share_rounded,
+                                color: palette.textMuted,
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 );

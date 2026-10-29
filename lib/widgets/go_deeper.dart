@@ -1,24 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../data/models.dart';
 import '../screens/study_page.dart';
+import '../share/share_sheet.dart';
 import '../state/app_state.dart';
 import '../theme/tokens.dart';
 import 'chrome.dart';
 
-Future<void> shareItem(BuildContext context, Item item) async {
-  final box = context.findRenderObject();
-  Rect? origin;
-  if (box is RenderBox && box.hasSize) {
-    origin = box.localToGlobal(Offset.zero) & box.size;
-  }
-  final verified = item.verified ? '' : '\nNot verified';
-  final text =
-      '"${item.text}"\n— ${item.author}\nSource · ${item.source.line}$verified\n$kAppName';
-  await SharePlus.instance.share(
-    ShareParams(text: text, sharePositionOrigin: origin),
-  );
+Future<void> shareItem(BuildContext context, Item item) {
+  return showShareSheet(context, item);
 }
 
 class ItemActions extends StatelessWidget {

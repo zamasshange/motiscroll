@@ -15,6 +15,7 @@ import '../l10n/languages.dart';
 import '../notifications/notification_planner.dart';
 import '../notifications/notification_prefs.dart';
 import '../notifications/notification_service.dart';
+import '../share/share_caption.dart';
 import '../tabs.dart';
 import '../theme/tokens.dart';
 import '../widgets/widget_payload.dart';
@@ -437,7 +438,7 @@ class AppState extends ChangeNotifier {
 
   /// A widget tap. An unknown line opens Home rather than a blank card.
   void openWidgetLink(Uri? uri) {
-    final link = WidgetLink.parse(uri);
+    final link = WidgetLink.parse(shareWebLinkToApp(uri) ?? uri);
     if (link == null) return;
     final id = link.itemId;
     if (id != null && _items.any((item) => item.id == id)) {
