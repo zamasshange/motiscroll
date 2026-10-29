@@ -524,7 +524,7 @@ class AppState extends ChangeNotifier {
     reminderOn = ok && notificationPrefs.anyEnabled;
     _touch();
     _publishProfile();
-    await syncNotifications();
+    unawaited(syncNotifications());
   }
 
   void dismissNotificationAsk() {

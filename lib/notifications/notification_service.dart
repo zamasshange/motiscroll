@@ -116,26 +116,44 @@ class NotificationService {
   Future<bool> requestPermission() async {
     try {
       await initialize();
-      final ios = _plugin
-          .resolvePlatformSpecificImplementation<
-            IOSFlutterLocalNotificationsPlugin
-          >();
-      final android = _plugin
-          .resolvePlatformSpecificImplementation<
-            AndroidFlutterLocalNotificationsPlugin
-          >();
-      final iosOk = await ios?.requestPermissions(
-        alert: true,
-        badge: false,
-        sound: true,
-      );
-      final androidOk = await android?.requestNotificationsPermission();
-      if (iosOk == false || androidOk == false) return false;
-      if (ios == null && android == null) return false;
+      final pending = _nativeRequestPermission();
+      final deadline = DateTime.now().add(const Duration(seconds: 12));
+      while (DateTime.now().isBefore(deadline)) {
+        final granted = await Future.any<bool?>([
+          pending.then<bool?>((value) => value),
+          Future<bool?>.delayed(const Duration(milliseconds: 280)),
+        ]);
+        if (granted != null) return granted;
+        if (await permissionGranted()) return true;
+      }
       return await permissionGranted();
     } on Object {
-      return false;
+      try {
+        return await permissionGranted();
+      } on Object {
+        return false;
+      }
     }
+  }
+
+  Future<bool> _nativeRequestPermission() async {
+    final ios = _plugin
+        .resolvePlatformSpecificImplementation<
+          IOSFlutterLocalNotificationsPlugin
+        >();
+    final android = _plugin
+        .resolvePlatformSpecificImplementation<
+          AndroidFlutterLocalNotificationsPlugin
+        >();
+    final iosOk = await ios?.requestPermissions(
+      alert: true,
+      badge: false,
+      sound: true,
+    );
+    final androidOk = await android?.requestNotificationsPermission();
+    if (iosOk == false || androidOk == false) return false;
+    if (ios == null && android == null) return false;
+    return permissionGranted();
   }
 
   Future<void> openSystemSettings() async {
@@ -148,13 +166,11 @@ class NotificationService {
   }
 
   Future<void> cancelAllScheduled({DateTime? from}) async {
+    // [from] is kept so callers can pass a date; we cancel the whole local plan.
     try {
       await initialize();
       await _plugin.cancel(id: legacyReminderId);
-      final now = from ?? DateTime.now();
-      for (final id in motiNotificationIdRange(from: now.subtract(const Duration(days: 1)))) {
-        await _plugin.cancel(id: id);
-      }
+      await _plugin.cancelAll();
     } on Object {
       return;
     }

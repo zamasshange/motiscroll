@@ -7,6 +7,7 @@ import '../state/app_state.dart';
 import '../theme/tokens.dart';
 import '../widgets/chrome.dart';
 import 'notification_offer.dart';
+import 'onboarding_previews.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -58,7 +59,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     final state = AppScope.of(context);
     state.setNotificationPrefs(_notifyPrefs);
     if (enable) {
-      await state.enableNotifications();
+      try {
+        await state.enableNotifications().timeout(const Duration(seconds: 12));
+      } on Object {
+        // Permission or scheduling can stall after Allow. Leave onboarding.
+      }
     } else {
       state.dismissNotificationAsk();
     }
@@ -105,30 +110,30 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             onNext: () => _go(3),
           ),
           _ValuePage(
-            image: 'assets/onboarding/home.png',
             title: 'A line is waiting',
             body:
                 'Home opens on the line of the day, a finder, and today\'s line.',
+            preview: const OnboardHomePreview(),
             showSkip: true,
             onNext: () => _go(4),
             onSkip: () => _go(6),
             page: 0,
           ),
           _ValuePage(
-            image: 'assets/onboarding/discover.png',
             title: 'Go deeper on any quote',
             body:
                 'Context, a fact, and a next step sit behind the line. The source stays in view.',
+            preview: const OnboardStudyPreview(),
             showSkip: true,
             onNext: () => _go(5),
             onSkip: () => _go(6),
             page: 1,
           ),
           _ValuePage(
-            image: 'assets/onboarding/feed.png',
             title: 'Scroll with purpose',
             body:
                 'One passage at a time, long enough to read and short enough to keep.',
+            preview: const OnboardFeedPreview(),
             showSkip: true,
             onNext: () => _go(6),
             onSkip: () => _go(6),
@@ -160,22 +165,27 @@ class _Welcome extends StatelessWidget {
     final top = MediaQuery.paddingOf(context).top;
     final bottom = MediaQuery.paddingOf(context).bottom;
     return Padding(
-      padding: EdgeInsets.fromLTRB(28, top + 32, 28, bottom + 24),
+      padding: EdgeInsets.fromLTRB(24, top + 16, 24, bottom + 24),
       child: Column(
         children: [
-          const Spacer(),
+          const MotiMark(size: 44),
+          const SizedBox(height: 20),
           Text(
             'Short lines and speeches, with the source still attached.',
             textAlign: TextAlign.center,
-            style: serif(palette, 36, height: 1.15),
+            style: serif(palette, 32, height: 1.12),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 8),
           Text(
             kAppName,
             textAlign: TextAlign.center,
-            style: sans(palette, 16, color: palette.textMuted),
+            style: sans(palette, 15, color: palette.textMuted),
           ),
-          const Spacer(),
+          const SizedBox(height: 20),
+          const Expanded(
+            child: OnboardDeviceFrame(child: OnboardHomePreview()),
+          ),
+          const SizedBox(height: 20),
           PrimaryButton(label: 'Get started', onPressed: onStart),
         ],
       ),
@@ -185,7 +195,7 @@ class _Welcome extends StatelessWidget {
 
 class _ValuePage extends StatelessWidget {
   const _ValuePage({
-    required this.image,
+    required this.preview,
     required this.title,
     required this.body,
     required this.showSkip,
@@ -194,7 +204,7 @@ class _ValuePage extends StatelessWidget {
     required this.page,
   });
 
-  final String image;
+  final Widget preview;
   final String title;
   final String body;
   final bool showSkip;
@@ -244,7 +254,7 @@ class _ValuePage extends StatelessWidget {
             style: sans(palette, 17, height: 1.35, color: palette.textMuted),
           ),
           const SizedBox(height: 18),
-          Expanded(child: _PhoneFrame(image: image)),
+          Expanded(child: OnboardDeviceFrame(child: preview)),
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -268,57 +278,6 @@ class _ValuePage extends StatelessWidget {
           PrimaryButton(label: 'Continue', onPressed: onNext),
         ],
       ),
-    );
-  }
-}
-
-class _PhoneFrame extends StatelessWidget {
-  const _PhoneFrame({required this.image});
-
-  final String image;
-
-  @override
-  Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        const shot = 1206 / 2622;
-        const bezelFrac = 0.042;
-        final outerAspect = (1 + 2 * bezelFrac) / (1 / shot + 2 * bezelFrac);
-        var outerW = constraints.maxWidth;
-        var outerH = outerW / outerAspect;
-        if (outerH > constraints.maxHeight) {
-          outerH = constraints.maxHeight;
-          outerW = outerH * outerAspect;
-        }
-        final bezel = outerW * bezelFrac / (1 + 2 * bezelFrac);
-        final radius = (outerW - bezel * 2) * 0.125;
-        return Center(
-          child: Container(
-            width: outerW,
-            height: outerH,
-            padding: EdgeInsets.all(bezel),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1C1C1E),
-              borderRadius: BorderRadius.circular(radius + bezel),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color(0x331C1610),
-                  blurRadius: 28,
-                  offset: const Offset(0, 16),
-                ),
-              ],
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(radius),
-              child: Image.asset(
-                image,
-                fit: BoxFit.cover,
-                filterQuality: FilterQuality.high,
-              ),
-            ),
-          ),
-        );
-      },
     );
   }
 }
@@ -682,29 +641,7 @@ class _WidgetOffer extends StatelessWidget {
             ),
           ),
           const Spacer(),
-          DecoratedBox(
-            decoration: BoxDecoration(
-              color: const Color(0xFF0B0B0D),
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 22, 20, 18),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Your daily quote appears here',
-                    style: serif(palette, 22, color: const Color(0xFFF4F1EA)),
-                  ),
-                  const SizedBox(height: 12),
-                  Text(
-                    'Sample',
-                    style: sans(palette, 13, color: const Color(0xFFE07A4A)),
-                  ),
-                ],
-              ),
-            ),
-          ),
+          const OnboardWidgetPreview(),
           const SizedBox(height: 28),
           Text('Add a widget', style: serif(palette, 32, height: 1.1)),
           const SizedBox(height: 8),

@@ -194,7 +194,13 @@ class NotificationAskSheet extends StatelessWidget {
         prefs: state.notificationPrefs,
         onPrefs: state.setNotificationPrefs,
         onTurnOn: () async {
-          await state.enableNotifications();
+          try {
+            await state
+                .enableNotifications()
+                .timeout(const Duration(seconds: 12));
+          } on Object {
+            // Still close if the system dialog never returns a result.
+          }
           if (context.mounted) Navigator.of(context).pop();
         },
         onSkip: () {

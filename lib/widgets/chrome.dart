@@ -654,6 +654,26 @@ class SourceLine extends StatelessWidget {
   }
 }
 
+class MotiMark extends StatelessWidget {
+  const MotiMark({super.key, this.size = 32, this.color});
+
+  final double size;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = AppScope.of(context).palette;
+    return Image.asset(
+      'assets/images/mark.png',
+      width: size,
+      height: size,
+      color: color ?? palette.text,
+      colorBlendMode: BlendMode.srcIn,
+      filterQuality: FilterQuality.high,
+    );
+  }
+}
+
 class UnverifiedMark extends StatelessWidget {
   const UnverifiedMark({super.key});
 

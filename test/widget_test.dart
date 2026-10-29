@@ -87,6 +87,46 @@ void main() {
     await tester.pumpWidget(const SizedBox.shrink());
   });
 
+  testWidgets('allowing notifications still leaves onboarding', (tester) async {
+    tester.view.physicalSize = const Size(390, 844);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    SharedPreferences.setMockInitialValues({});
+    final state = AppState();
+    await state.load();
+    state.debugSeed(uiFixture());
+    await tester.pumpWidget(MotiApp(state: state));
+    await tester.pump();
+
+    await tester.tap(find.text('Get started'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.tap(find.byKey(const Key('onboard-language-continue')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.tap(find.byKey(const Key('onboard-topics-continue')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    await tester.tap(find.text('Skip'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
+    await tester.tap(find.text('Maybe later'));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('Turn on'), findsOneWidget);
+
+    await tester.tap(find.text('Turn on'));
+    await tester.pump();
+    await tester.pump(const Duration(seconds: 1));
+    expect(find.text('One moment'), findsNothing);
+    expect(state.onboardingComplete, isTrue);
+    expect(find.text('LINE OF THE DAY'), findsOneWidget);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+  });
+
   testWidgets('feed shows quotes and skips sourcing placeholders', (
     tester,
   ) async {
