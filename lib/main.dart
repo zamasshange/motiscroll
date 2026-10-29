@@ -37,6 +37,10 @@ void registerPreviewNotifyExtension(AppState state) {
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  // The default image cache is 100 MB. Together with the library that is
+  // enough for Android, and iOS, to close the app.
+  PaintingBinding.instance.imageCache.maximumSize = 80;
+  PaintingBinding.instance.imageCache.maximumSizeBytes = 32 * 1024 * 1024;
   final state = AppState();
   await state.load();
   if (useFirebase) {

@@ -803,10 +803,19 @@ class AppState extends ChangeNotifier {
     _ensureLines();
     catalogLoading = false;
     catalogError = _items.isEmpty ? catalogError : null;
-    syncWidgets();
-    unawaited(syncNotifications());
-    unawaited(CatalogCache.write(_items));
     notifyListeners();
+    // Widgets, notifications, and the file copy walk the whole library.
+    // Running them in this same turn is what freezes taps, then gets the
+    // process closed.
+    final lines = _items;
+    unawaited(
+      Future<void>.delayed(const Duration(milliseconds: 600), () {
+        if (!identical(lines, _items)) return;
+        syncWidgets();
+        unawaited(syncNotifications());
+        unawaited(CatalogCache.write(lines));
+      }),
+    );
   }
 
   /// Keeps quotes on screen when the remote library is missing or over quota.

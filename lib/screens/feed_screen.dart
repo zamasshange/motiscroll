@@ -26,6 +26,8 @@ class _FeedScreenState extends State<FeedScreen> {
   Mood? _mood;
   var _forceAll = false;
   String? _applied;
+  String? _entriesKey;
+  List<_Entry>? _entriesCache;
 
   @override
   void didChangeDependencies() {
@@ -72,14 +74,19 @@ class _FeedScreenState extends State<FeedScreen> {
 
   List<_Entry> get _entries {
     final state = AppScope.of(context);
+    final key =
+        '${identityHashCode(state.items)}:${state.items.length}:${state.feedDeck}:$_forceAll:${_field?.name}:${_mood?.name}:${state.browseAll}:${state.collectionFocus?.name}:${state.followed.map((field) => field.name).join(',')}';
+    final cached = _entriesCache;
+    if (cached != null && key == _entriesKey) return cached;
     final lines = state.items.where((item) {
       if (_mood != null && !item.moods.contains(_mood)) return false;
       return true;
     }).toList();
-    if (_forceAll) return _mix(lines);
-    final focusedLines = lines.where(state.showsInFeed).toList();
-    if (focusedLines.isEmpty) return _mix(lines);
-    return _mix(focusedLines);
+    final focused = _forceAll ? lines : lines.where(state.showsInFeed).toList();
+    final mixed = _mix(focused.isEmpty ? lines : focused);
+    _entriesKey = key;
+    _entriesCache = mixed;
+    return mixed;
   }
 
   List<_Entry> _mix(List<Item> lines) {

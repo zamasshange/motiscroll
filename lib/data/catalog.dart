@@ -41,13 +41,15 @@ List<Item> discoverOrder(Set<Field> followed, List<Item> source) {
 /// [maxLineLength] is left out: on the feed it shrinks into a paragraph.
 const maxLineLength = 120;
 
+final _whitespace = RegExp(r'\s+');
+
 List<Item> freshDeck(List<Item> items, int seed) {
   final seenIds = <String>{};
   final seenText = <String>{};
   final unique = <Item>[];
   for (final item in items) {
     if (!seenIds.add(item.id)) continue;
-    final text = item.text.toLowerCase().replaceAll(RegExp(r'\s+'), ' ').trim();
+    final text = item.text.toLowerCase().replaceAll(_whitespace, ' ').trim();
     if (text.isEmpty || text.length > maxLineLength || !seenText.add(text)) {
       continue;
     }
@@ -62,18 +64,7 @@ List<Item> freshDeck(List<Item> items, int seed) {
   for (final name in names) {
     _shuffle(groups[name]!, seed ^ hashString(name));
   }
-  final mixed = <Item>[];
-  var pending = true;
-  while (pending) {
-    pending = false;
-    for (final name in names) {
-      final bucket = groups[name]!;
-      if (bucket.isEmpty) continue;
-      mixed.add(bucket.removeAt(0));
-      pending = true;
-    }
-  }
-  return mixed;
+  return _takeTurns([for (final name in names) groups[name]!]);
 }
 
 void _shuffle(List<Object> list, int seed) {
@@ -103,28 +94,16 @@ List<Item> dayRotate(List<Item> items, DateTime now) {
   }
   final buckets = groups.entries.toList()
     ..sort(
-      (a, b) => hashString(
-        '$day:${a.key}',
-      ).compareTo(hashString('$day:${b.key}')),
+      (a, b) =>
+          hashString('$day:${a.key}').compareTo(hashString('$day:${b.key}')),
     );
   for (final bucket in buckets) {
     bucket.value.sort(
-      (a, b) => hashString(
-        '$day:${a.id}',
-      ).compareTo(hashString('$day:${b.id}')),
+      (a, b) =>
+          hashString('$day:${a.id}').compareTo(hashString('$day:${b.id}')),
     );
   }
-  final mixed = <Item>[];
-  var pending = true;
-  while (pending) {
-    pending = false;
-    for (final bucket in buckets) {
-      if (bucket.value.isEmpty) continue;
-      mixed.add(bucket.value.removeAt(0));
-      pending = true;
-    }
-  }
-  return mixed;
+  return _takeTurns([for (final bucket in buckets) bucket.value]);
 }
 
 /// Gives every author a turn before anyone repeats, so one person
@@ -134,14 +113,23 @@ List<Item> rotateAuthors(List<Item> items) {
   for (final item in items) {
     groups.putIfAbsent(item.author, () => []).add(item);
   }
-  final buckets = groups.values.toList();
+  return _takeTurns(groups.values.toList());
+}
+
+/// One line from each author, then the next, without shifting the lists.
+List<Item> _takeTurns(List<List<Item>> buckets) {
+  if (buckets.isEmpty) return const [];
+  final indexes = List<int>.filled(buckets.length, 0);
   final mixed = <Item>[];
   var pending = true;
   while (pending) {
     pending = false;
-    for (final bucket in buckets) {
-      if (bucket.isEmpty) continue;
-      mixed.add(bucket.removeAt(0));
+    for (var i = 0; i < buckets.length; i++) {
+      final bucket = buckets[i];
+      final index = indexes[i];
+      if (index >= bucket.length) continue;
+      mixed.add(bucket[index]);
+      indexes[i] = index + 1;
       pending = true;
     }
   }
@@ -164,8 +152,20 @@ DailyPicks? dailyPicks(DateTime now, Mood? mood, List<Item> source) {
   final quotes = _pool(source.where((item) => !item.isSpeech), mood);
   if (quotes.isEmpty) return null;
   final speeches = _pool(source.where((item) => item.isSpeech), mood);
-  final quote = _pick(quotes, now, 'quote', pictured: true, maxLength: maxLineLength);
-  var boost = _pick(quotes, now, 'boost', pictured: true, maxLength: maxLineLength);
+  final quote = _pick(
+    quotes,
+    now,
+    'quote',
+    pictured: true,
+    maxLength: maxLineLength,
+  );
+  var boost = _pick(
+    quotes,
+    now,
+    'boost',
+    pictured: true,
+    maxLength: maxLineLength,
+  );
   if (boost.id == quote.id && quotes.length > 1) {
     final next = (quotes.indexOf(quote) + 1) % quotes.length;
     for (var step = 0; step < quotes.length; step++) {

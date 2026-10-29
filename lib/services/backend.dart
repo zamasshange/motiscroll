@@ -88,7 +88,9 @@ Future<void> _attachBackend(AppState state) async {
     try {
       FirebaseFirestore.instance.settings = const Settings(
         persistenceEnabled: true,
-        cacheSizeBytes: Settings.CACHE_SIZE_UNLIMITED,
+        // An unlimited cache keeps every library read in native memory.
+        // On a phone that grows until the system closes the app.
+        cacheSizeBytes: 40 * 1024 * 1024,
       );
     } on Exception {
       // A failed cache setting must not block the library read.

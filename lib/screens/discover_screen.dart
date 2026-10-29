@@ -23,6 +23,8 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   var _index = 0;
   var _deck = 0;
   var _signature = '';
+  String? _visibleKey;
+  List<Item>? _visibleItems;
 
   @override
   void didChangeDependencies() {
@@ -56,24 +58,35 @@ class _DiscoverScreenState extends State<DiscoverScreen> {
   }
 
   List<Item> _visible(AppState state) {
+    final key =
+        '${identityHashCode(state.items)}:${state.items.length}:${identityHashCode(state.discoverItems)}:${state.discoverItems.length}:${state.discoverShuffle}:${state.browseAll}:${state.collectionFocus?.name}:${state.followed.map((field) => field.name).join(',')}';
+    final cached = _visibleItems;
+    if (cached != null && key == _visibleKey) return cached;
     bool keep(Item item) => state.showsInFeed(item);
     final open =
         state.browseAll ||
         (state.collectionFocus == null && state.followed.isEmpty);
     if (open && state.items.isNotEmpty) {
-      return freshDeck(state.items, state.discoverShuffle);
+      return _remember(key, freshDeck(state.items, state.discoverShuffle));
     }
     final merged = state.items.where(keep).toList();
+    final seen = {for (final item in merged) item.id};
     for (final item in state.discoverItems.where(keep)) {
-      if (merged.every((other) => other.id != item.id)) merged.add(item);
+      if (seen.add(item.id)) merged.add(item);
     }
     if (merged.isEmpty) {
       final fallback = state.discoverItems.isNotEmpty
           ? state.discoverItems
           : state.items;
-      return freshDeck(fallback, state.discoverShuffle);
+      return _remember(key, freshDeck(fallback, state.discoverShuffle));
     }
-    return freshDeck(merged, state.discoverShuffle);
+    return _remember(key, freshDeck(merged, state.discoverShuffle));
+  }
+
+  List<Item> _remember(String key, List<Item> items) {
+    _visibleKey = key;
+    _visibleItems = items;
+    return items;
   }
 
   @override

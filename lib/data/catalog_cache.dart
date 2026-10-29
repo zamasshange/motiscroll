@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:path_provider/path_provider.dart';
 
@@ -9,6 +10,8 @@ import 'repositories.dart';
 /// The last published library, so the home screen can open before Firestore
 /// answers. The file is only written from lines the catalog already returned.
 class CatalogCache {
+  static var _generation = 0;
+
   static Future<List<Item>> read() async {
     if (Platform.environment['FLUTTER_TEST'] == 'true') return const [];
     try {
@@ -34,13 +37,18 @@ class CatalogCache {
 
   static Future<void> write(List<Item> items) async {
     if (items.isEmpty || Platform.environment['FLUTTER_TEST'] == 'true') return;
+    final generation = ++_generation;
     try {
+      // Let the screen paint before the library is copied into a file.
+      await Future<void>.delayed(const Duration(milliseconds: 400));
+      if (generation != _generation) return;
+      final rows = [for (final item in items) itemToPublishedJson(item)];
+      if (generation != _generation) return;
+      final encoded = await Isolate.run(() => jsonEncode({'items': rows}));
+      if (generation != _generation) return;
       final file = await _file();
-      await file.writeAsString(
-        jsonEncode({
-          'items': [for (final item in items) itemToPublishedJson(item)],
-        }),
-      );
+      if (generation != _generation) return;
+      await file.writeAsString(encoded);
     } on Object {
       return;
     }
