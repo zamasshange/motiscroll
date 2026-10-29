@@ -114,6 +114,12 @@ class NotificationsScreen extends StatelessWidget {
           if (kDebugMode) ...[
             const SizedBox(height: 24),
             _Chevron(
+              title: 'Send a sample',
+              onTap: () {
+                state.previewNotifications();
+              },
+            ),
+            _Chevron(
               title: notifyUi(code, 'plannedNotifications'),
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute<void>(

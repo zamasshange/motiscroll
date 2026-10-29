@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:developer' as developer;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:home_widget/home_widget.dart';
@@ -16,6 +17,24 @@ import 'theme/tokens.dart';
 import 'widgets/widget_payload.dart';
 import 'widgets/widget_sync.dart';
 
+var _previewExtensionRegistered = false;
+
+void registerPreviewNotifyExtension(AppState state) {
+  if (_previewExtensionRegistered) return;
+  _previewExtensionRegistered = true;
+  developer.registerExtension('ext.motiscroll.previewNotify', (
+    method,
+    params,
+  ) async {
+    try {
+      final shown = await state.previewNotifications();
+      return developer.ServiceExtensionResponse.result('{"shown":$shown}');
+    } on Object catch (error) {
+      return developer.ServiceExtensionResponse.error(1, '$error');
+    }
+  });
+}
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await QuoteCardRenderer.cleanupTemp();
@@ -23,6 +42,9 @@ Future<void> main() async {
   await state.load();
   await attachBackend(state);
   await WidgetSyncService.registerRefresh();
+  if (!kReleaseMode) {
+    registerPreviewNotifyExtension(state);
+  }
   runApp(MotiApp(state: state));
 }
 
@@ -51,25 +73,18 @@ class _MotiAppState extends State<MotiApp> with WidgetsBindingObserver {
     _applyOverlay();
     _listenForWidgetLinks();
     _listenForNotifications();
-    _registerPreviewNotify();
+    registerPreviewNotifyExtension(widget.state);
+    _maybePreviewNotifications();
   }
 
-  static var _previewExtensionRegistered = false;
-
-  void _registerPreviewNotify() {
-    if (_previewExtensionRegistered) return;
-    _previewExtensionRegistered = true;
-    developer.registerExtension('ext.motiscroll.previewNotify', (
-      method,
-      params,
-    ) async {
-      try {
-        final shown = await widget.state.previewNotifications();
-        return developer.ServiceExtensionResponse.result('{"shown":$shown}');
-      } on Object catch (error) {
-        return developer.ServiceExtensionResponse.error(1, '$error');
-      }
-    });
+  void _maybePreviewNotifications() {
+    if (kReleaseMode) return;
+    if (!const bool.fromEnvironment('PREVIEW_NOTIFY')) return;
+    unawaited(() async {
+      await Future<void>.delayed(const Duration(seconds: 2));
+      if (!mounted) return;
+      await widget.state.previewNotifications();
+    }());
   }
 
   @override

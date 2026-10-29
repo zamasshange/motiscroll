@@ -596,7 +596,7 @@ class AppState extends ChangeNotifier {
       body: notificationBody(chosen[1].text, chosen[1].author),
       payload: 'motiscroll://item/${chosen[1].id}',
       uiLang: lang,
-      delay: const Duration(seconds: 6),
+      delay: const Duration(seconds: 12),
     );
     return 2;
   }
