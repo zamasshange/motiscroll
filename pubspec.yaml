@@ -80,6 +80,11 @@ flutter:
 
   assets:
     - assets/images/mark.png
+    - assets/share/whatsapp.png
+    - assets/share/instagram.png
+    - assets/share/facebook.png
+    - assets/share/tiktok.png
+    - assets/share/x.png
     - assets/images/covers/
     - assets/onboarding/home.png
     - assets/onboarding/welcome_home.png
