@@ -91,9 +91,10 @@ void main() {
 
   testWidgets('notes done closes the sheet', (tester) async {
     final state = await _pumpPage(tester, const HomeScreen());
-    await tester.tap(find.byIcon(Icons.more_horiz_rounded).first);
+    await tester.tap(find.byIcon(Icons.chat_bubble_outline_rounded).first);
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
+    expect(find.text('Your notes'), findsOneWidget);
     expect(find.text('Done'), findsOneWidget);
     await tester.enterText(find.byType(TextField), 'come back to this');
     await tester.tap(find.text('Done'));

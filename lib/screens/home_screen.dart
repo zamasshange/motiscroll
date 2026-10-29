@@ -203,8 +203,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   _PlainIcon(
                     icon: Icons.chat_bubble_outline_rounded,
-                    label: 'Go deeper',
-                    onTap: () => openStudy(context, picks.quote),
+                    label: 'Notes',
+                    onTap: () => showNotes(context, picks.quote),
                   ),
                   Builder(
                     builder: (context) => _PlainIcon(
@@ -215,8 +215,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   _PlainIcon(
                     icon: Icons.more_horiz_rounded,
-                    label: 'Notes',
-                    onTap: () => showNotes(context, picks.quote),
+                    label: 'Go deeper',
+                    onTap: () => openStudy(context, picks.quote),
                   ),
                   _PlainIcon(
                     icon: Icons.wb_sunny_outlined,
@@ -505,7 +505,10 @@ class _Wheel extends StatelessWidget {
             final on = index == selected;
             return Center(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 6,
+                ),
                 decoration: BoxDecoration(
                   color: on ? palette.cardAlt : const Color(0x00000000),
                   borderRadius: BorderRadius.circular(circled ? 999 : 12),

@@ -111,9 +111,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ),
           _ValuePage(
             title: 'A line is waiting',
-            body:
-                'Home opens on the line of the day, a finder, and today\'s line.',
-            preview: const OnboardHomePreview(),
+            body: 'Home opens on the line of the day, a finder, and today\'s line.',
+            image: 'assets/onboarding/home.png',
             showSkip: true,
             onNext: () => _go(4),
             onSkip: () => _go(6),
@@ -121,9 +120,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ),
           _ValuePage(
             title: 'Go deeper on any quote',
-            body:
-                'Context, a fact, and a next step sit behind the line. The source stays in view.',
-            preview: const OnboardStudyPreview(),
+            body: 'Context, a fact, and a next step sit behind the line. The source stays in view.',
+            image: 'assets/onboarding/discover.png',
             showSkip: true,
             onNext: () => _go(5),
             onSkip: () => _go(6),
@@ -131,9 +129,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ),
           _ValuePage(
             title: 'Scroll with purpose',
-            body:
-                'One passage at a time, long enough to read and short enough to keep.',
-            preview: const OnboardFeedPreview(),
+            body: 'One passage at a time, long enough to read and short enough to keep.',
+            image: 'assets/onboarding/feed.png',
             showSkip: true,
             onNext: () => _go(6),
             onSkip: () => _go(6),
@@ -195,7 +192,7 @@ class _Welcome extends StatelessWidget {
 
 class _ValuePage extends StatelessWidget {
   const _ValuePage({
-    required this.preview,
+    required this.image,
     required this.title,
     required this.body,
     required this.showSkip,
@@ -204,7 +201,7 @@ class _ValuePage extends StatelessWidget {
     required this.page,
   });
 
-  final Widget preview;
+  final String image;
   final String title;
   final String body;
   final bool showSkip;
@@ -254,7 +251,7 @@ class _ValuePage extends StatelessWidget {
             style: sans(palette, 17, height: 1.35, color: palette.textMuted),
           ),
           const SizedBox(height: 18),
-          Expanded(child: OnboardDeviceFrame(child: preview)),
+          Expanded(child: _PhoneFrame(image: image)),
           const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -278,6 +275,57 @@ class _ValuePage extends StatelessWidget {
           PrimaryButton(label: 'Continue', onPressed: onNext),
         ],
       ),
+    );
+  }
+}
+
+class _PhoneFrame extends StatelessWidget {
+  const _PhoneFrame({required this.image});
+
+  final String image;
+
+  @override
+  Widget build(BuildContext context) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const shot = 1206 / 2622;
+        const bezelFrac = 0.042;
+        final outerAspect = (1 + 2 * bezelFrac) / (1 / shot + 2 * bezelFrac);
+        var outerW = constraints.maxWidth;
+        var outerH = outerW / outerAspect;
+        if (outerH > constraints.maxHeight) {
+          outerH = constraints.maxHeight;
+          outerW = outerH * outerAspect;
+        }
+        final bezel = outerW * bezelFrac / (1 + 2 * bezelFrac);
+        final radius = (outerW - bezel * 2) * 0.125;
+        return Center(
+          child: Container(
+            width: outerW,
+            height: outerH,
+            padding: EdgeInsets.all(bezel),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1C1C1E),
+              borderRadius: BorderRadius.circular(radius + bezel),
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x331C1610),
+                  blurRadius: 28,
+                  offset: Offset(0, 16),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(radius),
+              child: Image.asset(
+                image,
+                fit: BoxFit.cover,
+                filterQuality: FilterQuality.high,
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -566,11 +614,7 @@ class _TopicGroup extends StatelessWidget {
 }
 
 class _OnboardBar extends StatelessWidget {
-  const _OnboardBar({
-    required this.onBack,
-    required this.title,
-    this.trailing,
-  });
+  const _OnboardBar({required this.onBack, required this.title, this.trailing});
 
   final VoidCallback onBack;
   final String title;
@@ -656,4 +700,3 @@ class _WidgetOffer extends StatelessWidget {
     );
   }
 }
-

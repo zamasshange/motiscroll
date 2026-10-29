@@ -6,7 +6,6 @@ import '../data/catalog.dart';
 import '../data/models.dart';
 import '../state/app_state.dart';
 import '../theme/tokens.dart';
-import '../widgets/chrome.dart';
 import '../widgets/generated_cover.dart';
 
 Item? onboardPreviewItem(AppState state) {
@@ -183,151 +182,6 @@ class OnboardHomePreview extends StatelessWidget {
   }
 }
 
-class OnboardStudyPreview extends StatelessWidget {
-  const OnboardStudyPreview({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final state = AppScope.of(context);
-    final palette = state.palette;
-    final item = onboardPreviewItem(state);
-    return ColoredBox(
-      color: palette.bg,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(24, 54, 24, 32),
-        child: Column(
-          children: [
-            Align(
-              alignment: Alignment.centerRight,
-              child: Icon(Icons.close_rounded, color: palette.textMuted),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              item?.author ?? kAppName,
-              textAlign: TextAlign.center,
-              style: serif(palette, 32, height: 1.1),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              width: double.infinity,
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: palette.cardAlt,
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Text(
-                item?.text ??
-                    'Context, a fact, and a next step sit behind the line.',
-                textAlign: TextAlign.center,
-                style: serif(
-                  palette,
-                  18,
-                  height: 1.4,
-                  style: FontStyle.italic,
-                  weight: FontWeight.w500,
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            _StudyBlock(
-              title: 'Context',
-              body: item == null
-                  ? 'The source stays in view with the line.'
-                  : item.shownContext,
-            ),
-            const SizedBox(height: 12),
-            _StudyBlock(
-              title: 'Did you know',
-              body: item == null
-                  ? 'A short note on the person or the work.'
-                  : item.shownDidYouKnow,
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _StudyBlock extends StatelessWidget {
-  const _StudyBlock({required this.title, required this.body});
-
-  final String title;
-  final String body;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = AppScope.of(context).palette;
-    return Align(
-      alignment: Alignment.centerLeft,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            title,
-            style: sans(palette, 13, weight: FontWeight.w700, color: palette.accent),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            body,
-            maxLines: 4,
-            overflow: TextOverflow.ellipsis,
-            style: sans(palette, 16, height: 1.4),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class OnboardFeedPreview extends StatelessWidget {
-  const OnboardFeedPreview({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    final state = AppScope.of(context);
-    final palette = state.palette;
-    final item = onboardPreviewItem(state);
-    return ColoredBox(
-      color: palette.bg,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          if (item != null)
-            GeneratedCover(field: item.field, seed: item.id, subtle: true),
-          const ColoredBox(color: Color(0x990B0B0D)),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(28, 72, 28, 48),
-            child: Column(
-              children: [
-                const MotiMark(size: 36, color: kCream),
-                const Spacer(),
-                Text(
-                  item?.text ?? 'One passage at a time.',
-                  textAlign: TextAlign.center,
-                  style: serif(
-                    palette,
-                    32,
-                    height: 1.2,
-                    color: kCream,
-                  ),
-                ),
-                const SizedBox(height: 20),
-                Text(
-                  item == null ? kAppName : '— ${item.author}',
-                  textAlign: TextAlign.center,
-                  style: sans(palette, 16, color: const Color(0xCCF4F1EA)),
-                ),
-                const Spacer(),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class OnboardWidgetPreview extends StatelessWidget {
   const OnboardWidgetPreview({super.key});
 
@@ -347,10 +201,7 @@ class OnboardWidgetPreview extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(22, 28, 22, 22),
           child: Column(
             children: [
-              Text(
-                '9:41',
-                style: sans(palette, 16, weight: FontWeight.w600),
-              ),
+              Text('9:41', style: sans(palette, 16, weight: FontWeight.w600)),
               const SizedBox(height: 18),
               Expanded(
                 child: ClipRRect(

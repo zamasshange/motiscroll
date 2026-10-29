@@ -8,6 +8,7 @@ import '../widgets/chrome.dart';
 import '../widgets/go_deeper.dart';
 import '../widgets/quote_tap.dart';
 import 'line_screen.dart';
+import 'notes_sheet.dart';
 import 'study_page.dart';
 
 class FeedScreen extends StatefulWidget {
@@ -701,8 +702,8 @@ class _Rail extends StatelessWidget {
         const SizedBox(height: 18),
         _BareIcon(
           icon: Icons.chat_bubble_outline_rounded,
-          label: 'Open the study',
-          onTap: () => openStudy(context, item),
+          label: 'Notes',
+          onTap: () => showNotes(context, item),
         ),
         const SizedBox(height: 18),
         Builder(

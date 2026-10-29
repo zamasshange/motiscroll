@@ -8,6 +8,7 @@ import '../theme/tokens.dart';
 import '../widgets/chrome.dart';
 import '../widgets/go_deeper.dart';
 import '../widgets/quote_tap.dart';
+import 'notes_sheet.dart';
 import 'study_page.dart';
 
 class DiscoverScreen extends StatefulWidget {
@@ -340,7 +341,8 @@ class _DiscoverCard extends StatelessWidget {
                 ),
                 IconButton(
                   visualDensity: VisualDensity.compact,
-                  onPressed: () => openStudy(context, item),
+                  tooltip: 'Notes',
+                  onPressed: () => showNotes(context, item),
                   icon: Icon(
                     Icons.chat_bubble_outline_rounded,
                     color: palette.textMuted,
