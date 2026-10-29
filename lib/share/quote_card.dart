@@ -23,6 +23,9 @@ const shareQuoteFontMaxSquare = 48.0;
 
 const shareMaxPngBytes = 5 * 1024 * 1024;
 
+/// Physical pixels per logical pixel when writing a share file.
+const shareExportPixelRatio = 2.0;
+
 const shareFontFallbacks = <String>[
   'Noto Naskh Arabic',
   'Noto Sans Arabic',
@@ -165,6 +168,7 @@ TextStyle _quoteStyle(double size, String language, Color color) {
     height: shareQuoteLineHeight(language),
     fontWeight: FontWeight.w600,
     color: color,
+    decoration: TextDecoration.none,
   );
 }
 
@@ -192,12 +196,9 @@ class QuoteCardWidget extends StatelessWidget {
     final pad = 64.0;
     final light = template == ShareTemplate.light;
     final quoteColor = light ? const Color(0xFF111111) : kCream;
-    final metaColor = light
-        ? const Color(0xFF5C574F)
-        : const Color(0xCCF4F1EA);
+    final metaColor = light ? const Color(0xFF5C574F) : const Color(0xCCF4F1EA);
     final accent = light ? const Color(0xFFC4622D) : const Color(0xFFE07A4A);
-    final direction =
-        languageByCode(language)?.direction ?? TextDirection.ltr;
+    final direction = languageByCode(language)?.direction ?? TextDirection.ltr;
     final innerWidth = size.width - pad * 2;
     final innerHeight = size.height - top - bottom;
     final reserved = template == ShareTemplate.minimal ? 160.0 : 220.0;
@@ -211,9 +212,11 @@ class QuoteCardWidget extends StatelessWidget {
       maxSize: shareQuoteFontMax(format),
     );
     final tall = firstFit.tall;
+    final dpr = MediaQuery.maybeOf(context)?.devicePixelRatio ?? 1;
     return MediaQuery(
       data: MediaQueryData(
         size: size,
+        devicePixelRatio: dpr,
         textScaler: TextScaler.noScaling,
         padding: EdgeInsets.zero,
       ),
@@ -242,6 +245,7 @@ class QuoteCardWidget extends StatelessWidget {
                             fontSize: 18,
                             fontWeight: FontWeight.w600,
                             color: accent,
+                            decoration: TextDecoration.none,
                           ),
                         ),
                       ),
@@ -273,6 +277,7 @@ class QuoteCardWidget extends StatelessWidget {
                         height: 1.3,
                         fontWeight: FontWeight.w600,
                         color: quoteColor,
+                        decoration: TextDecoration.none,
                       ),
                     ),
                     const SizedBox(height: 8),
@@ -280,13 +285,17 @@ class QuoteCardWidget extends StatelessWidget {
                       item.source.line,
                       key: const Key('quote-card-source'),
                       textAlign: TextAlign.center,
-                      textDirection: mixedDirection(item.source.line, direction),
+                      textDirection: mixedDirection(
+                        item.source.line,
+                        direction,
+                      ),
                       style: TextStyle(
                         fontFamily: 'DMSans',
                         fontFamilyFallback: shareFontFallbacks,
                         fontSize: 16,
                         height: 1.3,
                         color: metaColor,
+                        decoration: TextDecoration.none,
                       ),
                     ),
                     SizedBox(height: tall ? 16 : 32),
@@ -356,7 +365,7 @@ class _Wordmark extends StatelessWidget {
             'assets/images/mark.png',
             width: 20,
             height: 20,
-            filterQuality: FilterQuality.medium,
+            filterQuality: FilterQuality.high,
           ),
         ),
         const SizedBox(width: 8),
@@ -368,6 +377,7 @@ class _Wordmark extends StatelessWidget {
             fontWeight: FontWeight.w600,
             letterSpacing: 0.4,
             color: color,
+            decoration: TextDecoration.none,
           ),
         ),
       ],

@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:developer' as developer;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -50,6 +51,25 @@ class _MotiAppState extends State<MotiApp> with WidgetsBindingObserver {
     _applyOverlay();
     _listenForWidgetLinks();
     _listenForNotifications();
+    _registerPreviewNotify();
+  }
+
+  static var _previewExtensionRegistered = false;
+
+  void _registerPreviewNotify() {
+    if (_previewExtensionRegistered) return;
+    _previewExtensionRegistered = true;
+    developer.registerExtension('ext.motiscroll.previewNotify', (
+      method,
+      params,
+    ) async {
+      try {
+        final shown = await widget.state.previewNotifications();
+        return developer.ServiceExtensionResponse.result('{"shown":$shown}');
+      } on Object catch (error) {
+        return developer.ServiceExtensionResponse.error(1, '$error');
+      }
+    });
   }
 
   @override
@@ -149,7 +169,8 @@ class _MotiAppState extends State<MotiApp> with WidgetsBindingObserver {
         darkTheme: _theme(darkPalette, Brightness.dark),
         builder: (context, child) {
           final state = AppScope.of(context);
-          final code = state.uiLanguage ??
+          final code =
+              state.uiLanguage ??
               state.resolvedContentLanguage(
                 View.of(context).platformDispatcher.locale,
               );
@@ -233,9 +254,7 @@ ThemeData _theme(Palette palette, Brightness brightness) {
       modalElevation: 0,
       clipBehavior: Clip.antiAlias,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(kSheetRadius),
-        ),
+        borderRadius: BorderRadius.vertical(top: Radius.circular(kSheetRadius)),
       ),
     ),
   );

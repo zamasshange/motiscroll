@@ -260,6 +260,67 @@ class NotificationService {
 
   Future<List<PlannedNotification>> loadPlan() => _store.loadPlan();
 
+  NotificationDetails _bannerDetails(String uiLang, String body) {
+    return NotificationDetails(
+      android: AndroidNotificationDetails(
+        'motiscroll_preview',
+        notifyUi(uiLang, 'notifications'),
+        icon: '@drawable/ic_stat_motiscroll',
+        channelShowBadge: false,
+        importance: Importance.high,
+        priority: Priority.high,
+        styleInformation: BigTextStyleInformation(body),
+      ),
+      iOS: DarwinNotificationDetails(
+        presentAlert: true,
+        presentBanner: true,
+        presentList: true,
+        presentSound: true,
+        presentBadge: false,
+        interruptionLevel: InterruptionLevel.active,
+      ),
+    );
+  }
+
+  Future<void> showNow({
+    required int id,
+    required String title,
+    required String body,
+    required String payload,
+    required String uiLang,
+  }) async {
+    await initialize();
+    await _plugin.show(
+      id: id,
+      title: title,
+      body: body,
+      payload: payload,
+      notificationDetails: _bannerDetails(uiLang, body),
+    );
+  }
+
+  Future<void> showIn({
+    required int id,
+    required String title,
+    required String body,
+    required String payload,
+    required String uiLang,
+    required Duration delay,
+  }) async {
+    await initialize();
+    await prepareZones();
+    final when = tz.TZDateTime.now(tz.local).add(delay);
+    await _plugin.zonedSchedule(
+      id: id,
+      title: title,
+      body: body,
+      payload: payload,
+      scheduledDate: when,
+      androidScheduleMode: AndroidScheduleMode.inexactAllowWhileIdle,
+      notificationDetails: _bannerDetails(uiLang, body),
+    );
+  }
+
   Future<void> _schedule(
     PlannedNotification row,
     tz.Location location,

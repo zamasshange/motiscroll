@@ -179,7 +179,7 @@ class MainActivity : FlutterActivity() {
             }
         val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size) ?: return null
         val out = ByteArrayOutputStream()
-        val ok = bitmap.compress(Bitmap.CompressFormat.JPEG, 92, out)
+        val ok = bitmap.compress(Bitmap.CompressFormat.JPEG, 95, out)
         bitmap.recycle()
         if (!ok) return null
         return out.toByteArray()

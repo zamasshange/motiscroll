@@ -15,6 +15,7 @@ import '../l10n/languages.dart';
 import '../notifications/notification_planner.dart';
 import '../notifications/notification_prefs.dart';
 import '../notifications/notification_service.dart';
+import '../notifications/notification_text.dart';
 import '../share/share_caption.dart';
 import '../tabs.dart';
 import '../theme/tokens.dart';
@@ -153,7 +154,8 @@ class AppState extends ChangeNotifier {
       legacyReminderTime: map['reminderTime'] as String?,
       legacyReminderOn: reminderOn,
     );
-    notificationAskCount = (map['notificationAskCount'] as num?)?.toInt() ??
+    notificationAskCount =
+        (map['notificationAskCount'] as num?)?.toInt() ??
         (map.containsKey('notificationPrefs')
             ? 0
             : reminderOn
@@ -420,9 +422,7 @@ class AppState extends ChangeNotifier {
       widgetsEnabled: widgetsEnabled,
       showSavedOnLockScreen: showSavedOnLockScreen,
     );
-    final source = [
-      for (final item in _items) widgetSourceFromItem(item),
-    ];
+    final source = [for (final item in _items) widgetSourceFromItem(item)];
     unawaited(WidgetSyncService.publish(payload, source: source));
   }
 
@@ -500,10 +500,7 @@ class AppState extends ChangeNotifier {
 
   bool get viewedToday => lastItemViewDate == dayKey(DateTime.now());
 
-  void applyNotificationFlags({
-    required bool enabled,
-    required int maxPerDay,
-  }) {
+  void applyNotificationFlags({required bool enabled, required int maxPerDay}) {
     notificationsEnabled = enabled;
     maxNotificationsPerDay = maxPerDay.clamp(0, maxNotificationsPerDayHardCap);
   }
@@ -559,6 +556,49 @@ class AppState extends ChangeNotifier {
     }
     notificationPlan = result.plan;
     notifyListeners();
+  }
+
+  /// Fires two banners from published lines so lock-screen shots are possible.
+  /// Never invents a quote. Returns how many were shown.
+  Future<int> previewNotifications() async {
+    if (!notificationPermissionGranted) {
+      await enableNotifications();
+    }
+    final lang = uiLanguage ?? contentLanguage ?? 'en';
+    final picks = dailyPicks(DateTime.now(), usualMood, items);
+    final chosen = <Item>[];
+    if (picks != null) {
+      chosen.add(picks.quote);
+      if (picks.speech != null && picks.speech!.id != picks.quote.id) {
+        chosen.add(picks.speech!);
+      } else if (picks.boost.id != picks.quote.id) {
+        chosen.add(picks.boost);
+      }
+    }
+    for (final item in items) {
+      if (chosen.length >= 2) break;
+      if (chosen.any((entry) => entry.id == item.id)) continue;
+      chosen.add(item);
+    }
+    if (chosen.isEmpty) return 0;
+    final service = NotificationService.instance;
+    await service.showNow(
+      id: 91001,
+      title: morningTitle(lang, 0),
+      body: notificationBody(chosen.first.text, chosen.first.author),
+      payload: 'motiscroll://item/${chosen.first.id}',
+      uiLang: lang,
+    );
+    if (chosen.length == 1) return 1;
+    await service.showIn(
+      id: 91002,
+      title: eveningTitle(lang, 0),
+      body: notificationBody(chosen[1].text, chosen[1].author),
+      payload: 'motiscroll://item/${chosen[1].id}',
+      uiLang: lang,
+      delay: const Duration(seconds: 6),
+    );
+    return 2;
   }
 
   Future<void> clearNotifications({bool clearPrefs = false}) async {
@@ -769,7 +809,9 @@ class AppState extends ChangeNotifier {
             field: author.field,
             moods: const [],
             source: Source(
-              title: line.sourceTitle.isEmpty ? 'BrainyQuote' : line.sourceTitle,
+              title: line.sourceTitle.isEmpty
+                  ? 'BrainyQuote'
+                  : line.sourceTitle,
               url: line.quoteUrl.isEmpty
                   ? 'https://www.brainyquote.com/authors/${_quoteSlug(author.name)}-quotes'
                   : line.quoteUrl,

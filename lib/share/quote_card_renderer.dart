@@ -80,7 +80,8 @@ class QuoteCardRenderer {
       format: format,
       language: language,
     );
-    var bytes = _cache[key];
+    final cacheId = '$key@${shareExportPixelRatio.toStringAsFixed(0)}';
+    var bytes = _cache[cacheId];
     bytes ??= await _capture(
       context: context,
       item: item,
@@ -89,17 +90,15 @@ class QuoteCardRenderer {
       language: language,
       translatedLabel: translatedLabel,
     );
-    _cache[key] = bytes;
+    _cache[cacheId] = bytes;
 
     var mime = 'image/png';
     var ext = 'png';
-    if (bytes.length > shareMaxPngBytes) {
-      final jpeg = await ShareBridge.instance.encodeJpeg(bytes);
-      if (jpeg != null && jpeg.isNotEmpty) {
-        bytes = jpeg;
-        mime = 'image/jpeg';
-        ext = 'jpg';
-      }
+    final jpeg = await ShareBridge.instance.encodeJpeg(bytes);
+    if (jpeg != null && jpeg.isNotEmpty) {
+      bytes = jpeg;
+      mime = 'image/jpeg';
+      ext = 'jpg';
     }
 
     final dir = await getTemporaryDirectory();
@@ -156,14 +155,24 @@ class QuoteCardRenderer {
       builder: (context) {
         return ShareCaptureHost(
           size: size,
-          child: RepaintBoundary(
-            key: boundaryKey,
-            child: QuoteCardWidget(
-              item: item,
-              template: template,
-              format: format,
-              language: language,
-              translatedLabel: translatedLabel,
+          child: MediaQuery(
+            data: MediaQueryData(
+              size: size,
+              devicePixelRatio: shareExportPixelRatio,
+              textScaler: TextScaler.noScaling,
+              padding: EdgeInsets.zero,
+            ),
+            child: RepaintBoundary(
+              key: boundaryKey,
+              child: ExcludeSemantics(
+                child: QuoteCardWidget(
+                  item: item,
+                  template: template,
+                  format: format,
+                  language: language,
+                  translatedLabel: translatedLabel,
+                ),
+              ),
             ),
           ),
         );
@@ -188,7 +197,7 @@ class QuoteCardRenderer {
           'Share card did not paint at ${size.width}x${size.height}.',
         );
       }
-      final image = await boundary.toImage(pixelRatio: 1);
+      final image = await boundary.toImage(pixelRatio: shareExportPixelRatio);
       try {
         final data = await image.toByteData(format: ui.ImageByteFormat.png);
         if (data == null) {

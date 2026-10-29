@@ -121,12 +121,7 @@ private enum ShareChannel {
       result(false)
       return
     }
-    var items: [Any] = []
-    if let image = UIImage(contentsOfFile: path) {
-      items.append(image)
-    } else {
-      items.append(URL(fileURLWithPath: path))
-    }
+    var items: [Any] = [URL(fileURLWithPath: path)]
     if !caption.isEmpty {
       items.append(caption)
     }
@@ -228,7 +223,7 @@ private enum ShareChannel {
       return nil
     }
     guard let image = UIImage(data: data),
-          let jpeg = image.jpegData(compressionQuality: 0.92) else {
+          let jpeg = image.jpegData(compressionQuality: 0.95) else {
       return nil
     }
     return FlutterStandardTypedData(bytes: jpeg)
