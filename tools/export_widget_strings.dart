@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import '../lib/l10n/widget_gallery.dart';
+import 'package:moti_scroll/l10n/widget_gallery.dart';
 
 /// Writes widget gallery strings from [widgetGallery].
 /// Languages other than English are flagged needs_review.
