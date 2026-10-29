@@ -32,6 +32,9 @@ abstract class ItemRepository {
   Future<Map<Field, int>> collectionCounts();
 
   Future<List<AuthorProfile>> authors();
+
+  /// A short server read so the home screen can draw before the full library.
+  Future<PageChunk> previewOpening() async => const PageChunk([]);
 }
 
 abstract class UserDirectory {
@@ -185,6 +188,12 @@ class FirestoreItemRepository implements ItemRepository {
       if (profile != null) profiles.add(profile);
     }
     return profiles;
+  }
+
+  @override
+  Future<PageChunk> previewOpening() async {
+    final snap = await _db.collection('publishedItems').limit(48).get();
+    return PageChunk(rotateAuthors(_itemsFrom(snap)));
   }
 
   Future<List<Item>> _randPage(double start, {List<String>? whereIn}) async {

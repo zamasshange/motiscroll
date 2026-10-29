@@ -1,3 +1,5 @@
+import 'package:flutter/foundation.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:intl/intl.dart';
@@ -13,6 +15,8 @@ import 'notification_text.dart';
 
 /// Retired Phase 2 repeating 8:00 reminder.
 const legacyReminderId = 8;
+
+const _iosNotify = MethodChannel('motiscroll/notify');
 
 class NotificationService {
   NotificationService({
@@ -282,6 +286,28 @@ class NotificationService {
     );
   }
 
+  Future<bool> _showOnIos({
+    required int id,
+    required String title,
+    required String body,
+    required String payload,
+    int? fireAtMillis,
+  }) async {
+    if (kIsWeb || defaultTargetPlatform != TargetPlatform.iOS) return false;
+    try {
+      await _iosNotify.invokeMethod<void>('show', {
+        'id': id,
+        'title': title,
+        'body': body,
+        'payload': payload,
+        'fireAtMillis': fireAtMillis,
+      });
+      return true;
+    } on Object {
+      return false;
+    }
+  }
+
   Future<void> showNow({
     required int id,
     required String title,
@@ -290,6 +316,9 @@ class NotificationService {
     required String uiLang,
   }) async {
     await initialize();
+    if (await _showOnIos(id: id, title: title, body: body, payload: payload)) {
+      return;
+    }
     await _plugin.show(
       id: id,
       title: title,
@@ -310,6 +339,15 @@ class NotificationService {
     await initialize();
     await prepareZones();
     final when = tz.TZDateTime.now(tz.local).add(delay);
+    if (await _showOnIos(
+      id: id,
+      title: title,
+      body: body,
+      payload: payload,
+      fireAtMillis: when.millisecondsSinceEpoch,
+    )) {
+      return;
+    }
     await _plugin.zonedSchedule(
       id: id,
       title: title,
@@ -333,6 +371,15 @@ class NotificationService {
       minute: row.minute,
     );
     if (!when.isAfter(tz.TZDateTime.now(location))) return;
+    if (await _showOnIos(
+      id: row.id,
+      title: row.title,
+      body: row.body,
+      payload: row.payload,
+      fireAtMillis: when.millisecondsSinceEpoch,
+    )) {
+      return;
+    }
     await _plugin.zonedSchedule(
       id: row.id,
       title: row.title,

@@ -51,4 +51,8 @@ class LocalItemRepository implements ItemRepository {
         field: items.where((item) => item.field == field).length,
     };
   }
+
+  @override
+  Future<PageChunk> previewOpening() async =>
+      PageChunk(items.take(48).toList());
 }

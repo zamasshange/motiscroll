@@ -1,4 +1,5 @@
 import Flutter
+import Intents
 import Photos
 import UIKit
 import UserNotifications
@@ -35,6 +36,13 @@ import workmanager_apple
     channel.setMethodCallHandler { call, result in
       ShareChannel.handle(call, result: result)
     }
+    let notify = FlutterMethodChannel(
+      name: "motiscroll/notify",
+      binaryMessenger: engineBridge.applicationRegistrar.messenger()
+    )
+    notify.setMethodCallHandler { call, result in
+      NotifyChannel.handle(call, result: result)
+    }
   }
 
   override func userNotificationCenter(
@@ -51,6 +59,116 @@ import workmanager_apple
       willPresent: notification,
       withCompletionHandler: completionHandler
     )
+  }
+}
+
+private enum NotifyChannel {
+  static func handle(_ call: FlutterMethodCall, result: @escaping FlutterResult) {
+    guard call.method == "show" else {
+      result(FlutterMethodNotImplemented)
+      return
+    }
+    let args = call.arguments as? [String: Any] ?? [:]
+    let id = (args["id"] as? NSNumber)?.intValue ?? 0
+    let title = args["title"] as? String ?? ""
+    let body = args["body"] as? String ?? ""
+    let payload = args["payload"] as? String ?? ""
+    let fireAt = (args["fireAtMillis"] as? NSNumber)?.doubleValue
+    let content = UNMutableNotificationContent()
+    content.title = title
+    content.body = body
+    content.sound = .default
+    content.userInfo = [
+      "NotificationId": id,
+      "presentAlert": true,
+      "presentSound": true,
+      "presentBadge": false,
+      "presentBanner": true,
+      "presentList": true,
+      "payload": payload,
+    ]
+    let branded = brandedContent(content, title: title, body: body)
+    let trigger = triggerFor(fireAtMillis: fireAt)
+    let request = UNNotificationRequest(
+      identifier: "\(id)",
+      content: branded,
+      trigger: trigger
+    )
+    UNUserNotificationCenter.current().add(request) { error in
+      DispatchQueue.main.async {
+        if let error = error as NSError?, error.domain != UNErrorDomain {
+          result(
+            FlutterError(
+              code: "notify",
+              message: error.localizedDescription,
+              details: nil
+            )
+          )
+        } else {
+          result(nil)
+        }
+      }
+    }
+  }
+
+  static func triggerFor(fireAtMillis: Double?) -> UNNotificationTrigger? {
+    guard let fireAtMillis else { return nil }
+    let date = Date(timeIntervalSince1970: fireAtMillis / 1000)
+    guard date.timeIntervalSinceNow > 1 else { return nil }
+    let parts = Calendar.current.dateComponents(
+      [.year, .month, .day, .hour, .minute, .second],
+      from: date
+    )
+    return UNCalendarNotificationTrigger(dateMatching: parts, repeats: false)
+  }
+
+  /// iOS draws the app icon on the banner. A stale install can keep the
+  /// Flutter logo there, so the quote carries the Moti mark as its avatar.
+  static func brandedContent(
+    _ content: UNMutableNotificationContent,
+    title: String,
+    body: String
+  ) -> UNNotificationContent {
+    guard #available(iOS 15.0, *),
+          let data = iconData()
+    else { return content }
+    let avatar = INImage(imageData: data)
+    let sender = INPerson(
+      personHandle: INPersonHandle(value: "motiscroll", type: .unknown),
+      nameComponents: nil,
+      displayName: title,
+      image: avatar,
+      contactIdentifier: nil,
+      customIdentifier: "motiscroll",
+      isMe: false
+    )
+    let intent = INSendMessageIntent(
+      recipients: nil,
+      outgoingMessageType: .outgoingMessageText,
+      content: body,
+      speakableGroupName: nil,
+      conversationIdentifier: "motiscroll.quotes",
+      serviceName: nil,
+      sender: sender,
+      attachments: nil
+    )
+    intent.setImage(avatar, forParameterNamed: \.sender)
+    let interaction = INInteraction(intent: intent, response: nil)
+    interaction.direction = .incoming
+    interaction.donate(completion: nil)
+    guard let updated = try? content.updating(from: intent) else { return content }
+    return updated
+  }
+
+  static func iconData() -> Data? {
+    let names = ["AppIcon60x60@3x", "AppIcon60x60@2x", "AppIcon60x60"]
+    for name in names {
+      if let path = Bundle.main.path(forResource: name, ofType: "png"),
+         let data = try? Data(contentsOf: URL(fileURLWithPath: path)) {
+        return data
+      }
+    }
+    return nil
   }
 }
 

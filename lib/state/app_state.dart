@@ -7,6 +7,7 @@ import 'package:flutter_timezone/flutter_timezone.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import '../data/catalog.dart';
+import '../data/catalog_cache.dart';
 import '../data/discover_deck.dart';
 import '../data/models.dart';
 import '../data/repositories.dart';
@@ -139,6 +140,12 @@ class AppState extends ChangeNotifier {
         // Keep defaults when the stored blob is unreadable.
       }
     }
+    final cached = await CatalogCache.read();
+    if (cached.isEmpty) return;
+    _items = cached;
+    _fromPublished = true;
+    discoverItems = cached;
+    _ensureLines();
   }
 
   void _read(Map<String, dynamic> map) {
@@ -651,10 +658,20 @@ class AppState extends ChangeNotifier {
     unawaited(syncNotifications());
   }
 
-  Future<void> refreshCatalog() async {
-    catalogLoading = true;
+  void adoptCatalog(PageChunk page) {
+    if (page.items.isEmpty) return;
+    _items = page.items;
+    _fromPublished = true;
+    feedHasMore = page.items.length >= catalogPageSize;
     catalogError = null;
+    catalogLoading = false;
+    _ensureLines();
+    if (discoverItems.isEmpty) discoverItems = _items;
     notifyListeners();
+  }
+
+  Future<void> refreshCatalog() async {
+    catalogError = null;
     final repository = this.repository;
     if (repository == null) {
       _ensureLines();
@@ -666,12 +683,27 @@ class AppState extends ChangeNotifier {
       notifyListeners();
       return;
     }
+    if (_items.isEmpty) {
+      catalogLoading = true;
+      notifyListeners();
+      try {
+        adoptCatalog(await repository.previewOpening());
+      } on Exception {
+        // The full read below still runs.
+      }
+    }
     try {
       final page = await repository.page();
-      _items = page.items;
-      _fromPublished = true;
-      feedHasMore = page.items.length >= catalogPageSize;
-      catalogError = page.items.isEmpty ? 'Nothing is published yet.' : null;
+      if (page.items.isNotEmpty) {
+        _items = page.items;
+        _fromPublished = true;
+        feedHasMore = page.items.length >= catalogPageSize;
+        catalogError = null;
+      }
+      _ensureLines();
+      catalogLoading = false;
+      catalogError = _items.isEmpty ? 'Nothing is published yet.' : null;
+      notifyListeners();
     } on Exception catch (error, stack) {
       FlutterError.reportError(
         FlutterErrorDetails(
@@ -751,6 +783,7 @@ class AppState extends ChangeNotifier {
     catalogError = _items.isEmpty ? catalogError : null;
     syncWidgets();
     unawaited(syncNotifications());
+    unawaited(CatalogCache.write(_items));
     notifyListeners();
   }
 

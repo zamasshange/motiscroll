@@ -155,6 +155,14 @@ Future<void> _attachBackend(AppState state) async {
         state.contentReady = false;
       }
     };
+    state.repository = FirestoreItemRepository(FirebaseFirestore.instance);
+    if (state.items.isEmpty) {
+      try {
+        state.adoptCatalog(await state.repository!.previewOpening());
+      } on Exception {
+        // Sign-in below retries the library read.
+      }
+    }
     try {
       await FirebaseAuth.instance.signInAnonymously().timeout(
         const Duration(seconds: 8),
@@ -173,7 +181,7 @@ Future<void> _attachBackend(AppState state) async {
       return;
     }
     state.remote = true;
-    state.repository = FirestoreItemRepository(FirebaseFirestore.instance);
+    state.repository ??= FirestoreItemRepository(FirebaseFirestore.instance);
     state.directory = FirestoreUserDirectory(FirebaseFirestore.instance, uid);
     state.accountLabel = 'Saved on this device';
     state.accountError = null;
