@@ -5,7 +5,7 @@
     <string name="quoteOfTheDay">Zitat des Tages</string>
     <string name="translated">Übersetzt</string>
     <string name="openToStart">Öffne die App, um zu starten</string>
-    <string name="openToRefresh">Öffne Moti Scroll zum Aktualisieren</string>
+    <string name="openToRefresh">Öffne MotiScroll zum Aktualisieren</string>
     <string name="streakLabel">Tage in Folge</string>
     <string name="saveAQuote">Speichere ein Zitat, um es hier zu sehen</string>
     <string name="yourDailyQuote">Dein Zitat des Tages erscheint hier</string>
@@ -20,8 +20,8 @@
     <string name="refreshWidgets">Widgets jetzt aktualisieren</string>
     <string name="showSavedLock">Gespeicherte Zitate auf dem Sperrbildschirm zeigen</string>
     <string name="showSavedLockDetail">Standardmäßig aus. Gespeicherte Zitate bleiben vom Sperrbildschirm fern. Ein gesperrtes Telefon kann jemand in der Nähe lesen.</string>
-    <string name="iosWidgetHelp">Auf dem iPhone den Startbildschirm gedrückt halten, auf + tippen und Moti Scroll wählen. Dieselben Widgets lassen sich vom Sperrbildschirm hinzufügen. Gespeicherte Zitate werden dort nicht angeboten.</string>
-    <string name="androidWidgetHelp">Auf Android den Startbildschirm gedrückt halten, Widgets öffnen und Moti Scroll wählen. Sperrbildschirm-Widgets werden nicht angeboten.</string>
+    <string name="iosWidgetHelp">Auf dem iPhone den Startbildschirm gedrückt halten, auf + tippen und MotiScroll wählen. Dieselben Widgets lassen sich vom Sperrbildschirm hinzufügen. Gespeicherte Zitate werden dort nicht angeboten.</string>
+    <string name="androidWidgetHelp">Auf Android den Startbildschirm gedrückt halten, Widgets öffnen und MotiScroll wählen. Sperrbildschirm-Widgets werden nicht angeboten.</string>
     <string name="field_sports">Sport</string>
     <string name="field_business">Wirtschaft</string>
     <string name="field_science">Wissenschaft</string>

@@ -5,7 +5,7 @@
     <string name="quoteOfTheDay">Aanhaling van die dag</string>
     <string name="translated">Vertaal</string>
     <string name="openToStart">Maak die app oop om te begin</string>
-    <string name="openToRefresh">Maak Moti Scroll oop om te verfris</string>
+    <string name="openToRefresh">Maak MotiScroll oop om te verfris</string>
     <string name="streakLabel">dae agtereen</string>
     <string name="saveAQuote">Stoor ’n aanhaling om dit hier te sien</string>
     <string name="yourDailyQuote">Jou daaglikse aanhaling verskyn hier</string>
@@ -20,8 +20,8 @@
     <string name="refreshWidgets">Verfris widgets nou</string>
     <string name="showSavedLock">Wys gestoorde aanhalings op sluitskerm-widgets</string>
     <string name="showSavedLockDetail">Af by verstek. Gestoorde aanhalings bly van die sluitskerm af. Iemand langsaan kan ’n geslote foon lees.</string>
-    <string name="iosWidgetHelp">Op iPhone, hou die tuisskerm, tik +, en kies Moti Scroll. Dieselfde widgets kan van die sluitskerm bygevoeg word. Gestoorde aanhalings word nie daar aangebied nie.</string>
-    <string name="androidWidgetHelp">Op Android, hou die tuisskerm, maak Widgets oop, en kies Moti Scroll. Sluitskerm-widgets word nie aangebied nie.</string>
+    <string name="iosWidgetHelp">Op iPhone, hou die tuisskerm, tik +, en kies MotiScroll. Dieselfde widgets kan van die sluitskerm bygevoeg word. Gestoorde aanhalings word nie daar aangebied nie.</string>
+    <string name="androidWidgetHelp">Op Android, hou die tuisskerm, maak Widgets oop, en kies MotiScroll. Sluitskerm-widgets word nie aangebied nie.</string>
     <string name="field_sports">Sport</string>
     <string name="field_business">Besigheid</string>
     <string name="field_science">Wetenskap</string>

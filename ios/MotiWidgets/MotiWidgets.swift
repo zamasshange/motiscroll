@@ -164,7 +164,7 @@ struct QuoteEntry: TimelineEntry {
     static let empty = QuoteEntry(
         date: .now,
         quote: nil,
-        message: "Open Moti Scroll to refresh",
+        message: "Open MotiScroll to refresh",
         direction: .leftToRight,
         language: "en",
         showSource: false,
@@ -250,7 +250,7 @@ struct QuoteView: View {
             .accessibilityElement(children: .ignore)
             .accessibilityLabel("quote, by \(quote.authorName)")
         } else {
-            Text(entry.message ?? "Open Moti Scroll to refresh")
+            Text(entry.message ?? "Open MotiScroll to refresh")
                 .font(quoteFont(18))
                 .foregroundStyle(textColor)
                 .widgetAccentable()
@@ -264,7 +264,7 @@ struct QuoteView: View {
         if let quote = entry.quote {
             return "\(quote.text) — \(quote.authorName)"
         }
-        return entry.message ?? "Open Moti Scroll to refresh"
+        return entry.message ?? "Open MotiScroll to refresh"
     }
 
     private var quoteSize: CGFloat {
@@ -410,7 +410,7 @@ enum MotiTimeline {
             return QuoteEntry(
                 date: date,
                 quote: nil,
-                message: payload?.text("openToRefresh", fallback: "Open Moti Scroll to refresh") ?? "Open Moti Scroll to refresh",
+                message: payload?.text("openToRefresh", fallback: "Open MotiScroll to refresh") ?? "Open MotiScroll to refresh",
                 direction: payload?.direction == "rtl" ? .rightToLeft : .leftToRight,
                 language: payload?.contentLanguage ?? "en",
                 showSource: false,
@@ -424,7 +424,7 @@ enum MotiTimeline {
                 quote: nil,
                 message: disabled
                     ? payload?.text("yourDailyQuote", fallback: "Your daily quote appears here")
-                    : payload?.text("openToRefresh", fallback: "Open Moti Scroll to refresh"),
+                    : payload?.text("openToRefresh", fallback: "Open MotiScroll to refresh"),
                 direction: payload?.direction == "rtl" ? .rightToLeft : .leftToRight,
                 language: payload?.contentLanguage ?? "en",
                 showSource: false,
@@ -512,7 +512,7 @@ struct StreakProvider: TimelineProvider {
                 date: .now,
                 count: 0,
                 label: "",
-                message: payload?.text("openToRefresh", fallback: "Open Moti Scroll to refresh") ?? "Open Moti Scroll to refresh"
+                message: payload?.text("openToRefresh", fallback: "Open MotiScroll to refresh") ?? "Open MotiScroll to refresh"
             )
         }
         return StreakEntry(

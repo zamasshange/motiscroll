@@ -5,7 +5,7 @@
     <string name="quoteOfTheDay">Frase del día</string>
     <string name="translated">Traducido</string>
     <string name="openToStart">Abre la app para empezar</string>
-    <string name="openToRefresh">Abre Moti Scroll para actualizar</string>
+    <string name="openToRefresh">Abre MotiScroll para actualizar</string>
     <string name="streakLabel">racha de días</string>
     <string name="saveAQuote">Guarda una frase para verla aquí</string>
     <string name="yourDailyQuote">Tu frase del día aparece aquí</string>
@@ -20,8 +20,8 @@
     <string name="refreshWidgets">Actualizar widgets ahora</string>
     <string name="showSavedLock">Mostrar frases guardadas en widgets de la pantalla de bloqueo</string>
     <string name="showSavedLockDetail">Desactivado por defecto. Las frases guardadas no aparecen en la pantalla de bloqueo. Un teléfono bloqueado puede leerlo quien esté cerca.</string>
-    <string name="iosWidgetHelp">En el iPhone, mantén pulsada la pantalla de inicio, toca + y elige Moti Scroll. Los mismos widgets se pueden añadir desde la pantalla de bloqueo. Las frases guardadas no se ofrecen ahí.</string>
-    <string name="androidWidgetHelp">En Android, mantén pulsada la pantalla de inicio, abre Widgets y elige Moti Scroll. No hay widgets de pantalla de bloqueo.</string>
+    <string name="iosWidgetHelp">En el iPhone, mantén pulsada la pantalla de inicio, toca + y elige MotiScroll. Los mismos widgets se pueden añadir desde la pantalla de bloqueo. Las frases guardadas no se ofrecen ahí.</string>
+    <string name="androidWidgetHelp">En Android, mantén pulsada la pantalla de inicio, abre Widgets y elige MotiScroll. No hay widgets de pantalla de bloqueo.</string>
     <string name="field_sports">Deporte</string>
     <string name="field_business">Negocios</string>
     <string name="field_science">Ciencia</string>

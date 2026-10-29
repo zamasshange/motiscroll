@@ -5,7 +5,7 @@
     <string name="quoteOfTheDay">Цитата дня</string>
     <string name="translated">Перевод</string>
     <string name="openToStart">Откройте приложение, чтобы начать</string>
-    <string name="openToRefresh">Откройте Moti Scroll, чтобы обновить</string>
+    <string name="openToRefresh">Откройте MotiScroll, чтобы обновить</string>
     <string name="streakLabel">дней подряд</string>
     <string name="saveAQuote">Сохраните цитату, чтобы увидеть её здесь</string>
     <string name="yourDailyQuote">Здесь появится цитата дня</string>
@@ -20,8 +20,8 @@
     <string name="refreshWidgets">Обновить виджеты</string>
     <string name="showSavedLock">Показывать сохранённые цитаты на экране блокировки</string>
     <string name="showSavedLockDetail">Выключено по умолчанию. Сохранённые цитаты не попадают на экран блокировки. Заблокированный телефон может прочитать кто-то рядом.</string>
-    <string name="iosWidgetHelp">На iPhone удерживайте домашний экран, нажмите + и выберите Moti Scroll. Те же виджеты можно добавить с экрана блокировки. Сохранённые цитаты там не предлагаются.</string>
-    <string name="androidWidgetHelp">На Android удерживайте домашний экран, откройте «Виджеты» и выберите Moti Scroll. Виджетов экрана блокировки нет.</string>
+    <string name="iosWidgetHelp">На iPhone удерживайте домашний экран, нажмите + и выберите MotiScroll. Те же виджеты можно добавить с экрана блокировки. Сохранённые цитаты там не предлагаются.</string>
+    <string name="androidWidgetHelp">На Android удерживайте домашний экран, откройте «Виджеты» и выберите MotiScroll. Виджетов экрана блокировки нет.</string>
     <string name="field_sports">Спорт</string>
     <string name="field_business">Бизнес</string>
     <string name="field_science">Наука</string>

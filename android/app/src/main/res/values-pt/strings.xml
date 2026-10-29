@@ -5,7 +5,7 @@
     <string name="quoteOfTheDay">Citação do dia</string>
     <string name="translated">Traduzido</string>
     <string name="openToStart">Abra a app para começar</string>
-    <string name="openToRefresh">Abra o Moti Scroll para atualizar</string>
+    <string name="openToRefresh">Abra o MotiScroll para atualizar</string>
     <string name="streakLabel">dias seguidos</string>
     <string name="saveAQuote">Guarde uma citação para a ver aqui</string>
     <string name="yourDailyQuote">A sua citação do dia aparece aqui</string>
@@ -20,8 +20,8 @@
     <string name="refreshWidgets">Atualizar widgets agora</string>
     <string name="showSavedLock">Mostrar citações guardadas nos widgets do ecrã bloqueado</string>
     <string name="showSavedLockDetail">Desligado por predefinição. As citações guardadas ficam fora do ecrã bloqueado. Um telefone bloqueado pode ser lido por quem estiver perto.</string>
-    <string name="iosWidgetHelp">No iPhone, toque e mantenha o ecrã inicial, toque em + e escolha Moti Scroll. Os mesmos widgets podem ser adicionados no ecrã bloqueado. As citações guardadas não são oferecidas aí.</string>
-    <string name="androidWidgetHelp">No Android, toque e mantenha o ecrã inicial, abra Widgets e escolha Moti Scroll. Não há widgets de ecrã bloqueado.</string>
+    <string name="iosWidgetHelp">No iPhone, toque e mantenha o ecrã inicial, toque em + e escolha MotiScroll. Os mesmos widgets podem ser adicionados no ecrã bloqueado. As citações guardadas não são oferecidas aí.</string>
+    <string name="androidWidgetHelp">No Android, toque e mantenha o ecrã inicial, abra Widgets e escolha MotiScroll. Não há widgets de ecrã bloqueado.</string>
     <string name="field_sports">Desporto</string>
     <string name="field_business">Negócios</string>
     <string name="field_science">Ciência</string>

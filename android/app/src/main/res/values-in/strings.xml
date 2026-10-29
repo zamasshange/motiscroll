@@ -5,7 +5,7 @@
     <string name="quoteOfTheDay">Kutipan hari ini</string>
     <string name="translated">Terjemahan</string>
     <string name="openToStart">Buka aplikasi untuk mulai</string>
-    <string name="openToRefresh">Buka Moti Scroll untuk menyegarkan</string>
+    <string name="openToRefresh">Buka MotiScroll untuk menyegarkan</string>
     <string name="streakLabel">hari beruntun</string>
     <string name="saveAQuote">Simpan kutipan untuk melihatnya di sini</string>
     <string name="yourDailyQuote">Kutipan harian Anda muncul di sini</string>
@@ -20,8 +20,8 @@
     <string name="refreshWidgets">Segarkan widget sekarang</string>
     <string name="showSavedLock">Tampilkan kutipan tersimpan di widget layar kunci</string>
     <string name="showSavedLockDetail">Mati secara bawaan. Kutipan tersimpan tidak tampil di layar kunci. Ponsel yang terkunci tetap bisa dibaca orang di dekatnya.</string>
-    <string name="iosWidgetHelp">Di iPhone, sentuh dan tahan Layar Utama, ketuk +, lalu pilih Moti Scroll. Widget yang sama bisa ditambahkan dari layar kunci. Kutipan tersimpan tidak ditawarkan di sana.</string>
-    <string name="androidWidgetHelp">Di Android, sentuh dan tahan Layar Utama, buka Widget, lalu pilih Moti Scroll. Widget layar kunci tidak ditawarkan.</string>
+    <string name="iosWidgetHelp">Di iPhone, sentuh dan tahan Layar Utama, ketuk +, lalu pilih MotiScroll. Widget yang sama bisa ditambahkan dari layar kunci. Kutipan tersimpan tidak ditawarkan di sana.</string>
+    <string name="androidWidgetHelp">Di Android, sentuh dan tahan Layar Utama, buka Widget, lalu pilih MotiScroll. Widget layar kunci tidak ditawarkan.</string>
     <string name="field_sports">Olahraga</string>
     <string name="field_business">Bisnis</string>
     <string name="field_science">Sains</string>

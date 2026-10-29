@@ -5,7 +5,7 @@
     <string name="quoteOfTheDay">Nukuu ya leo</string>
     <string name="translated">Imetafsiriwa</string>
     <string name="openToStart">Fungua programu uanze</string>
-    <string name="openToRefresh">Fungua Moti Scroll upate upya</string>
+    <string name="openToRefresh">Fungua MotiScroll upate upya</string>
     <string name="streakLabel">siku mfululizo</string>
     <string name="saveAQuote">Hifadhi nukuu ili uione hapa</string>
     <string name="yourDailyQuote">Nukuu yako ya kila siku itaonekana hapa</string>
@@ -20,8 +20,8 @@
     <string name="refreshWidgets">Onyesha upya wijeti sasa</string>
     <string name="showSavedLock">Onyesha nukuu zilizohifadhiwa kwenye skrini iliyofungwa</string>
     <string name="showSavedLockDetail">Imezimwa kwa chaguo-msingi. Nukuu zilizohifadhiwa hazionekani kwenye skrini iliyofungwa. Simu iliyofungwa bado inaweza kusomwa na aliye karibu.</string>
-    <string name="iosWidgetHelp">Kwenye iPhone, gusa na ushikilie skrini ya nyumbani, gusa +, kisha chagua Moti Scroll. Wijeti hizo zinaweza kuongezwa kwenye skrini iliyofungwa. Nukuu zilizohifadhiwa hazitolewi huko.</string>
-    <string name="androidWidgetHelp">Kwenye Android, gusa na ushikilie skrini ya nyumbani, fungua Wijeti, kisha chagua Moti Scroll. Wijeti za skrini iliyofungwa hazitolewi.</string>
+    <string name="iosWidgetHelp">Kwenye iPhone, gusa na ushikilie skrini ya nyumbani, gusa +, kisha chagua MotiScroll. Wijeti hizo zinaweza kuongezwa kwenye skrini iliyofungwa. Nukuu zilizohifadhiwa hazitolewi huko.</string>
+    <string name="androidWidgetHelp">Kwenye Android, gusa na ushikilie skrini ya nyumbani, fungua Wijeti, kisha chagua MotiScroll. Wijeti za skrini iliyofungwa hazitolewi.</string>
     <string name="field_sports">Michezo</string>
     <string name="field_business">Biashara</string>
     <string name="field_science">Sayansi</string>

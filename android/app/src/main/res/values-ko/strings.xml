@@ -5,7 +5,7 @@
     <string name="quoteOfTheDay">오늘의 문장</string>
     <string name="translated">번역</string>
     <string name="openToStart">앱을 열어 시작하세요</string>
-    <string name="openToRefresh">새로고침하려면 Moti Scroll을 여세요</string>
+    <string name="openToRefresh">새로고침하려면 MotiScroll을 여세요</string>
     <string name="streakLabel">일 연속</string>
     <string name="saveAQuote">문장을 저장하면 여기에 표시됩니다</string>
     <string name="yourDailyQuote">오늘의 문장이 여기에 표시됩니다</string>
@@ -20,8 +20,8 @@
     <string name="refreshWidgets">위젯 지금 새로고침</string>
     <string name="showSavedLock">잠금 화면 위젯에 저장한 문장 표시</string>
     <string name="showSavedLockDetail">기본값은 꺼짐입니다. 저장한 문장은 잠금 화면에 나오지 않습니다. 잠긴 화면도 곁에 있는 사람이 읽을 수 있습니다.</string>
-    <string name="iosWidgetHelp">iPhone에서 홈 화면을 길게 누르고 +를 탭한 뒤 Moti Scroll을 고르세요. 잠금 화면에서도 같은 위젯을 추가할 수 있습니다. 저장한 문장은 잠금 화면에 나오지 않습니다.</string>
-    <string name="androidWidgetHelp">Android에서 홈 화면을 길게 누르고 위젯을 연 뒤 Moti Scroll을 고르세요. 잠금 화면 위젯은 제공하지 않습니다.</string>
+    <string name="iosWidgetHelp">iPhone에서 홈 화면을 길게 누르고 +를 탭한 뒤 MotiScroll을 고르세요. 잠금 화면에서도 같은 위젯을 추가할 수 있습니다. 저장한 문장은 잠금 화면에 나오지 않습니다.</string>
+    <string name="androidWidgetHelp">Android에서 홈 화면을 길게 누르고 위젯을 연 뒤 MotiScroll을 고르세요. 잠금 화면 위젯은 제공하지 않습니다.</string>
     <string name="field_sports">스포츠</string>
     <string name="field_business">비즈니스</string>
     <string name="field_science">과학</string>

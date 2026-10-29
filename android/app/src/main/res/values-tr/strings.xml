@@ -5,7 +5,7 @@
     <string name="quoteOfTheDay">Günün sözü</string>
     <string name="translated">Çeviri</string>
     <string name="openToStart">Başlamak için uygulamayı açın</string>
-    <string name="openToRefresh">Yenilemek için Moti Scroll’u açın</string>
+    <string name="openToRefresh">Yenilemek için MotiScroll’u açın</string>
     <string name="streakLabel">günlük seri</string>
     <string name="saveAQuote">Burada görmek için bir söz kaydedin</string>
     <string name="yourDailyQuote">Günlük sözünüz burada görünür</string>
@@ -20,8 +20,8 @@
     <string name="refreshWidgets">Widget’ları şimdi yenile</string>
     <string name="showSavedLock">Kayıtlı sözleri kilit ekranı widget’larında göster</string>
     <string name="showSavedLockDetail">Varsayılan olarak kapalı. Kayıtlı sözler kilit ekranında görünmez. Kilitli bir telefonu yakındaki biri okuyabilir.</string>
-    <string name="iosWidgetHelp">iPhone’da Ana Ekrana basılı tutun, + düğmesine dokunun ve Moti Scroll’u seçin. Aynı widget’lar kilit ekranından da eklenebilir. Kayıtlı sözler orada sunulmaz.</string>
-    <string name="androidWidgetHelp">Android’de Ana Ekrana basılı tutun, Widget’lar’ı açın ve Moti Scroll’u seçin. Kilit ekranı widget’ı sunulmaz.</string>
+    <string name="iosWidgetHelp">iPhone’da Ana Ekrana basılı tutun, + düğmesine dokunun ve MotiScroll’u seçin. Aynı widget’lar kilit ekranından da eklenebilir. Kayıtlı sözler orada sunulmaz.</string>
+    <string name="androidWidgetHelp">Android’de Ana Ekrana basılı tutun, Widget’lar’ı açın ve MotiScroll’u seçin. Kilit ekranı widget’ı sunulmaz.</string>
     <string name="field_sports">Spor</string>
     <string name="field_business">İş</string>
     <string name="field_science">Bilim</string>

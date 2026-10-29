@@ -1,6 +1,7 @@
 import 'package:flutter/widgets.dart';
 
-const kAppName = 'Moti Scroll';
+const kAppName = 'MotiScroll';
+const kAppShortName = 'Motis';
 const kTabBarHeight = 62.0;
 const kTabBarFloat = 10.0;
 const kCardRadius = 24.0;

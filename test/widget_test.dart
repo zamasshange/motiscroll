@@ -20,7 +20,7 @@ void main() {
     await tester.pump();
 
     expect(find.text('Get started'), findsOneWidget);
-    expect(find.text('Moti Scroll'), findsWidgets);
+    expect(find.text('MotiScroll'), findsWidgets);
   });
 
   testWidgets('onboarding finishes on Home', (tester) async {

@@ -5,7 +5,7 @@
     <string name="quoteOfTheDay">Citazione del giorno</string>
     <string name="translated">Tradotto</string>
     <string name="openToStart">Apri l’app per iniziare</string>
-    <string name="openToRefresh">Apri Moti Scroll per aggiornare</string>
+    <string name="openToRefresh">Apri MotiScroll per aggiornare</string>
     <string name="streakLabel">giorni di fila</string>
     <string name="saveAQuote">Salva una citazione per vederla qui</string>
     <string name="yourDailyQuote">La tua citazione del giorno appare qui</string>
@@ -20,8 +20,8 @@
     <string name="refreshWidgets">Aggiorna i widget ora</string>
     <string name="showSavedLock">Mostra le citazioni salvate sui widget della schermata di blocco</string>
     <string name="showSavedLockDetail">Spento per impostazione predefinita. Le citazioni salvate restano fuori dalla schermata di blocco. Un telefono bloccato può essere letto da chi è vicino.</string>
-    <string name="iosWidgetHelp">Su iPhone, tieni premuta la schermata Home, tocca + e scegli Moti Scroll. Gli stessi widget si aggiungono dalla schermata di blocco. Le citazioni salvate non sono offerte lì.</string>
-    <string name="androidWidgetHelp">Su Android, tieni premuta la schermata Home, apri Widget e scegli Moti Scroll. I widget della schermata di blocco non sono offerti.</string>
+    <string name="iosWidgetHelp">Su iPhone, tieni premuta la schermata Home, tocca + e scegli MotiScroll. Gli stessi widget si aggiungono dalla schermata di blocco. Le citazioni salvate non sono offerte lì.</string>
+    <string name="androidWidgetHelp">Su Android, tieni premuta la schermata Home, apri Widget e scegli MotiScroll. I widget della schermata di blocco non sono offerti.</string>
     <string name="field_sports">Sport</string>
     <string name="field_business">Affari</string>
     <string name="field_science">Scienza</string>

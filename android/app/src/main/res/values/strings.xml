@@ -4,7 +4,7 @@
     <string name="quoteOfTheDay">Quote of the Day</string>
     <string name="translated">Translated</string>
     <string name="openToStart">Open the app to get started</string>
-    <string name="openToRefresh">Open Moti Scroll to refresh</string>
+    <string name="openToRefresh">Open MotiScroll to refresh</string>
     <string name="streakLabel">day streak</string>
     <string name="saveAQuote">Save a quote to see it here</string>
     <string name="yourDailyQuote">Your daily quote appears here</string>
@@ -19,8 +19,8 @@
     <string name="refreshWidgets">Refresh widgets now</string>
     <string name="showSavedLock">Show saved quotes on lock screen widgets</string>
     <string name="showSavedLockDetail">Off by default. Saved quotes stay off the lock screen either way. A locked phone can be read by anyone nearby.</string>
-    <string name="iosWidgetHelp">On iPhone, touch and hold the Home Screen, tap +, and choose Moti Scroll. The same widgets can be added from the lock screen customizer. Saved quotes are not offered on the lock screen.</string>
-    <string name="androidWidgetHelp">On Android, touch and hold the Home Screen, open Widgets, and choose Moti Scroll. Lock screen widgets are not offered.</string>
+    <string name="iosWidgetHelp">On iPhone, touch and hold the Home Screen, tap +, and choose MotiScroll. The same widgets can be added from the lock screen customizer. Saved quotes are not offered on the lock screen.</string>
+    <string name="androidWidgetHelp">On Android, touch and hold the Home Screen, open Widgets, and choose MotiScroll. Lock screen widgets are not offered.</string>
     <string name="field_sports">Sports</string>
     <string name="field_business">Business</string>
     <string name="field_science">Science</string>

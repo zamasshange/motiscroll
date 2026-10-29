@@ -5,7 +5,7 @@
     <string name="quoteOfTheDay">今日の言葉</string>
     <string name="translated">翻訳</string>
     <string name="openToStart">アプリを開いて始めましょう</string>
-    <string name="openToRefresh">更新するには Moti Scroll を開いてください</string>
+    <string name="openToRefresh">更新するには MotiScroll を開いてください</string>
     <string name="streakLabel">日連続</string>
     <string name="saveAQuote">名言を保存するとここに表示されます</string>
     <string name="yourDailyQuote">今日の言葉がここに表示されます</string>
@@ -20,8 +20,8 @@
     <string name="refreshWidgets">ウィジェットを今すぐ更新</string>
     <string name="showSavedLock">ロック画面のウィジェットに保存した言葉を表示</string>
     <string name="showSavedLockDetail">初期状態はオフです。保存した言葉はロック画面に出しません。ロック中でも近くの人に読まれることがあります。</string>
-    <string name="iosWidgetHelp">iPhone ではホーム画面を長押しし、+ をタップして Moti Scroll を選びます。ロック画面からも同じウィジェットを追加できます。保存した言葉はロック画面には出ません。</string>
-    <string name="androidWidgetHelp">Android ではホーム画面を長押しし、ウィジェットを開いて Moti Scroll を選びます。ロック画面用ウィジェットはありません。</string>
+    <string name="iosWidgetHelp">iPhone ではホーム画面を長押しし、+ をタップして MotiScroll を選びます。ロック画面からも同じウィジェットを追加できます。保存した言葉はロック画面には出ません。</string>
+    <string name="androidWidgetHelp">Android ではホーム画面を長押しし、ウィジェットを開いて MotiScroll を選びます。ロック画面用ウィジェットはありません。</string>
     <string name="field_sports">スポーツ</string>
     <string name="field_business">ビジネス</string>
     <string name="field_science">科学</string>
