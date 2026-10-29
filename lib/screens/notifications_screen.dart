@@ -115,8 +115,12 @@ class NotificationsScreen extends StatelessWidget {
             const SizedBox(height: 24),
             _Chevron(
               title: 'Send a sample',
-              onTap: () {
-                state.previewNotifications();
+              onTap: () async {
+                final shown = await state.previewNotifications();
+                if (!context.mounted || shown > 0) return;
+                if (!state.notificationPermissionGranted) {
+                  await NotificationService.instance.openSystemSettings();
+                }
               },
             ),
             _Chevron(

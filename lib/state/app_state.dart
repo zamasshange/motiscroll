@@ -565,9 +565,12 @@ class AppState extends ChangeNotifier {
   /// Fires two banners from published lines so lock-screen shots are possible.
   /// Never invents a quote. Returns how many were shown.
   Future<int> previewNotifications() async {
-    if (!notificationPermissionGranted) {
+    final allowed = await NotificationService.instance.permissionGranted();
+    notificationPermissionGranted = allowed;
+    if (!allowed) {
       await enableNotifications();
     }
+    if (!notificationPermissionGranted) return 0;
     final lang = uiLanguage ?? contentLanguage ?? 'en';
     final picks = dailyPicks(DateTime.now(), usualMood, items);
     final chosen = <Item>[];

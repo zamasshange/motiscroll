@@ -1,6 +1,7 @@
 import Flutter
 import Photos
 import UIKit
+import UserNotifications
 import workmanager_apple
 
 @main
@@ -9,17 +10,24 @@ import workmanager_apple
     _ application: UIApplication,
     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
   ) -> Bool {
+    // Own the notification center before plugins register. Otherwise Firebase
+    // Messaging becomes the delegate and presents local banners as nothing
+    // while the app is open. Android still shows those heads-up.
+    UNUserNotificationCenter.current().delegate = self
     if #available(iOS 13.0, *) {
       WorkmanagerPlugin.registerPeriodicTask(
         withIdentifier: "moti-widget-refresh",
         frequency: nil
       )
     }
-    return super.application(application, didFinishLaunchingWithOptions: launchOptions)
+    let launched = super.application(application, didFinishLaunchingWithOptions: launchOptions)
+    UNUserNotificationCenter.current().delegate = self
+    return launched
   }
 
   func didInitializeImplicitFlutterEngine(_ engineBridge: FlutterImplicitEngineBridge) {
     GeneratedPluginRegistrant.register(with: engineBridge.pluginRegistry)
+    UNUserNotificationCenter.current().delegate = self
     let channel = FlutterMethodChannel(
       name: "motiscroll/share",
       binaryMessenger: engineBridge.applicationRegistrar.messenger()
@@ -27,6 +35,22 @@ import workmanager_apple
     channel.setMethodCallHandler { call, result in
       ShareChannel.handle(call, result: result)
     }
+  }
+
+  override func userNotificationCenter(
+    _ center: UNUserNotificationCenter,
+    willPresent notification: UNNotification,
+    withCompletionHandler completionHandler: @escaping (UNNotificationPresentationOptions) -> Void
+  ) {
+    if notification.request.content.userInfo["NotificationId"] != nil {
+      completionHandler([.banner, .list, .sound])
+      return
+    }
+    super.userNotificationCenter(
+      center,
+      willPresent: notification,
+      withCompletionHandler: completionHandler
+    )
   }
 }
 

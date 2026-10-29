@@ -559,7 +559,7 @@ struct PoolIntent: WidgetConfigurationIntent {
     static var title: LocalizedStringResource = "pool_widget_name"
 
     @Parameter(title: "Pool")
-    var pool: PoolChoice
+    var pool: PoolChoice?
 }
 
 struct PoolProvider: AppIntentTimelineProvider {
@@ -571,7 +571,10 @@ struct PoolProvider: AppIntentTimelineProvider {
 
     func timeline(for configuration: PoolIntent, in context: Context) async -> Timeline<QuoteEntry> {
         let payload = WidgetStore.load()
-        let key = configuration.pool.poolKey
+        guard let key = configuration.pool?.poolKey else {
+            let entry = MotiTimeline.quoteEntry(at: .now, family: .systemMedium, payload: payload, quote: nil)
+            return Timeline(entries: [entry], policy: .after(Date().addingTimeInterval(5 * 60 * 60)))
+        }
         let pool = key.0 == "mood" ? payload?.moodPools[key.1] : payload?.fieldPools[key.1]
         let items = pool ?? []
         guard let payload, !payload.needsRefresh, payload.widgetsEnabled, !items.isEmpty else {
