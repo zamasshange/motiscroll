@@ -39,8 +39,7 @@ abstract class UserDirectory {
     required Set<Field> fields,
     required Mood? mood,
     required String timezone,
-    required String reminderTime,
-    required bool reminderLocal,
+    required Map<String, Object?> notifications,
   });
 
   Future<void> setFlag({
@@ -228,16 +227,14 @@ class FirestoreUserDirectory implements UserDirectory {
     required Set<Field> fields,
     required Mood? mood,
     required String timezone,
-    required String reminderTime,
-    required bool reminderLocal,
+    required Map<String, Object?> notifications,
   }) async {
     await _user.set({
       'onboardingDone': true,
       'timezone': timezone,
       'usualMood': mood?.name,
       'selectedFields': fields.map((field) => field.name).toList(),
-      'reminderTime': reminderTime,
-      'reminderLocal': reminderLocal,
+      ...notifications,
       'createdAt': FieldValue.serverTimestamp(),
     }, SetOptions(merge: true));
     for (final field in fields) {

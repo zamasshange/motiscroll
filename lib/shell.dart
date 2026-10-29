@@ -5,6 +5,7 @@ import 'screens/collections_screen.dart';
 import 'screens/discover_screen.dart';
 import 'screens/feed_screen.dart';
 import 'screens/home_screen.dart';
+import 'screens/notifications_screen.dart';
 import 'state/app_state.dart';
 import 'tabs.dart';
 import 'theme/tokens.dart';
@@ -18,6 +19,7 @@ class TabShell extends StatefulWidget {
 
 class _TabShellState extends State<TabShell> {
   var _index = AppTab.home;
+  var _askShown = false;
 
   @override
   void didChangeDependencies() {
@@ -31,6 +33,19 @@ class _TabShellState extends State<TabShell> {
     final target = state.feedTarget;
     if (target != null && _index != AppTab.feed) {
       setState(() => _index = AppTab.feed);
+    }
+    if (state.notificationAskPending && !_askShown) {
+      _askShown = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) async {
+        if (!mounted) return;
+        await Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => const NotificationAskSheet(),
+            fullscreenDialog: true,
+          ),
+        );
+        if (mounted) _askShown = false;
+      });
     }
   }
 

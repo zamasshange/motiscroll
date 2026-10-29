@@ -113,6 +113,7 @@ class _AccountScreenState extends State<AccountScreen> {
                   ? () {}
                   : () => _run(() async {
                       await deleteAccount();
+                      await state.clearNotifications(clearPrefs: true);
                       await state.clearWidgets();
                       if (!context.mounted) return;
                       Navigator.of(context).popUntil((route) => route.isFirst);

@@ -50,6 +50,31 @@ test("a user cannot write their own streak fields", async () => {
   );
 });
 
+test("notification prefs must be the allowed fields and types", async () => {
+  const user = testEnv.authenticatedContext("notify-user").firestore();
+  await assertSucceeds(
+    setDoc(doc(user, "users/notify-user"), {
+      timezone: "Asia/Kolkata",
+      morningEnabled: true,
+      morningTime: "09:30",
+      eveningEnabled: true,
+      eveningTime: "20:30",
+      quoteSource: "followed_fields",
+      pausedUntil: null,
+    }),
+  );
+  await assertFails(
+    setDoc(
+      doc(user, "users/notify-user"),
+      { morningTime: "9am", quoteSource: "ads" },
+      { merge: true },
+    ),
+  );
+  await assertFails(
+    setDoc(doc(user, "users/notify-user"), { reminderUtcBucket: 0 }, { merge: true }),
+  );
+});
+
 test("reports can be created only as yourself", async () => {
   const user = testEnv.authenticatedContext("reporter").firestore();
   await assertSucceeds(

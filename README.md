@@ -1,4 +1,4 @@
-# Moti Scroll
+# MotiScroll
 
 Flutter app of public-domain quotes and short speech excerpts. Four tabs: Home, Feed, Discover, Collections. The visual design is fixed. Phase 2 adds Firebase behind that design.
 
@@ -117,11 +117,47 @@ cd functions && npm run test:rules
 
 ## Cost
 
-Each card is one `publishedItems` read. Discover and Feed page 20 documents and prefetch near the end. Followed fields add a second query. The daily document is one read. Scheduled reminder and daily jobs run on a clock (every 15 minutes, and once a day). Set a budget alert before deploy. Empty LLM or YouTube secrets skip those calls.
+Each card is one `publishedItems` read. Discover and Feed page 20 documents and prefetch near the end. Followed fields add a second query. The daily document is one read. The Phase 2 FCM quote-of-the-day job is off unless `SEND_FCM_DAILY=true`. Daily document writes still run once a day. Set a budget alert before deploy. Empty LLM or YouTube secrets skip those calls.
 
 ## Privacy
 
-Settings includes Account (link, sign out, delete), Rights and sources, Privacy, and Terms. Privacy and Terms are placeholders for a lawyer. Delete account removes the user subtree and the Auth user, and clears the widget copy on the phone. App Check is enforced on callable functions outside the emulator. Turn on enforcement for Firestore and Storage in the console after Play Integrity and App Attest are configured.
+Settings includes Account (link, sign out, delete), Notifications, Rights and sources, Privacy, and Terms. Privacy and Terms are placeholders for a lawyer. Delete account removes the user subtree and the Auth user, and clears the widget copy and the local notification plan on the phone. App Check is enforced on callable functions outside the emulator. Turn on enforcement for Firestore and Storage in the console after Play Integrity and App Attest are configured.
+
+## Notifications
+
+MotiScroll schedules at most two local notifications a day: a morning quote at 09:30 and an evening reflection at 20:30 in the user’s time zone, unless they pick other times. Content comes from the same published cache the widgets use. Quote text is never invented, shortened, or cut; a longer line is skipped. Every notification names the author. Permission is never required to use the app, and is never asked on first launch.
+
+The plan covers the next 14 local days and is rebuilt only when the app is opened or a relevant setting changes. Days 1–7 get both enabled slots. Days 8–14 get the morning slot only (or the evening slot if morning is off). A user who stops opening MotiScroll stops receiving notifications after at most 14 days. Remote Config `notificationsEnabled` is the kill switch. `maxNotificationsPerDay` defaults to 2 and is capped at 2.
+
+The Phase 2 server push (`sendReminderBucket`) stays deployed but does nothing unless `SEND_FCM_DAILY=true`. FCM tokens stay in the user document for a possible later opt-in announcement, which is out of scope here.
+
+### Manual check
+
+On a real iPhone and an Android phone:
+
+- Install a fresh build. Confirm the home-screen name is Motis and the icon is the cream X on near-black, not the Flutter logo. A reinstall may be needed if the launcher cached the old glyph.
+- Finish onboarding with **Not now**. Confirm no system permission prompt appeared before that screen, and that the app still works.
+- Open Settings → Notifications, tap **Turn on**, grant permission, set both times two minutes ahead, background the app, and confirm two different quotes arrive. Expanded notifications show the full line and `— Author`.
+- Kill the app. Confirm a later notification still opens that line in the Feed. If the line is gone, Home opens.
+- Turn on airplane mode. Confirm a scheduled notification still fires (it is local).
+- Reboot the Android phone. Confirm later notifications still fire (`RECEIVE_BOOT_COMPLETED` is set).
+- Change the phone time zone, including a half-hour zone such as India. Open the app. Confirm new times match the zone.
+- Cross a day boundary. Confirm the next day’s line is not a repeat of today.
+- Switch the content language to Arabic and to Russian. Arabic and Persian must lay out correctly, including a Latin author name on an Arabic quote. Russian streak titles must pluralize.
+- Deny notification permission, then re-enable it from Settings → Notifications → Open system settings.
+- On iOS, turn on a Focus mode that silences MotiScroll and confirm the OS, not the app, is what holds the notification.
+- On Android, note battery saver and manufacturer optimization. Some brands delay or drop inexact alarms; [dontkillmyapp.com](https://dontkillmyapp.com) is the guidance to show a user, not something the app can override.
+- Debug builds only: Settings → Notifications → Planned notifications lists the 14-day stack (date, slot, quote id). That row is hidden in release.
+
+`flutter analyze` should be clean. `flutter build ios` and `flutter build apk` build the app.
+
+### What you still do in Xcode / Android Studio
+
+- iOS: no extra capability is required for local notifications. Confirm the App Icon asset is the Motis mark (already in `AppIcon.appiconset`). After pulling, delete the app from the simulator/device once so the icon cache clears.
+- Android: `POST_NOTIFICATIONS` and the boot receiver are already in the manifest. No exact-alarm permission is requested. After pulling, uninstall once if the launcher still shows the Flutter logo.
+- Deploy functions when you want the FCM daily job fully disabled in production (`SEND_FCM_DAILY` unset). Until that deploy, users who turn local notifications on are skipped by the old job because `reminderLocal` is true.
+
+Out of scope: marketing or announcement pushes, images in notifications, Save/Share actions, streak milestone celebrations, Live Activities, send-time A/B tests.
 
 ## Widgets
 
@@ -133,7 +169,7 @@ There is no `publishedLocalized` collection. Widgets use the same published line
 
 Saved quotes are a home screen widget only. Settings has “Show saved quotes on lock screen widgets”, off by default. Turning it on records the choice. The Saved widget is still not a lock screen family.
 
-Sign-out and Delete account clear the payload. If it is missing or older than 14 days, the widget says “Open Moti Scroll to refresh”.
+Sign-out and Delete account clear the payload. If it is missing or older than 14 days, the widget says “Open MotiScroll to refresh”.
 
 Remote Config `widgetsEnabled` defaults to true. When it is false, the sync writes a payload with no lines and the widgets show the neutral placeholder.
 
@@ -175,7 +211,7 @@ On a real iPhone and an Android phone:
 - Change the app language to Arabic and to Russian. Arabic lays out from the right. Russian uses the bundled serif.
 - Turn on airplane mode, leave the app, and confirm the widget still shows the last payload.
 - Cross midnight, or set the phone’s date forward one day. Quote of the Day changes. It does not show yesterday’s line as if it were new after the payload is older than 14 days.
-- Delete the app’s data, or sign out. The widget says to open Moti Scroll, not a leftover line.
+- Delete the app’s data, or sign out. The widget says to open MotiScroll, not a leftover line.
 - Settings → Widgets → Refresh widgets now updates the widgets.
 
 `flutter analyze` should be clean. `flutter build ios` and `flutter build apk` build the app. The iOS widget extension is not part of that build until the Xcode target exists.

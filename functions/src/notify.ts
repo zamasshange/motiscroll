@@ -30,7 +30,12 @@ export const writeDaily = onSchedule("every day 00:05", async () => {
   await backfillDaily(1);
 });
 
+function dailyFcmEnabled(): boolean {
+  return process.env.SEND_FCM_DAILY === "true";
+}
+
 export const syncReminderBucket = onDocumentWritten("users/{uid}", async (event) => {
+  if (!dailyFcmEnabled()) return;
   const after = event.data?.after;
   if (!after?.exists) return;
   const data = after.data() ?? {};
@@ -40,6 +45,7 @@ export const syncReminderBucket = onDocumentWritten("users/{uid}", async (event)
 });
 
 export const sendReminderBucket = onSchedule("every 15 minutes", async () => {
+  if (!dailyFcmEnabled()) return;
   const now = new Date();
   const bucket = Math.floor((now.getUTCHours() * 60 + now.getUTCMinutes()) / 15) * 15;
   const day = now.toISOString().slice(0, 10);
@@ -55,7 +61,7 @@ export const sendReminderBucket = onSchedule("every 15 minutes", async () => {
     if (tokens.length === 0) continue;
     const response = await getMessaging().sendEachForMulticast({
       tokens,
-      notification: { title: "Moti Scroll", body: quote.slice(0, 140) },
+      notification: { title: "MotiScroll", body: quote.slice(0, 140) },
       data: { itemId: String(daily.data()?.itemId ?? "") },
     });
     const invalid: string[] = [];

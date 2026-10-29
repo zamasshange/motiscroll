@@ -90,10 +90,16 @@ Future<void> attachBackend(AppState state) async {
         'livingFiguresEnabled': true,
         'contentReady': false,
         'widgetsEnabled': true,
+        'notificationsEnabled': true,
+        'maxNotificationsPerDay': 2,
       });
       await config.fetchAndActivate();
       state.contentReady = config.getBool('contentReady');
       state.setWidgetsEnabled(config.getBool('widgetsEnabled'));
+      state.applyNotificationFlags(
+        enabled: config.getBool('notificationsEnabled'),
+        maxPerDay: config.getInt('maxNotificationsPerDay'),
+      );
     } on Exception {
       state.contentReady = false;
     }
@@ -104,7 +110,12 @@ Future<void> attachBackend(AppState state) async {
         await config.fetchAndActivate();
         state.contentReady = config.getBool('contentReady');
         state.setWidgetsEnabled(config.getBool('widgetsEnabled'));
+        state.applyNotificationFlags(
+          enabled: config.getBool('notificationsEnabled'),
+          maxPerDay: config.getInt('maxNotificationsPerDay'),
+        );
         state.notifyAccount();
+        await state.syncNotifications();
       } on Exception {
         state.contentReady = false;
       }
@@ -267,6 +278,7 @@ Future<void> _afterAuth(AppState state) async {
   state.accountLabel = signedIn?.email ?? 'Signed in';
   state.accountError = null;
   state.notifyAccount();
+  await state.syncNotifications();
 }
 
 String _authMessage(FirebaseAuthException error) {
@@ -302,6 +314,7 @@ Future<void> signOutToAnonymous(AppState state) async {
   await FirebaseAuth.instance.signOut();
   await FirebaseAuth.instance.signInAnonymously();
   state.accountLabel = 'Saved on this device';
+  await state.clearNotifications();
   state.notifyAccount();
   await state.clearWidgets();
 }

@@ -2,13 +2,14 @@ import 'package:flutter/material.dart';
 
 import '../l10n/ui_text.dart';
 import '../l10n/widget_gallery.dart';
-import '../services/reminders.dart';
+import '../notifications/notification_text.dart';
 import '../state/app_state.dart';
 import '../theme/tokens.dart';
 import '../widgets/chrome.dart';
 import 'account_screen.dart';
 import 'language_screen.dart';
 import 'legal_screen.dart';
+import 'notifications_screen.dart';
 
 const kAppVersion = 'v1.0.0 (1)';
 
@@ -40,6 +41,10 @@ class SettingsScreen extends StatelessWidget {
         _Chevron(
           title: ui(code, 'general'),
           onTap: () => _push(context, const GeneralSettingsScreen()),
+        ),
+        _Chevron(
+          title: notifyUi(code, 'notifications'),
+          onTap: () => _push(context, const NotificationsScreen()),
         ),
         _Chevron(
           title: widgetString(code, 'widgets'),
@@ -106,42 +111,15 @@ class WidgetsSettingsScreen extends StatelessWidget {
   }
 }
 
-class GeneralSettingsScreen extends StatefulWidget {
+class GeneralSettingsScreen extends StatelessWidget {
   const GeneralSettingsScreen({super.key});
-
-  @override
-  State<GeneralSettingsScreen> createState() => _GeneralSettingsScreenState();
-}
-
-class _GeneralSettingsScreenState extends State<GeneralSettingsScreen> {
-  var _busy = false;
-
-  Future<void> _toggleReminder(bool value) async {
-    final state = AppScope.of(context);
-    setState(() => _busy = true);
-    if (value) {
-      final ok = await scheduleDailyReminder();
-      if (!mounted) return;
-      state.setReminder(ok);
-      if (!ok) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('The reminder was not scheduled.')),
-        );
-      }
-    } else {
-      await cancelDailyReminder();
-      if (!mounted) return;
-      state.setReminder(false);
-    }
-    if (mounted) setState(() => _busy = false);
-  }
 
   String _themeLabel(AppState state) {
     if (state.followSystemTheme) return 'System';
     return state.dark ? 'Dark' : 'Light';
   }
 
-  void _pickTheme() {
+  void _pickTheme(BuildContext context) {
     final state = AppScope.of(context);
     _choose(
       context,
@@ -159,7 +137,7 @@ class _GeneralSettingsScreenState extends State<GeneralSettingsScreen> {
     );
   }
 
-  void _pickFontSize() {
+  void _pickFontSize(BuildContext context) {
     final state = AppScope.of(context);
     _choose(
       context,
@@ -179,18 +157,12 @@ class _GeneralSettingsScreenState extends State<GeneralSettingsScreen> {
         _Chevron(
           title: 'Switch theme',
           value: _themeLabel(state),
-          onTap: _pickTheme,
+          onTap: () => _pickTheme(context),
         ),
         _Chevron(
           title: 'Font size',
           value: state.largeText ? 'Large' : 'Default (recommended)',
-          onTap: _pickFontSize,
-        ),
-        _Toggle(
-          title: 'Daily reminder',
-          subtitle: 'A local nudge at 8:00',
-          value: state.reminderOn,
-          onChanged: _busy ? null : _toggleReminder,
+          onTap: () => _pickFontSize(context),
         ),
         _Chevron(
           title: 'Replay onboarding',

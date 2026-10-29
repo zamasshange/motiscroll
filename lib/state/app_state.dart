@@ -12,6 +12,9 @@ import '../data/models.dart';
 import '../data/repositories.dart';
 import '../data/roster_lines.dart';
 import '../l10n/languages.dart';
+import '../notifications/notification_planner.dart';
+import '../notifications/notification_prefs.dart';
+import '../notifications/notification_service.dart';
 import '../tabs.dart';
 import '../theme/tokens.dart';
 import '../widgets/widget_payload.dart';
@@ -38,6 +41,14 @@ class AppState extends ChangeNotifier {
   String? lastStreakDate;
   bool hintDismissed = false;
   bool reminderOn = false;
+  NotificationPrefs notificationPrefs = const NotificationPrefs();
+  bool notificationPermissionGranted = false;
+  bool notificationsEnabled = true;
+  int maxNotificationsPerDay = maxNotificationsPerDayHardCap;
+  int notificationAskCount = 0;
+  bool notificationAskPending = false;
+  String? lastItemViewDate;
+  List<PlannedNotification> notificationPlan = const [];
   int bestStreak = 0;
   String? contentLanguage;
   String? uiLanguage;
@@ -134,6 +145,22 @@ class AppState extends ChangeNotifier {
     lastStreakDate = map['lastStreakDate'] as String?;
     hintDismissed = map['hintDismissed'] as bool? ?? false;
     reminderOn = map['reminderOn'] as bool? ?? false;
+    notificationPrefs = NotificationPrefs.fromJson(
+      map['notificationPrefs'] is Map
+          ? Map<String, dynamic>.from(map['notificationPrefs'] as Map)
+          : null,
+      legacyReminderTime: map['reminderTime'] as String?,
+      legacyReminderOn: reminderOn,
+    );
+    notificationAskCount = (map['notificationAskCount'] as num?)?.toInt() ??
+        (map.containsKey('notificationPrefs')
+            ? 0
+            : reminderOn
+            ? 2
+            : onboardingComplete
+            ? 1
+            : 0);
+    lastItemViewDate = map['lastItemViewDate'] as String?;
     bestStreak = (map['bestStreak'] as num?)?.toInt() ?? 0;
     liked
       ..clear()
@@ -183,6 +210,9 @@ class AppState extends ChangeNotifier {
     'lastStreakDate': lastStreakDate,
     'hintDismissed': hintDismissed,
     'reminderOn': reminderOn,
+    'notificationPrefs': notificationPrefs.toJson(),
+    'notificationAskCount': notificationAskCount,
+    'lastItemViewDate': lastItemViewDate,
     'bestStreak': bestStreak,
     'liked': liked.toList(),
     'saved': saved.toList(),
@@ -221,6 +251,7 @@ class AppState extends ChangeNotifier {
   void toggleSave(String id) {
     final on = saved.add(id);
     if (!on) saved.remove(id);
+    if (on) _maybeAskNotifications();
     _touch();
     directory?.setFlag(collection: 'saved', id: id, on: on);
     syncWidgets();
@@ -244,9 +275,11 @@ class AppState extends ChangeNotifier {
     feedTarget = id;
     final today = dayKey(DateTime.now());
     final alreadyToday = lastStreakDate == today;
+    lastItemViewDate = today;
     noteVisit();
     if (alreadyToday) _touch();
     _syncView(id);
+    unawaited(syncNotifications());
   }
 
   void consumeFeedTarget() {
@@ -298,12 +331,14 @@ class AppState extends ChangeNotifier {
     }
     _touch();
     directory?.setFlag(collection: 'followedFields', id: field.name, on: on);
+    unawaited(syncNotifications());
   }
 
   void setMood(Mood mood) {
     if (usualMood == mood) return;
     usualMood = mood;
     _touch();
+    unawaited(syncNotifications());
   }
 
   void setDark(bool value) {
@@ -341,6 +376,7 @@ class AppState extends ChangeNotifier {
     _touch();
     _syncLanguages();
     syncWidgets();
+    unawaited(syncNotifications());
   }
 
   void setSecondLanguage(String? code) {
@@ -461,6 +497,80 @@ class AppState extends ChangeNotifier {
     _touch();
   }
 
+  bool get viewedToday => lastItemViewDate == dayKey(DateTime.now());
+
+  void applyNotificationFlags({
+    required bool enabled,
+    required int maxPerDay,
+  }) {
+    notificationsEnabled = enabled;
+    maxNotificationsPerDay = maxPerDay.clamp(0, maxNotificationsPerDayHardCap);
+  }
+
+  void setNotificationPrefs(NotificationPrefs next) {
+    notificationPrefs = next;
+    reminderOn = next.anyEnabled;
+    _touch();
+    _publishProfile();
+    unawaited(syncNotifications());
+  }
+
+  Future<void> enableNotifications() async {
+    final ok = await NotificationService.instance.requestPermission();
+    notificationPermissionGranted = ok;
+    notificationAskCount = 2;
+    notificationAskPending = false;
+    reminderOn = ok && notificationPrefs.anyEnabled;
+    _touch();
+    _publishProfile();
+    await syncNotifications();
+  }
+
+  void dismissNotificationAsk() {
+    notificationAskCount = notificationAskCount >= 1 ? 2 : 1;
+    notificationAskPending = false;
+    _touch();
+  }
+
+  void _maybeAskNotifications() {
+    if (notificationAskCount != 1) return;
+    if (notificationPermissionGranted) return;
+    notificationAskPending = true;
+  }
+
+  Future<void> syncNotifications() async {
+    final result = await NotificationService.instance.rebuild(
+      prefs: notificationPrefs,
+      items: items,
+      followed: followed,
+      seenIds: read,
+      streak: streak,
+      viewedToday: viewedToday,
+      language: contentLanguage ?? 'en',
+      uiLanguage: uiLanguage ?? contentLanguage ?? 'en',
+      usualMood: usualMood,
+      notificationsEnabled: notificationsEnabled,
+      maxPerDay: maxNotificationsPerDay,
+    );
+    notificationPermissionGranted = result.granted;
+    if (result.prefs.timeZone != notificationPrefs.timeZone) {
+      notificationPrefs = result.prefs;
+    }
+    notificationPlan = result.plan;
+    notifyListeners();
+  }
+
+  Future<void> clearNotifications({bool clearPrefs = false}) async {
+    await NotificationService.instance.clearLocalPlan();
+    notificationPlan = const [];
+    notificationPermissionGranted = false;
+    if (clearPrefs) {
+      notificationPrefs = const NotificationPrefs();
+      reminderOn = false;
+    }
+    _touch();
+  }
+
   void noteVisit() {
     final now = DateTime.now();
     final today = dayKey(now);
@@ -474,6 +584,7 @@ class AppState extends ChangeNotifier {
     if (streak > bestStreak) bestStreak = streak;
     lastStreakDate = today;
     visitDays.add(today);
+    if (streak >= 2) _maybeAskNotifications();
     _touch();
     syncWidgets();
   }
@@ -489,6 +600,7 @@ class AppState extends ChangeNotifier {
     _touch();
     _publishProfile();
     syncWidgets();
+    unawaited(syncNotifications());
   }
 
   Future<void> refreshCatalog() async {
@@ -590,6 +702,7 @@ class AppState extends ChangeNotifier {
     catalogLoading = false;
     catalogError = _items.isEmpty ? catalogError : null;
     syncWidgets();
+    unawaited(syncNotifications());
     notifyListeners();
   }
 
@@ -726,8 +839,10 @@ class AppState extends ChangeNotifier {
   }
 
   void noteLine(String id) {
+    lastItemViewDate = dayKey(DateTime.now());
     noteVisit();
     _syncView(id);
+    unawaited(syncNotifications());
   }
 
   void _syncView(String id) {
@@ -756,12 +871,12 @@ class AppState extends ChangeNotifier {
       zone = 'UTC';
     }
     try {
+      notificationPrefs = notificationPrefs.copyWith(timeZone: zone);
       await directory.ensureProfile(
         fields: followed,
         mood: usualMood,
         timezone: zone,
-        reminderTime: '08:00',
-        reminderLocal: reminderOn,
+        notifications: notificationPrefs.toFirestore(usualMood),
       );
     } on Exception {
       return;
@@ -784,6 +899,7 @@ class AppState extends ChangeNotifier {
     read.clear();
     visitDays.clear();
     notes.clear();
+    lastItemViewDate = null;
     _touch();
     syncWidgets();
   }

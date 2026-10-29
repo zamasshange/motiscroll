@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../data/models.dart';
 import '../l10n/languages.dart';
-import '../services/reminders.dart';
+import '../notifications/notification_prefs.dart';
 import '../state/app_state.dart';
 import '../theme/tokens.dart';
 import '../widgets/chrome.dart';
+import 'notification_offer.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -21,6 +22,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   String? _language;
   final _fields = <Field>{};
   Mood? _mood;
+  var _notifyPrefs = const NotificationPrefs();
 
   @override
   void didChangeDependencies() {
@@ -31,6 +33,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     _language = state.contentLanguage ?? state.resolvedContentLanguage(device);
     _fields.addAll(state.followed);
     _mood = state.usualMood;
+    _notifyPrefs = state.notificationPrefs;
     _seeded = true;
   }
 
@@ -49,15 +52,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     );
   }
 
-  Future<void> _finish({required bool reminder}) async {
+  Future<void> _finish({required bool enable}) async {
     if (_busy) return;
     setState(() => _busy = true);
     final state = AppScope.of(context);
-    if (reminder) {
-      final ok = await scheduleDailyReminder();
-      if (!mounted) return;
-      state.setReminder(ok);
+    state.setNotificationPrefs(_notifyPrefs);
+    if (enable) {
+      await state.enableNotifications();
+    } else {
+      state.dismissNotificationAsk();
     }
+    if (!mounted) return;
     state.completeOnboarding(fields: _fields, mood: _mood);
   }
 
@@ -130,11 +135,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             page: 2,
           ),
           _WidgetOffer(onNext: () => _go(7), onBack: () => _go(5)),
-          _Reminder(
+          NotificationOffer(
             busy: _busy,
+            prefs: _notifyPrefs,
+            onPrefs: (prefs) => setState(() => _notifyPrefs = prefs),
             onBack: () => _go(6),
-            onAllow: () => _finish(reminder: true),
-            onSkip: () => _finish(reminder: false),
+            onTurnOn: () => _finish(enable: true),
+            onSkip: () => _finish(enable: false),
           ),
         ],
       ),
@@ -713,60 +720,3 @@ class _WidgetOffer extends StatelessWidget {
   }
 }
 
-class _Reminder extends StatelessWidget {
-  const _Reminder({
-    required this.busy,
-    required this.onBack,
-    required this.onAllow,
-    required this.onSkip,
-  });
-
-  final bool busy;
-  final VoidCallback onBack;
-  final VoidCallback onAllow;
-  final VoidCallback onSkip;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = AppScope.of(context).palette;
-    final top = MediaQuery.paddingOf(context).top;
-    final bottom = MediaQuery.paddingOf(context).bottom;
-    return Padding(
-      padding: EdgeInsets.fromLTRB(24, top + 16, 24, bottom + 24),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Pressable(
-            onPressed: busy ? null : onBack,
-            semanticLabel: 'Back',
-            child: Text(
-              'Back',
-              style: sans(
-                palette,
-                15,
-                weight: FontWeight.w600,
-                color: palette.textMuted,
-              ),
-            ),
-          ),
-          const Spacer(),
-          Text('8:00', style: serif(palette, 64, height: 1)),
-          const SizedBox(height: 16),
-          Text('A nudge at eight', style: serif(palette, 32, height: 1.1)),
-          const SizedBox(height: 8),
-          Text(
-            'One local reminder. It stays on this phone, and you can turn it off later.',
-            style: sans(palette, 16, height: 1.4, color: palette.textMuted),
-          ),
-          const Spacer(),
-          PrimaryButton(
-            label: busy ? 'One moment' : 'Allow',
-            onPressed: busy ? () {} : onAllow,
-          ),
-          const SizedBox(height: 8),
-          OutlineButton(label: 'Not now', onPressed: busy ? () {} : onSkip),
-        ],
-      ),
-    );
-  }
-}

@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:home_widget/home_widget.dart';
 
 import 'l10n/languages.dart';
+import 'notifications/notification_service.dart';
 import 'screens/onboarding_screen.dart';
 import 'services/backend.dart';
 import 'shell.dart';
@@ -46,6 +47,7 @@ class _MotiAppState extends State<MotiApp> with WidgetsBindingObserver {
     _syncSystemBrightness();
     _applyOverlay();
     _listenForWidgetLinks();
+    _listenForNotifications();
   }
 
   @override
@@ -68,6 +70,31 @@ class _MotiAppState extends State<MotiApp> with WidgetsBindingObserver {
       );
     } on Object {
       return;
+    }
+  }
+
+  Future<void> _listenForNotifications() async {
+    final service = NotificationService.instance;
+    service.onTap = (payload) {
+      widget.state.openWidgetLink(notificationPayloadUri(payload));
+    };
+    try {
+      await service.initialize();
+      final launch = await service.launchPayload();
+      if (!mounted) return;
+      if (launch != null) {
+        widget.state.openWidgetLink(notificationPayloadUri(launch));
+      }
+      await widget.state.syncNotifications();
+    } on Object {
+      return;
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      unawaited(widget.state.syncNotifications());
     }
   }
 
