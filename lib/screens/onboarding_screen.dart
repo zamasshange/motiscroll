@@ -176,15 +176,9 @@ class _Welcome extends StatelessWidget {
             textAlign: TextAlign.center,
             style: sans(palette, 15, color: palette.textMuted),
           ),
-          const SizedBox(height: 20),
-          Expanded(
-            child: OnboardDeviceFrame(
-              child: Image.asset(
-                'assets/onboarding/welcome_home.png',
-                fit: BoxFit.cover,
-                alignment: Alignment.topCenter,
-              ),
-            ),
+          const SizedBox(height: 16),
+          const Expanded(
+            child: _PhoneFrame(image: 'assets/onboarding/welcome_home.png'),
           ),
           const SizedBox(height: 20),
           PrimaryButton(label: 'Get started', onPressed: onStart),
