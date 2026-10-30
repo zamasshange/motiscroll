@@ -2,6 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../state/app_state.dart';
 import '../theme/tokens.dart';
+import '../widgets/chrome.dart';
+
+/// Public copy of this screen. Play Console and the app both use this address.
+const privacyPolicyUrl =
+    'https://github.com/zamasshange/motiscroll/blob/main/docs/privacy-policy.md';
 
 enum LegalKind { rights, privacy, terms }
 
@@ -26,7 +31,7 @@ class LegalScreen extends StatelessWidget {
       ),
       LegalKind.privacy => (
         'Privacy',
-        'Placeholder for lawyer review. The app stores your library, likes, saves, follows, streak, and notification preferences in Firebase under your account. '
+        'The full policy is linked below. The app stores your library, likes, saves, follows, streak, and notification preferences in Firebase under your account. '
             'Anonymous sign-in creates that account on the device. Linking Apple, Google, or email keeps the same account. '
             'Home screen and lock screen widgets keep a copy of quote text, the author, the streak, and saved lines in an App Group on this phone. That copy has no email, user id, or sign-in token. Saved lines are not shown on a lock screen widget. A setting records whether you would allow that, and it stays off until you turn it on. '
             'Quote notifications are scheduled on this phone. They hold the quote text and the author, not your user id, email, or streak beyond an optional streak title. The upcoming stack is stored only on the device. You can turn notifications off in Settings or in the system notification settings. Permission is never required to use MotiScroll. Notification text can appear on the lock screen. Notifications are not ads or purchase prompts. '
@@ -54,6 +59,29 @@ class LegalScreen extends StatelessWidget {
           Text(copy.$1, style: serif(palette, 40, height: 1.05)),
           const SizedBox(height: 16),
           Text(copy.$2, style: sans(palette, 16, height: 1.45)),
+          if (kind == LegalKind.privacy) ...[
+            const SizedBox(height: 20),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed: () => openLink(privacyPolicyUrl),
+                style: TextButton.styleFrom(
+                  padding: EdgeInsets.zero,
+                  minimumSize: Size.zero,
+                  tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  foregroundColor: palette.text,
+                  alignment: Alignment.centerLeft,
+                ),
+                child: Text(
+                  privacyPolicyUrl,
+                  style: sans(palette, 16, height: 1.45).copyWith(
+                    decoration: TextDecoration.underline,
+                    decorationColor: palette.text,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
